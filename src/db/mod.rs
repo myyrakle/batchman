@@ -28,9 +28,10 @@ pub async fn setup_schema(db: &DatabaseConnection) {
     let schema = Schema::new(DbBackend::Sqlite);
 
     // Derive from Entity
-    let create_table_statement: TableCreateStatement = schema
-        .create_table_from_entity(entities::task_definition::Entity)
-        .into();
+    let mut create_table_statement =
+        schema.create_table_from_entity(entities::task_definition::Entity);
+
+    create_table_statement.if_not_exists();
 
     let database_backend = db.get_database_backend();
 
