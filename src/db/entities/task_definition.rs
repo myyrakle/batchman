@@ -4,7 +4,7 @@ use sea_orm::entity::prelude::*;
 #[sea_orm(table_name = "task_definition")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    pub id: i32, // primary key
+    pub id: u64, // primary key
     pub name: String,    // task name
     pub version: String, // task version
 
