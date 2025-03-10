@@ -1,16 +1,32 @@
-mod db;
+pub(crate) mod db;
+pub(crate) mod docker;
 
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
 
-use db::setup_schema;
+use db::{entities, setup_schema};
+use docker::run_container;
 
 #[tokio::main]
 async fn main() {
     let connection = db::create_database_connection().await.unwrap();
 
     setup_schema(&connection).await;
+
+    let container_id = run_container(entities::task_definition::Model {
+        id: 1,
+        name: "my_task".to_owned(),
+        version: "1.0".to_owned(),
+        image: "ubuntu:latest".to_owned(),
+        command: Some("echo".to_owned()),
+        args: Some("Hello, World!".to_owned()),
+        env: None,
+        memory_limit: Some(512),
+        cpu_limit: Some(1024),
+    });
+
+    println!("Container ID: {}", container_id);
 
     // // Docker 컨테이너 실행
     // let container_name = "my_container";
