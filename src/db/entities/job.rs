@@ -5,6 +5,8 @@ use sea_orm::entity::prelude::*;
 pub enum JobStatus {
     #[sea_orm(string_value = "Pending")]
     Pending,
+    #[sea_orm(string_value = "Starting")]
+    Starting,
     #[sea_orm(string_value = "Running")]
     Running,
     #[sea_orm(string_value = "Finished")]

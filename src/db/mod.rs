@@ -2,10 +2,7 @@ pub(crate) mod entities;
 
 use std::time::Duration;
 
-use sea_orm::{
-    ConnectOptions, ConnectionTrait, Database, DatabaseConnection, DbBackend, Schema,
-    sea_query::TableCreateStatement,
-};
+use sea_orm::{ConnectOptions, ConnectionTrait, Database, DatabaseConnection, DbBackend, Schema};
 
 pub async fn create_database_connection() -> anyhow::Result<DatabaseConnection> {
     let mut opt = ConnectOptions::new("sqlite://./db.sqlite?mode=rwc");
