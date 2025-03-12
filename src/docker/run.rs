@@ -2,7 +2,7 @@ use std::process::Command;
 
 use crate::db::entities;
 
-pub fn run_container(task_definition: entities::task_definition::Model) -> String {
+pub fn run_container(task_definition: entities::task_definition::Model) -> anyhow::Result<String> {
     // Docker 컨테이너 실행
     let image_name = &task_definition.image;
 
@@ -45,16 +45,16 @@ pub fn run_container(task_definition: entities::task_definition::Model) -> Strin
         }
     }
 
-    let output = command.output().expect("Failed to start Docker container");
+    let output = command.output()?;
 
     if !output.status.success() {
-        eprintln!(
+        return Err(anyhow::anyhow!(
             "Failed to start Docker container: {}",
             String::from_utf8_lossy(&output.stderr)
-        );
+        ));
     }
 
     let container_id = String::from_utf8_lossy(&output.stdout).trim().to_owned();
 
-    container_id
+    Ok(container_id)
 }
