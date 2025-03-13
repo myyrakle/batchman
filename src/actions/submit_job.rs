@@ -1,6 +1,6 @@
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, IntoActiveModel};
 
-use crate::entities::{self};
+use crate::db::entities;
 
 #[derive(Debug, Clone)]
 pub struct SubmitJobParams<'a> {
