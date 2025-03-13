@@ -2,18 +2,11 @@ pub(crate) mod actions;
 pub(crate) mod db;
 pub(crate) mod docker;
 
-use std::fs::File;
-use std::io::Write;
-use std::process::Command;
-
-use db::{entities, setup_schema};
-use docker::run_container;
-
 #[tokio::main]
 async fn main() {
-    let connection = db::create_database_connection().await.unwrap();
+    // let connection = db::create_database_connection().await.unwrap();
 
-    setup_schema(&connection).await;
+    // setup_schema(&connection).await;
 
     // // Docker 로그 가져오기
     // let log_output = Command::new("docker")
