@@ -1,6 +1,7 @@
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel, QueryFilter,
-    QueryOrder, QuerySelect,
+    ActiveModelTrait,
+    ActiveValue::{NotSet, Set},
+    ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
 };
 
 use crate::{db::entities, routes::task_definitions::CreateTaskDefinitionBody};
@@ -29,22 +30,19 @@ pub async fn create_task_definition(params: CreateDefinitionParams<'_>) -> anyho
         }
     }
 
-    let new_definition = entities::task_definition::Model {
-        id: 0,
-        name: params.request.name,
-        version: version,
-        image: params.request.image,
-        command: params.request.command,
-        args: params.request.args,
-        env: params.request.env,
-        memory_limit: params.request.memory_limit,
-        cpu_limit: params.request.cpu_limit,
+    let new_definition = entities::task_definition::ActiveModel {
+        id: NotSet,
+        name: Set(params.request.name),
+        version: Set(version),
+        image: Set(params.request.image),
+        command: Set(params.request.command),
+        args: Set(params.request.args),
+        env: Set(params.request.env),
+        memory_limit: Set(params.request.memory_limit),
+        cpu_limit: Set(params.request.cpu_limit),
     };
 
-    let saved = new_definition
-        .into_active_model()
-        .insert(params.connection)
-        .await?;
+    let saved = new_definition.insert(params.connection).await?;
 
     Ok(saved.id)
 }
