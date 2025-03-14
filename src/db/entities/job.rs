@@ -19,10 +19,10 @@ pub enum JobStatus {
 #[sea_orm(table_name = "job")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    pub id: u64, // primary key
+    pub id: i64, // primary key
     pub name: String, // job name
 
-    pub task_definition_id: u64, // task definition id
+    pub task_definition_id: i64, // task definition id
 
     pub status: JobStatus, // job status
 
