@@ -6,8 +6,8 @@ use serde::Serialize;
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: u64, // primary key
-    pub name: String,    // task name
-    pub version: String, // task version
+    pub name: String, // task name
+    pub version: u64, // task version
 
     pub image: String,           // docker image
     pub command: Option<String>, // docker run command
