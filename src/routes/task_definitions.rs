@@ -49,3 +49,24 @@ pub async fn list_task_definitions(
             .unwrap(),
     }
 }
+
+#[derive(Deserialize)]
+pub struct CreateTaskDefinitionBody {
+    pub name: String,            // task name
+    pub version: Option<String>, // task version
+
+    pub image: String,           // docker image
+    pub command: Option<String>, // docker run command
+    pub args: Option<String>,    // docker run arguments
+    pub env: Option<String>,     // environment variables
+
+    pub memory_limit: Option<u32>, // memory limit in MB
+    pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
+}
+
+pub async fn create_task_definition(
+    Json(query): Json<CreateTaskDefinitionBody>,
+    Extension(connection): Extension<DatabaseConnection>,
+) -> response::Response {
+    unimplemented!();
+}
