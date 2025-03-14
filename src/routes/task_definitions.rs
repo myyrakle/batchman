@@ -10,11 +10,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::actions;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ListTaskDefinitionsQuery {
-    task_definition_id: Option<i64>,
-    contains_name: Option<String>,
-    name: Option<String>,
+    pub task_definition_id: Option<i64>,
+    pub contains_name: Option<String>,
+    pub name: Option<String>,
 }
 
 pub type ListTaskDefinitionsItem = crate::db::entities::task_definition::Model;
@@ -31,9 +31,7 @@ pub async fn list_task_definitions(
     let task_definitions = actions::list_task_definition::list_task_definitions(
         actions::list_task_definition::ListTaskDefinitionsParams {
             connection: &connection,
-            task_definition_id: query.task_definition_id,
-            contains_name: query.contains_name,
-            name: query.name,
+            query,
         },
     )
     .await;
