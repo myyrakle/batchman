@@ -4,12 +4,12 @@ use sea_orm::entity::prelude::*;
 #[sea_orm(table_name = "schedule")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    pub id: u64, // primary key
+    pub id: i64, // primary key
     pub name: String, // schedule name
 
     pub cron_expression: String, // cron expression
 
-    pub task_definition_id: u64, // task definition id
+    pub task_definition_id: i64, // task definition id
     pub command: Option<String>, // docker run command
 
     pub created_at: Option<chrono::NaiveDateTime>, // job submited time

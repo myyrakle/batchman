@@ -5,7 +5,7 @@ use crate::db::entities;
 #[derive(Debug, Clone)]
 pub struct ListTaskDefinitionsParams<'a> {
     pub connection: &'a DatabaseConnection,
-    pub task_definition_id: Option<u64>,
+    pub task_definition_id: Option<i64>,
     pub contains_name: Option<String>,
     pub name: Option<String>,
 }

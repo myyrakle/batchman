@@ -11,7 +11,7 @@ pub struct CreateDefinitionParams<'a> {
     pub request: CreateTaskDefinitionBody,
 }
 
-pub async fn create_task_definition(params: CreateDefinitionParams<'_>) -> anyhow::Result<u64> {
+pub async fn create_task_definition(params: CreateDefinitionParams<'_>) -> anyhow::Result<i64> {
     // version이 없다면 동일한 이름의 task definition이 있는지 확인
 
     let mut version = 1;
@@ -43,8 +43,8 @@ pub async fn create_task_definition(params: CreateDefinitionParams<'_>) -> anyho
 
     let saved = new_definition
         .into_active_model()
-        .save(params.connection)
+        .insert(params.connection)
         .await?;
 
-    Ok(saved.id.unwrap())
+    Ok(saved.id)
 }

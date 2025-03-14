@@ -12,7 +12,7 @@ use crate::actions;
 
 #[derive(Deserialize)]
 pub struct ListTaskDefinitionsQuery {
-    task_definition_id: Option<u64>,
+    task_definition_id: Option<i64>,
     contains_name: Option<String>,
     name: Option<String>,
 }

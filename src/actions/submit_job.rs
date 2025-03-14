@@ -5,7 +5,7 @@ use crate::db::entities;
 #[derive(Debug, Clone)]
 pub struct SubmitJobParams<'a> {
     connection: &'a DatabaseConnection,
-    task_definition_id: u64,
+    task_definition_id: i64,
     job_name: String,
 }
 
