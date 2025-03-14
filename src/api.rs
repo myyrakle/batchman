@@ -27,6 +27,10 @@ async fn main() {
             "/task-definitions",
             post(routes::task_definitions::create_task_definition),
         )
+        .route(
+            "/task-definitions/:task_definition_id",
+            get(routes::task_definitions::patch_task_definition),
+        )
         .layer(Extension(connection));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:13939")
