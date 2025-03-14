@@ -4,10 +4,10 @@ use crate::db::entities;
 
 #[derive(Debug, Clone)]
 pub struct ListTaskDefinitionsParams<'a> {
-    connection: &'a DatabaseConnection,
-    task_definition_id: Option<u64>,
-    contains_name: Option<String>,
-    name: Option<String>,
+    pub connection: &'a DatabaseConnection,
+    pub task_definition_id: Option<u64>,
+    pub contains_name: Option<String>,
+    pub name: Option<String>,
 }
 
 pub async fn list_task_definitions(

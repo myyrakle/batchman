@@ -1,6 +1,7 @@
 pub(crate) mod actions;
 pub(crate) mod db;
 pub(crate) mod docker;
+pub(crate) mod routes;
 
 use axum::{Extension, Router, routing::get};
 use db::setup_schema;
@@ -15,6 +16,10 @@ async fn main() {
         // `GET /` goes to `root`
         .route("/", get(root))
         .route("/database-check", get(database_check))
+        .route(
+            "/task-definitions",
+            get(routes::task_definitions::list_task_definitions),
+        )
         .layer(Extension(connection));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:13939")
