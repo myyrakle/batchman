@@ -1,4 +1,8 @@
-use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, IntoActiveModel};
+use sea_orm::{
+    ActiveModelTrait,
+    ActiveValue::{NotSet, Set},
+    DatabaseConnection, EntityTrait, IntoActiveModel,
+};
 
 use crate::db::entities;
 
@@ -18,15 +22,15 @@ pub async fn submit_job(params: SubmitJobParams<'_>) -> anyhow::Result<()> {
         return Err(anyhow::anyhow!("Task definition not found"));
     };
 
-    let new_job = entities::job::Model {
-        id: 0,
-        name: params.job_name,
-        task_definition_id: params.task_definition_id,
-        status: entities::job::JobStatus::Pending,
-        submited_at: Some(chrono::Utc::now().naive_utc()),
-        started_at: None,
-        finished_at: None,
-        container_id: None,
+    let new_job = entities::job::ActiveModel {
+        id: NotSet,
+        name: Set(params.job_name),
+        task_definition_id: Set(params.task_definition_id),
+        status: Set(entities::job::JobStatus::Pending),
+        submited_at: Set(Some(chrono::Utc::now().naive_utc())),
+        started_at: Set(None),
+        finished_at: Set(None),
+        container_id: Set(None),
     };
 
     new_job.into_active_model().save(params.connection).await?;
