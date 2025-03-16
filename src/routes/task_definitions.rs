@@ -117,5 +117,19 @@ pub async fn delete_task_definition(
     Path(task_definition_id): Path<i64>,
     Extension(connection): Extension<DatabaseConnection>,
 ) -> response::Response {
-    unimplemented!("");
+    let task_definition = actions::delete_task_definition::delete_task_definition(
+        actions::delete_task_definition::DeleteDefinitionParams {
+            connection: &connection,
+            task_definition_id,
+        },
+    )
+    .await;
+
+    match task_definition {
+        Ok(_) => Response::builder().status(200).body(Body::empty()).unwrap(),
+        Err(error) => Response::builder()
+            .status(500)
+            .body(Body::new(error.to_string()))
+            .unwrap(),
+    }
 }
