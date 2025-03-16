@@ -1,8 +1,6 @@
 use sea_orm::{
-    ActiveModelTrait,
-    ActiveValue::{NotSet, Set},
-    ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder,
-    QuerySelect,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait,
+    IntoActiveModel, QueryFilter, QuerySelect,
 };
 
 use crate::{db::entities, routes::task_definitions::PatchTaskDefinitionBody};
