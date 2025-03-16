@@ -112,3 +112,10 @@ pub async fn patch_task_definition(
             .unwrap(),
     }
 }
+
+pub async fn delete_task_definition(
+    Path(task_definition_id): Path<i64>,
+    Extension(connection): Extension<DatabaseConnection>,
+) -> response::Response {
+    unimplemented!("");
+}
