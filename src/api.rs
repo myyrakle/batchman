@@ -5,7 +5,7 @@ pub(crate) mod routes;
 
 use axum::{
     Extension, Router,
-    routing::{get, post},
+    routing::{get, patch, post},
 };
 use db::setup_schema;
 use sea_orm::DatabaseConnection;
@@ -28,8 +28,8 @@ async fn main() {
             post(routes::task_definitions::create_task_definition),
         )
         .route(
-            "/task-definitions/:task_definition_id",
-            get(routes::task_definitions::patch_task_definition),
+            "/task-definitions/{task_definition_id}",
+            patch(routes::task_definitions::patch_task_definition),
         )
         .layer(Extension(connection));
 

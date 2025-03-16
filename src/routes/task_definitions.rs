@@ -95,5 +95,20 @@ pub async fn patch_task_definition(
     Extension(connection): Extension<DatabaseConnection>,
     Json(query): Json<PatchTaskDefinitionBody>,
 ) -> response::Response {
-    unimplemented!("patch_task_definition")
+    let task_definition = actions::patch_task_definition::patch_task_definition(
+        actions::patch_task_definition::PatchDefinitionParams {
+            connection: &connection,
+            task_definition_id,
+            request: query,
+        },
+    )
+    .await;
+
+    match task_definition {
+        Ok(_) => Response::builder().status(200).body(Body::empty()).unwrap(),
+        Err(error) => Response::builder()
+            .status(500)
+            .body(Body::new(error.to_string()))
+            .unwrap(),
+    }
 }
