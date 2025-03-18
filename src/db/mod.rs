@@ -2,7 +2,9 @@ pub(crate) mod entities;
 
 use std::time::Duration;
 
-use sea_orm::{ConnectOptions, ConnectionTrait, Database, DatabaseConnection, DbBackend, Schema};
+use sea_orm::{
+    ConnectOptions, ConnectionTrait, Database, DatabaseConnection, DbBackend, Schema, sea_query,
+};
 
 pub async fn create_database_connection() -> anyhow::Result<DatabaseConnection> {
     let mut opt = ConnectOptions::new("sqlite://./db.sqlite?mode=rwc");
@@ -24,16 +26,33 @@ pub async fn setup_schema(db: &DatabaseConnection) {
     // Setup Schema helper
     let schema = Schema::new(DbBackend::Sqlite);
 
-    // Derive from Entity
-    let mut create_table_statement =
-        schema.create_table_from_entity(entities::task_definition::Entity);
+    // task_definition table generate
+    {
+        let mut create_table_statement =
+            schema.create_table_from_entity(entities::task_definition::Entity);
 
-    create_table_statement.if_not_exists();
+        create_table_statement.if_not_exists();
 
-    let database_backend = db.get_database_backend();
+        let database_backend = db.get_database_backend();
 
-    // Execute create table statement
-    db.execute(database_backend.build(&create_table_statement))
-        .await
-        .expect("Failed to create table");
+        // Execute create table statement
+        db.execute(database_backend.build(&create_table_statement))
+            .await
+            .expect("Failed to create table");
+
+        // create index
+
+        let create_unique_index_query = sea_query::Index::create()
+            .unique()
+            .if_not_exists()
+            .name("task_definition_name_unique")
+            .table(entities::task_definition::Entity)
+            .col(entities::task_definition::Column::Name)
+            .col(entities::task_definition::Column::Version)
+            .to_owned();
+
+        db.execute(database_backend.build(&create_unique_index_query))
+            .await
+            .expect("Failed to create index");
+    }
 }
