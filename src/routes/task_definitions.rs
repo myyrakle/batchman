@@ -61,12 +61,12 @@ pub struct CreateTaskDefinitionBody {
 
 pub async fn create_task_definition(
     Extension(connection): Extension<DatabaseConnection>,
-    Json(query): Json<CreateTaskDefinitionBody>,
+    Json(body): Json<CreateTaskDefinitionBody>,
 ) -> response::Response {
     let task_definition = actions::create_task_definition::create_task_definition(
         actions::create_task_definition::CreateDefinitionParams {
             connection: &connection,
-            request: query,
+            request: body,
         },
     )
     .await;

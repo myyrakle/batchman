@@ -35,6 +35,7 @@ async fn main() {
             "/task-definitions/{task_definition_id}",
             delete(routes::task_definitions::delete_task_definition),
         )
+        .route("/jobs/submit", post(routes::jobs::submit_job))
         .layer(Extension(connection));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:13939")
