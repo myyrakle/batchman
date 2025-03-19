@@ -1,4 +1,5 @@
 pub(crate) mod actions;
+pub(crate) mod background;
 pub(crate) mod db;
 pub(crate) mod docker;
 pub(crate) mod routes;
@@ -14,6 +15,8 @@ use sea_orm::DatabaseConnection;
 async fn main() {
     let connection = db::create_database_connection().await.unwrap();
     setup_schema(&connection).await;
+
+    background::start_background_loop(connection.clone()).expect("Failed to start background loop");
 
     let app = Router::new()
         // `GET /` goes to `root`
