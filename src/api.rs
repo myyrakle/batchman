@@ -16,8 +16,6 @@ async fn main() {
     let connection = db::create_database_connection().await.unwrap();
     setup_schema(&connection).await;
 
-    background::start_background_loop(connection.clone()).expect("Failed to start background loop");
-
     let app = Router::new()
         // `GET /` goes to `root`
         .route("/", get(root))
@@ -39,13 +37,18 @@ async fn main() {
             delete(routes::task_definitions::delete_task_definition),
         )
         .route("/jobs/submit", post(routes::jobs::submit_job))
-        .layer(Extension(connection));
+        .layer(Extension(connection.clone()));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:13939")
         .await
         .unwrap();
 
-    axum::serve(listener, app).await.unwrap();
+    let (server, _) = tokio::join!(
+        axum::serve(listener, app),
+        background::start_background_loop(connection.clone()),
+    );
+
+    server.unwrap();
 }
 
 async fn root() -> &'static str {
