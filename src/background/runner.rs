@@ -16,11 +16,14 @@ pub async fn start_runner_loop(database_connection: DatabaseConnection) {
             find_query = find_query.filter(entities::job::Column::Status.eq(JobStatus::Pending));
             find_query = find_query.limit(5); // TODO: config 설정 가능한 값으로 빼기
 
-            let Ok(pending_jobs) = find_query.all(&database_connection).await else {
-                println!("Error fetching pending jobs");
-                // TODO: 대기시간을 config 설정 가능한 값으로 빼기
-                tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-                continue;
+            let pending_jobs = match find_query.all(&database_connection).await {
+                Ok(pending_jobs) => pending_jobs,
+                Err(error) => {
+                    println!("Error fetching pending jobs: {:?}", error);
+                    // TODO: 대기시간을 config 설정 가능한 값으로 빼기
+                    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                    continue;
+                }
             };
 
             if pending_jobs.is_empty() {
