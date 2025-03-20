@@ -1,3 +1,4 @@
+use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
@@ -12,7 +13,7 @@ pub struct Model {
     pub task_definition_id: i64, // task definition id
     pub command: Option<String>, // docker run command
 
-    pub created_at: Option<chrono::NaiveDateTime>, // job submited time
+    pub created_at: Option<chrono::DateTime<Utc>>, // job submited time
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
