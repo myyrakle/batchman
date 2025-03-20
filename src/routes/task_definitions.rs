@@ -63,7 +63,7 @@ pub async fn create_task_definition(
     Extension(connection): Extension<DatabaseConnection>,
     Json(body): Json<CreateTaskDefinitionBody>,
 ) -> response::Response {
-    let task_definition = actions::create_task_definition::create_task_definition(
+    let task_definition_id = actions::create_task_definition::create_task_definition(
         actions::create_task_definition::CreateDefinitionParams {
             connection: &connection,
             request: body,
@@ -71,8 +71,8 @@ pub async fn create_task_definition(
     )
     .await;
 
-    match task_definition {
-        Ok(task_definition) => Json(task_definition).into_response(),
+    match task_definition_id {
+        Ok(task_definition_id) => Json(task_definition_id).into_response(),
         Err(error) => Response::builder()
             .status(500)
             .body(Body::new(error.to_string()))
@@ -95,7 +95,7 @@ pub async fn patch_task_definition(
     Extension(connection): Extension<DatabaseConnection>,
     Json(query): Json<PatchTaskDefinitionBody>,
 ) -> response::Response {
-    let task_definition = actions::patch_task_definition::patch_task_definition(
+    let result = actions::patch_task_definition::patch_task_definition(
         actions::patch_task_definition::PatchDefinitionParams {
             connection: &connection,
             task_definition_id,
@@ -104,7 +104,7 @@ pub async fn patch_task_definition(
     )
     .await;
 
-    match task_definition {
+    match result {
         Ok(_) => Response::builder().status(200).body(Body::empty()).unwrap(),
         Err(error) => Response::builder()
             .status(500)
@@ -117,7 +117,7 @@ pub async fn delete_task_definition(
     Path(task_definition_id): Path<i64>,
     Extension(connection): Extension<DatabaseConnection>,
 ) -> response::Response {
-    let task_definition = actions::delete_task_definition::delete_task_definition(
+    let result = actions::delete_task_definition::delete_task_definition(
         actions::delete_task_definition::DeleteDefinitionParams {
             connection: &connection,
             task_definition_id,
@@ -125,7 +125,7 @@ pub async fn delete_task_definition(
     )
     .await;
 
-    match task_definition {
+    match result {
         Ok(_) => Response::builder().status(200).body(Body::empty()).unwrap(),
         Err(error) => Response::builder()
             .status(500)
