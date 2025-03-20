@@ -35,7 +35,11 @@ pub fn run_container(task_definition: entities::task_definition::Model) -> anyho
 
     // CMD 설정
     if let Some(cmd) = &task_definition.command {
-        command.arg(cmd);
+        let command_list = serde_json::from_str::<Vec<String>>(cmd)?;
+
+        for cmd in command_list {
+            command.arg(cmd);
+        }
     }
 
     // Arguments 전달

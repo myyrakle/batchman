@@ -19,14 +19,14 @@ pub async fn submit_job(
     Extension(connection): Extension<DatabaseConnection>,
     Json(body): Json<SubmitJobBody>,
 ) -> response::Response {
-    let task_definition = actions::submit_job::submit_job(SubmitJobParams {
+    let job_id = actions::submit_job::submit_job(SubmitJobParams {
         connection: &connection,
         request_body: body,
     })
     .await;
 
-    match task_definition {
-        Ok(task_definition) => Json(task_definition).into_response(),
+    match job_id {
+        Ok(job_id) => Json(job_id).into_response(),
         Err(error) => Response::builder()
             .status(500)
             .body(Body::new(error.to_string()))

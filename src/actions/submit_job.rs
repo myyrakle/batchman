@@ -12,7 +12,7 @@ pub struct SubmitJobParams<'a> {
     pub request_body: SubmitJobBody,
 }
 
-pub async fn submit_job(params: SubmitJobParams<'_>) -> anyhow::Result<()> {
+pub async fn submit_job(params: SubmitJobParams<'_>) -> anyhow::Result<i64> {
     let task_definition =
         entities::task_definition::Entity::find_by_id(params.request_body.task_definition_id)
             .one(params.connection)
@@ -27,13 +27,16 @@ pub async fn submit_job(params: SubmitJobParams<'_>) -> anyhow::Result<()> {
         name: Set(params.request_body.job_name),
         task_definition_id: Set(params.request_body.task_definition_id),
         status: Set(entities::job::JobStatus::Pending),
-        submited_at: Set(Some(chrono::Utc::now().naive_utc())),
+        submited_at: Set(Some(chrono::Utc::now())),
         started_at: Set(None),
         finished_at: Set(None),
         container_id: Set(None),
     };
 
-    new_job.into_active_model().save(params.connection).await?;
+    let model = new_job
+        .into_active_model()
+        .insert(params.connection)
+        .await?;
 
-    Ok(())
+    Ok(model.id)
 }

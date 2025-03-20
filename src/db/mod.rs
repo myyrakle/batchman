@@ -55,4 +55,18 @@ pub async fn setup_schema(db: &DatabaseConnection) {
             .await
             .expect("Failed to create index");
     }
+
+    // job table generate
+    {
+        let mut create_table_statement = schema.create_table_from_entity(entities::job::Entity);
+
+        create_table_statement.if_not_exists();
+
+        let database_backend = db.get_database_backend();
+
+        // Execute create table statement
+        db.execute(database_backend.build(&create_table_statement))
+            .await
+            .expect("Failed to create table");
+    }
 }

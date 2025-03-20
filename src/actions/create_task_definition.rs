@@ -35,7 +35,10 @@ pub async fn create_task_definition(params: CreateDefinitionParams<'_>) -> anyho
         name: Set(params.request.name),
         version: Set(version),
         image: Set(params.request.image),
-        command: Set(params.request.command),
+        command: Set(params
+            .request
+            .command
+            .map(|command| serde_json::to_string(&command).unwrap_or_default())),
         args: Set(params.request.args),
         env: Set(params.request.env),
         memory_limit: Set(params.request.memory_limit),

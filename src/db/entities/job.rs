@@ -1,3 +1,4 @@
+use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
 #[derive(EnumIter, DeriveActiveEnum, Clone, Debug, PartialEq, Eq)]
@@ -26,9 +27,9 @@ pub struct Model {
 
     pub status: JobStatus, // job status
 
-    pub submited_at: Option<chrono::NaiveDateTime>, // job submited time
-    pub started_at: Option<chrono::NaiveDateTime>,  // job started time
-    pub finished_at: Option<chrono::NaiveDateTime>, // job finished time
+    pub submited_at: Option<chrono::DateTime<Utc>>, // job submited time
+    pub started_at: Option<chrono::DateTime<Utc>>,  // job started time
+    pub finished_at: Option<chrono::DateTime<Utc>>, // job finished time
 
     pub container_id: Option<String>, // batch container id (docker container id)
 }

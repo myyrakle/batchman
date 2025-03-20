@@ -8,7 +8,7 @@ use axum::{
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 
-use crate::actions;
+use crate::{actions, db::entities};
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct ListTaskDefinitionsQuery {
@@ -17,7 +17,38 @@ pub struct ListTaskDefinitionsQuery {
     pub name: Option<String>,
 }
 
-pub type ListTaskDefinitionsItem = crate::db::entities::task_definition::Model;
+#[derive(Serialize)]
+pub struct ListTaskDefinitionsItem {
+    pub id: i64,      // primary key
+    pub name: String, // task name
+    pub version: i64, // task version
+
+    pub image: String,                // docker image
+    pub command: Option<Vec<String>>, // docker run command
+    pub args: Option<String>,         // docker run arguments
+    pub env: Option<String>,          // environment variables
+
+    pub memory_limit: Option<u32>, // memory limit in MB
+    pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
+}
+
+impl From<entities::task_definition::Model> for ListTaskDefinitionsItem {
+    fn from(model: entities::task_definition::Model) -> Self {
+        ListTaskDefinitionsItem {
+            id: model.id,
+            name: model.name,
+            version: model.version,
+            image: model.image,
+            command: model
+                .command
+                .map(|command| serde_json::from_str(&command).unwrap_or_default()),
+            args: model.args,
+            env: model.env,
+            memory_limit: model.memory_limit,
+            cpu_limit: model.cpu_limit,
+        }
+    }
+}
 
 #[derive(Serialize)]
 pub struct ListTaskDefinitionsResponse {
@@ -38,7 +69,12 @@ pub async fn list_task_definitions(
 
     match task_definitions {
         Ok(task_definitions) => {
-            let response = ListTaskDefinitionsResponse { task_definitions };
+            let response = ListTaskDefinitionsResponse {
+                task_definitions: task_definitions
+                    .into_iter()
+                    .map(ListTaskDefinitionsItem::from)
+                    .collect(),
+            };
             Json(response).into_response()
         }
         Err(error) => Response::builder()
@@ -50,20 +86,20 @@ pub async fn list_task_definitions(
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct CreateTaskDefinitionBody {
-    pub name: String,              // task name
-    pub image: String,             // docker image
-    pub command: Option<String>,   // docker run command
-    pub args: Option<String>,      // docker run arguments
-    pub env: Option<String>,       // environment variables
-    pub memory_limit: Option<u32>, // memory limit in MB
-    pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
+    pub name: String,                 // task name
+    pub image: String,                // docker image
+    pub command: Option<Vec<String>>, // docker run command
+    pub args: Option<String>,         // docker run arguments
+    pub env: Option<String>,          // environment variables
+    pub memory_limit: Option<u32>,    // memory limit in MB
+    pub cpu_limit: Option<u32>,       // cpu limit (default 1024)
 }
 
 pub async fn create_task_definition(
     Extension(connection): Extension<DatabaseConnection>,
     Json(body): Json<CreateTaskDefinitionBody>,
 ) -> response::Response {
-    let task_definition = actions::create_task_definition::create_task_definition(
+    let task_definition_id = actions::create_task_definition::create_task_definition(
         actions::create_task_definition::CreateDefinitionParams {
             connection: &connection,
             request: body,
@@ -71,8 +107,8 @@ pub async fn create_task_definition(
     )
     .await;
 
-    match task_definition {
-        Ok(task_definition) => Json(task_definition).into_response(),
+    match task_definition_id {
+        Ok(task_definition_id) => Json(task_definition_id).into_response(),
         Err(error) => Response::builder()
             .status(500)
             .body(Body::new(error.to_string()))
@@ -95,7 +131,7 @@ pub async fn patch_task_definition(
     Extension(connection): Extension<DatabaseConnection>,
     Json(query): Json<PatchTaskDefinitionBody>,
 ) -> response::Response {
-    let task_definition = actions::patch_task_definition::patch_task_definition(
+    let result = actions::patch_task_definition::patch_task_definition(
         actions::patch_task_definition::PatchDefinitionParams {
             connection: &connection,
             task_definition_id,
@@ -104,7 +140,7 @@ pub async fn patch_task_definition(
     )
     .await;
 
-    match task_definition {
+    match result {
         Ok(_) => Response::builder().status(200).body(Body::empty()).unwrap(),
         Err(error) => Response::builder()
             .status(500)
@@ -117,7 +153,7 @@ pub async fn delete_task_definition(
     Path(task_definition_id): Path<i64>,
     Extension(connection): Extension<DatabaseConnection>,
 ) -> response::Response {
-    let task_definition = actions::delete_task_definition::delete_task_definition(
+    let result = actions::delete_task_definition::delete_task_definition(
         actions::delete_task_definition::DeleteDefinitionParams {
             connection: &connection,
             task_definition_id,
@@ -125,7 +161,7 @@ pub async fn delete_task_definition(
     )
     .await;
 
-    match task_definition {
+    match result {
         Ok(_) => Response::builder().status(200).body(Body::empty()).unwrap(),
         Err(error) => Response::builder()
             .status(500)
