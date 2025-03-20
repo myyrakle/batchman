@@ -33,8 +33,14 @@ pub async fn start_runner_loop(database_connection: DatabaseConnection) {
             }
 
             for pending_job in pending_jobs {
-                if let Err(error) = process_pending_job(&database_connection, pending_job).await {
+                if let Err(error) = process_pending_job(&database_connection, &pending_job).await {
                     println!("Error processing job: {:?}", error);
+                    let mut job_active_model = pending_job.into_active_model();
+                    job_active_model.status = Set(JobStatus::Failed);
+
+                    if let Err(error) = job_active_model.update(&database_connection).await {
+                        println!("Error updating job status: {:?}", error);
+                    }
                 }
             }
         }
@@ -44,12 +50,12 @@ pub async fn start_runner_loop(database_connection: DatabaseConnection) {
 
 async fn process_pending_job(
     database_connection: &DatabaseConnection,
-    pending_job: entities::job::Model,
+    pending_job: &entities::job::Model,
 ) -> anyhow::Result<()> {
     // TODO: 리소스 제한이나 실행 제한 등에 걸리지 않는지 확인 (차후 개발)
 
     // job 상태를 START로 변경
-    let mut job_active_model = pending_job.into_active_model();
+    let mut job_active_model = pending_job.clone().into_active_model();
     job_active_model.status = Set(JobStatus::Starting);
     job_active_model.started_at = Set(Some(chrono::Utc::now()));
     let pending_job = job_active_model.clone().update(database_connection).await?;
@@ -59,9 +65,6 @@ async fn process_pending_job(
         .one(database_connection)
         .await
     else {
-        let mut job_active_model = pending_job.into_active_model();
-        job_active_model.status = Set(JobStatus::Failed);
-        job_active_model.update(database_connection).await?;
         return Err(anyhow::anyhow!("Error fetching task definition"));
     };
 
