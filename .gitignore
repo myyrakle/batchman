@@ -27,3 +27,5 @@ Cargo.lock
 
 *.sqlite
 *.http
+
+sample.json
