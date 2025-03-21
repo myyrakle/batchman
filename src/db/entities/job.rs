@@ -32,6 +32,7 @@ pub struct Model {
     pub finished_at: Option<chrono::DateTime<Utc>>, // job finished time
 
     pub container_id: Option<String>, // batch container id (docker container id)
+    pub exit_code: Option<i32>,       // batch exit code
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

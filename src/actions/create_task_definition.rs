@@ -25,7 +25,7 @@ pub async fn create_task_definition(params: CreateDefinitionParams<'_>) -> anyho
             .all(params.connection)
             .await?;
 
-        if task_definitions.len() > 0 {
+        if !task_definitions.is_empty() {
             version = task_definitions[0].version + 1;
         }
     }
