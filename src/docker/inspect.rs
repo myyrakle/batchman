@@ -8,6 +8,7 @@ pub struct ContainerInspectResult {
     pub state: ContainerState,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Deserialize)]
 pub struct ContainerState {
     #[serde(rename = "Status")]
@@ -23,11 +24,13 @@ pub struct ContainerState {
     #[serde(rename = "Dead")]
     pub dead: bool,
     #[serde(rename = "ExitCode")]
-    pub exit_code: i32,
+    pub exit_code: Option<i32>,
     #[serde(rename = "StartedAt")]
-    pub started_at: chrono::DateTime<chrono::Utc>,
+    pub started_at: Option<chrono::DateTime<chrono::Utc>>,
     #[serde(rename = "FinishedAt")]
-    pub finished_at: chrono::DateTime<chrono::Utc>,
+    pub finished_at: Option<chrono::DateTime<chrono::Utc>>,
+    #[serde(rename = "Error")]
+    pub error: Option<String>,
 }
 
 pub fn inspect_container(container_id: &str) -> anyhow::Result<ContainerInspectResult> {

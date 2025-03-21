@@ -32,6 +32,7 @@ pub async fn submit_job(params: SubmitJobParams<'_>) -> anyhow::Result<i64> {
         finished_at: Set(None),
         container_id: Set(None),
         exit_code: Set(None),
+        error_message: Set(None),
     };
 
     let model = new_job
