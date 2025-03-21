@@ -1,6 +1,6 @@
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait,
-    IntoActiveModel, QueryFilter, QuerySelect,
+    IntoActiveModel, QueryFilter,
 };
 
 use crate::{
@@ -14,7 +14,6 @@ pub async fn start_status_tracker_loop(database_connection: DatabaseConnection) 
             let mut find_query = entities::job::Entity::find();
 
             find_query = find_query.filter(entities::job::Column::Status.eq(JobStatus::Running));
-            find_query = find_query.limit(5); // TODO: config 설정 가능한 값으로 빼기
 
             let running_jobs = match find_query.all(&database_connection).await {
                 Ok(jobs) => jobs,
@@ -43,6 +42,8 @@ pub async fn start_status_tracker_loop(database_connection: DatabaseConnection) 
                     }
                 }
             }
+
+            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
         }
     })
     .await;
