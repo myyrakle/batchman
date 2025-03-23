@@ -37,6 +37,7 @@ async fn main() {
             delete(routes::task_definitions::delete_task_definition),
         )
         .route("/jobs/submit", post(routes::jobs::submit_job))
+        .route("/jobs/stop", post(routes::jobs::stop_job))
         .layer(Extension(connection.clone()));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:13939")
