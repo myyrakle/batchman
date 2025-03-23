@@ -3,16 +3,17 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use crate::{
     db::entities::{self, job::JobStatus},
     docker,
+    routes::jobs::StopJobBody,
 };
 
 #[derive(Debug, Clone)]
 pub struct StopJobParams<'a> {
     pub connection: &'a DatabaseConnection,
-    pub job_id: i64,
+    pub request_body: StopJobBody,
 }
 
 pub async fn stop_job(params: StopJobParams<'_>) -> anyhow::Result<()> {
-    let job_id = params.job_id;
+    let job_id = params.request_body.job_id;
 
     let mut find_job_query = entities::job::Entity::find();
 
