@@ -1,7 +1,10 @@
+use std::sync::Arc;
+
 use sea_orm::{DatabaseConnection, EntityTrait};
 
 use crate::{
     actions::{self, submit_job::SubmitJobParams},
+    context,
     db::entities,
     routes::jobs::SubmitJobBody,
 };
@@ -44,11 +47,11 @@ pub async fn list_schedules(
 }
 
 pub async fn start_scheduler_loop(
-    database_connection: DatabaseConnection,
-    mut receiver: ScheduleCDCReceiver,
+    context: Arc<context::Context>,
+    mut receiver: tokio::sync::mpsc::Receiver<ScheduleCDCEvent>,
 ) {
     let _ = tokio::spawn(async move {
-        let mut schedules = list_schedules(&database_connection)
+        let mut schedules = list_schedules(&context.connection)
             .await
             .expect("Failed to load schedules");
 
@@ -57,7 +60,7 @@ pub async fn start_scheduler_loop(
             // 스케줄 데이터가 변경되면 스케줄을 다시 로드
             // TODO: 추후에는 정보 기반으로 변경된 스케줄만 로드하도록 개선
             if let Ok(_) = receiver.try_recv() {
-                schedules = list_schedules(&database_connection)
+                schedules = list_schedules(&context.connection)
                     .await
                     .expect("Failed to load schedules");
             }
@@ -70,7 +73,7 @@ pub async fn start_scheduler_loop(
 
             for schedule in schedules.iter() {
                 if is_time_to_trigger(schedule) {
-                    if let Err(error) = submit_job_by_schedule(&database_connection, schedule).await
+                    if let Err(error) = submit_job_by_schedule(&context.connection, schedule).await
                     {
                         log::error!(
                             "Failed to submit job for schedule {}: {}",

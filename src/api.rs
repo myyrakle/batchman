@@ -1,9 +1,12 @@
 pub(crate) mod actions;
 pub(crate) mod background;
+pub(crate) mod context;
 pub(crate) mod db;
 pub(crate) mod docker;
 pub(crate) mod repositories;
 pub(crate) mod routes;
+
+use std::sync::Arc;
 
 use axum::{
     Extension, Router,
@@ -18,8 +21,10 @@ async fn main() {
     let connection = db::create_database_connection().await.unwrap();
     setup_schema(&connection).await;
 
-    let (_schedule_cdc_sender, schedule_cdc_receiver) =
+    let (schedule_cdc_sender, schedule_cdc_receiver) =
         tokio::sync::mpsc::channel::<ScheduleCDCEvent>(8);
+
+    let context = Arc::new(context::Context::new(connection, schedule_cdc_sender));
 
     let app = Router::new()
         // `GET /` goes to `root`
@@ -43,7 +48,7 @@ async fn main() {
         )
         .route("/jobs/submit", post(routes::jobs::submit_job))
         .route("/jobs/stop", post(routes::jobs::stop_job))
-        .layer(Extension(connection.clone()));
+        .layer(Extension(context.clone()));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:13939")
         .await
@@ -51,7 +56,7 @@ async fn main() {
 
     let (server, _) = tokio::join!(
         axum::serve(listener, app),
-        background::start_background_loop(connection.clone(), schedule_cdc_receiver),
+        background::start_background_loop(context, schedule_cdc_receiver),
     );
 
     server.unwrap();
