@@ -18,8 +18,19 @@ impl Context {
         schedule_cdc_sender: tokio::sync::mpsc::Sender<ScheduleCDCEvent>,
     ) -> Self {
         Self {
-            connection,
+            connection: connection.clone(),
             schedule_cdc_sender,
+            task_definition_repository: Box::new(
+                repositories::task_definition::TaskDefinitionSeaOrmRepository::new(
+                    connection.clone(),
+                ),
+            ),
+            job_repository: Box::new(repositories::job::JobSeaOrmRepository::new(
+                connection.clone(),
+            )),
+            schedule_repository: Box::new(repositories::schedule::ScheduleSeaOrmRepository::new(
+                connection,
+            )),
         }
     }
 }
