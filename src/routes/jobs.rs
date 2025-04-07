@@ -4,10 +4,12 @@ use axum::{
     http::Response,
     response::{self, IntoResponse},
 };
-use sea_orm::DatabaseConnection;
 use serde::Deserialize;
 
-use crate::actions::{self, stop_job::StopJobParams, submit_job::SubmitJobParams};
+use crate::{
+    actions::{self, stop_job::StopJobParams, submit_job::SubmitJobParams},
+    context::SharedContext,
+};
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct SubmitJobBody {
@@ -16,11 +18,11 @@ pub struct SubmitJobBody {
 }
 
 pub async fn submit_job(
-    Extension(connection): Extension<DatabaseConnection>,
+    Extension(state): Extension<SharedContext>,
     Json(body): Json<SubmitJobBody>,
 ) -> response::Response {
     let job_id = actions::submit_job::submit_job(SubmitJobParams {
-        connection: &connection,
+        connection: &state.connection,
         request_body: body,
     })
     .await;
@@ -40,11 +42,11 @@ pub struct StopJobBody {
 }
 
 pub async fn stop_job(
-    Extension(connection): Extension<DatabaseConnection>,
+    Extension(state): Extension<SharedContext>,
     Json(body): Json<StopJobBody>,
 ) -> response::Response {
     let result = actions::stop_job::stop_job(StopJobParams {
-        connection: &connection,
+        connection: &state.connection,
         request_body: body,
     })
     .await;

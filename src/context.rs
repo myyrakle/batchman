@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use sea_orm::DatabaseConnection;
 
 use crate::{background::scheduler::ScheduleCDCEvent, repositories};
@@ -11,6 +13,8 @@ pub struct Context {
     pub job_repository: Box<dyn repositories::JobRepository + Send + Sync>,
     pub schedule_repository: Box<dyn repositories::ScheduleRepository + Send + Sync>,
 }
+
+pub type SharedContext = Arc<Context>;
 
 impl Context {
     pub fn new(

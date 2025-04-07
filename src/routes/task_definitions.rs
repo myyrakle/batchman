@@ -5,10 +5,9 @@ use axum::{
     http::Response,
     response::{self, IntoResponse},
 };
-use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 
-use crate::{actions, db::entities};
+use crate::{actions, context::SharedContext, db::entities};
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct ListTaskDefinitionsQuery {
@@ -57,11 +56,11 @@ pub struct ListTaskDefinitionsResponse {
 
 pub async fn list_task_definitions(
     Query(query): Query<ListTaskDefinitionsQuery>,
-    Extension(connection): Extension<DatabaseConnection>,
+    Extension(state): Extension<SharedContext>,
 ) -> response::Response {
     let task_definitions = actions::list_task_definition::list_task_definitions(
         actions::list_task_definition::ListTaskDefinitionsParams {
-            connection: &connection,
+            connection: &state.connection,
             query,
         },
     )
@@ -96,12 +95,12 @@ pub struct CreateTaskDefinitionBody {
 }
 
 pub async fn create_task_definition(
-    Extension(connection): Extension<DatabaseConnection>,
+    Extension(state): Extension<SharedContext>,
     Json(body): Json<CreateTaskDefinitionBody>,
 ) -> response::Response {
     let task_definition_id = actions::create_task_definition::create_task_definition(
         actions::create_task_definition::CreateDefinitionParams {
-            connection: &connection,
+            connection: &state.connection,
             request: body,
         },
     )
@@ -128,12 +127,12 @@ pub struct PatchTaskDefinitionBody {
 
 pub async fn patch_task_definition(
     Path(task_definition_id): Path<i64>,
-    Extension(connection): Extension<DatabaseConnection>,
+    Extension(state): Extension<SharedContext>,
     Json(query): Json<PatchTaskDefinitionBody>,
 ) -> response::Response {
     let result = actions::patch_task_definition::patch_task_definition(
         actions::patch_task_definition::PatchDefinitionParams {
-            connection: &connection,
+            connection: &state.connection,
             task_definition_id,
             request: query,
         },
@@ -151,11 +150,11 @@ pub async fn patch_task_definition(
 
 pub async fn delete_task_definition(
     Path(task_definition_id): Path<i64>,
-    Extension(connection): Extension<DatabaseConnection>,
+    Extension(state): Extension<SharedContext>,
 ) -> response::Response {
     let result = actions::delete_task_definition::delete_task_definition(
         actions::delete_task_definition::DeleteDefinitionParams {
-            connection: &connection,
+            connection: &state.connection,
             task_definition_id,
         },
     )

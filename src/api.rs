@@ -13,6 +13,7 @@ use axum::{
     routing::{delete, get, patch, post},
 };
 use background::scheduler::ScheduleCDCEvent;
+use context::SharedContext;
 use db::setup_schema;
 use sea_orm::DatabaseConnection;
 
@@ -66,8 +67,8 @@ async fn root() -> &'static str {
     "Hello, World!"
 }
 
-async fn database_check(Extension(state): Extension<DatabaseConnection>) -> &'static str {
-    state.ping().await.unwrap();
+async fn database_check(Extension(state): Extension<SharedContext>) -> &'static str {
+    state.connection.ping().await.unwrap();
 
     "OK"
 }
