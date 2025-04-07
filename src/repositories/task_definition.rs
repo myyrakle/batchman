@@ -1,8 +1,12 @@
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
+use sea_orm::{
+    ActiveModelTrait,
+    ActiveValue::{NotSet, Set},
+    ColumnTrait, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
+};
 
 use crate::db::entities;
 
-use super::{ListTaskDefinitionsParams, TaskDefinitionRepository};
+use super::{CreateTaskDefinitionParams, ListTaskDefinitionsParams, TaskDefinitionRepository};
 
 pub struct TaskDefinitionSeaOrmRepository {
     pub connection: sea_orm::DatabaseConnection,
@@ -31,6 +35,29 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
         let task_definitions = find_query.all(&self.connection).await?;
 
         Ok(task_definitions)
+    }
+
+    async fn create_task_definition(
+        &self,
+        params: CreateTaskDefinitionParams,
+    ) -> anyhow::Result<i64> {
+        let new_definition = entities::task_definition::ActiveModel {
+            id: NotSet,
+            name: Set(params.name),
+            version: Set(params.version),
+            image: Set(params.image),
+            command: Set(params
+                .command
+                .map(|command| serde_json::to_string(&command).unwrap_or_default())),
+            args: Set(params.args),
+            env: Set(params.env),
+            memory_limit: Set(params.memory_limit),
+            cpu_limit: Set(params.cpu_limit),
+        };
+
+        let saved = new_definition.insert(&self.connection).await?;
+
+        Ok(saved.id)
     }
 }
 
