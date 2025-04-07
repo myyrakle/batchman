@@ -2,6 +2,7 @@ pub(crate) mod actions;
 pub(crate) mod background;
 pub(crate) mod db;
 pub(crate) mod docker;
+pub(crate) mod repositories;
 pub(crate) mod routes;
 
 use axum::{
