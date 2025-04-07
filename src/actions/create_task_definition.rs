@@ -4,7 +4,10 @@ use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
 };
 
-use crate::{db::entities, routes::task_definitions::CreateTaskDefinitionBody};
+use crate::{
+    context::SharedContext, db::entities, repositories::ListTaskDefinitionsParams,
+    routes::task_definitions::CreateTaskDefinitionBody,
+};
 
 #[derive(Debug, Clone)]
 pub struct CreateDefinitionRequest<'a> {
@@ -12,17 +15,22 @@ pub struct CreateDefinitionRequest<'a> {
     pub request: CreateTaskDefinitionBody,
 }
 
-pub async fn create_task_definition(params: CreateDefinitionRequest<'_>) -> anyhow::Result<i64> {
+pub async fn create_task_definition(
+    context: SharedContext,
+    params: CreateDefinitionRequest<'_>,
+) -> anyhow::Result<i64> {
     // version이 없다면 동일한 이름의 task definition이 있는지 확인
 
     let mut version = 1;
 
     {
-        let task_definitions = entities::task_definition::Entity::find()
-            .filter(entities::task_definition::Column::Name.eq(&params.request.name))
-            .order_by_desc(entities::task_definition::Column::Version)
-            .limit(1)
-            .all(params.connection)
+        let task_definitions = context
+            .task_definition_repository
+            .list_task_definitions(ListTaskDefinitionsParams {
+                name: Some(params.request.name.clone()),
+                limit: Some(1),
+                order_by_desc: Some(entities::task_definition::Column::Version),
+            })
             .await?;
 
         if !task_definitions.is_empty() {

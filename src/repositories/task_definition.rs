@@ -1,6 +1,6 @@
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
 
-use crate::{db::entities, routes::task_definitions};
+use crate::db::entities;
 
 use super::{ListTaskDefinitionsParams, TaskDefinitionRepository};
 

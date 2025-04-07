@@ -1,5 +1,3 @@
-use sea_orm::prelude::async_trait::async_trait;
-
 use crate::db::entities;
 
 pub mod job;

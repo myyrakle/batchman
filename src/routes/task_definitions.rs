@@ -99,6 +99,7 @@ pub async fn create_task_definition(
     Json(body): Json<CreateTaskDefinitionBody>,
 ) -> response::Response {
     let task_definition_id = actions::create_task_definition::create_task_definition(
+        state.clone(),
         actions::create_task_definition::CreateDefinitionRequest {
             connection: &state.connection,
             request: body,
