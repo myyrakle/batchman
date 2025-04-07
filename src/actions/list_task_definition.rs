@@ -3,13 +3,13 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use crate::{db::entities, routes::task_definitions::ListTaskDefinitionsQuery};
 
 #[derive(Debug, Clone)]
-pub struct ListTaskDefinitionsParams<'a> {
+pub struct ListTaskDefinitionsRequest<'a> {
     pub connection: &'a DatabaseConnection,
     pub query: ListTaskDefinitionsQuery,
 }
 
 pub async fn list_task_definitions(
-    params: ListTaskDefinitionsParams<'_>,
+    params: ListTaskDefinitionsRequest<'_>,
 ) -> anyhow::Result<Vec<entities::task_definition::Model>> {
     let mut find_query = entities::task_definition::Entity::find();
 

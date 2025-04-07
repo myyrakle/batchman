@@ -3,12 +3,12 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFil
 use crate::db::entities;
 
 #[derive(Debug, Clone)]
-pub struct DeleteDefinitionParams<'a> {
+pub struct DeleteDefinitionRequest<'a> {
     pub connection: &'a DatabaseConnection,
     pub task_definition_id: i64,
 }
 
-pub async fn delete_task_definition(params: DeleteDefinitionParams<'_>) -> anyhow::Result<()> {
+pub async fn delete_task_definition(params: DeleteDefinitionRequest<'_>) -> anyhow::Result<()> {
     let task_definition = entities::task_definition::Entity::find()
         .filter(entities::task_definition::Column::Id.eq(params.task_definition_id))
         .limit(1)

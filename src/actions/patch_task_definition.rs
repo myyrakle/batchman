@@ -6,13 +6,13 @@ use sea_orm::{
 use crate::{db::entities, routes::task_definitions::PatchTaskDefinitionBody};
 
 #[derive(Debug, Clone)]
-pub struct PatchDefinitionParams<'a> {
+pub struct PatchDefinitionRequest<'a> {
     pub connection: &'a DatabaseConnection,
     pub task_definition_id: i64,
     pub request: PatchTaskDefinitionBody,
 }
 
-pub async fn patch_task_definition(params: PatchDefinitionParams<'_>) -> anyhow::Result<()> {
+pub async fn patch_task_definition(params: PatchDefinitionRequest<'_>) -> anyhow::Result<()> {
     // version이 없다면 동일한 이름의 task definition이 있는지 확인
 
     let task_definition = entities::task_definition::Entity::find()

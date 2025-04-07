@@ -15,7 +15,6 @@ use axum::{
 use background::scheduler::ScheduleCDCEvent;
 use context::SharedContext;
 use db::setup_schema;
-use sea_orm::DatabaseConnection;
 
 #[tokio::main]
 async fn main() {

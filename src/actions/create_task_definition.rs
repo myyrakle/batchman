@@ -7,12 +7,12 @@ use sea_orm::{
 use crate::{db::entities, routes::task_definitions::CreateTaskDefinitionBody};
 
 #[derive(Debug, Clone)]
-pub struct CreateDefinitionParams<'a> {
+pub struct CreateDefinitionRequest<'a> {
     pub connection: &'a DatabaseConnection,
     pub request: CreateTaskDefinitionBody,
 }
 
-pub async fn create_task_definition(params: CreateDefinitionParams<'_>) -> anyhow::Result<i64> {
+pub async fn create_task_definition(params: CreateDefinitionRequest<'_>) -> anyhow::Result<i64> {
     // version이 없다면 동일한 이름의 task definition이 있는지 확인
 
     let mut version = 1;

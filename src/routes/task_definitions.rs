@@ -59,7 +59,7 @@ pub async fn list_task_definitions(
     Extension(state): Extension<SharedContext>,
 ) -> response::Response {
     let task_definitions = actions::list_task_definition::list_task_definitions(
-        actions::list_task_definition::ListTaskDefinitionsParams {
+        actions::list_task_definition::ListTaskDefinitionsRequest {
             connection: &state.connection,
             query,
         },
@@ -99,7 +99,7 @@ pub async fn create_task_definition(
     Json(body): Json<CreateTaskDefinitionBody>,
 ) -> response::Response {
     let task_definition_id = actions::create_task_definition::create_task_definition(
-        actions::create_task_definition::CreateDefinitionParams {
+        actions::create_task_definition::CreateDefinitionRequest {
             connection: &state.connection,
             request: body,
         },
@@ -131,7 +131,7 @@ pub async fn patch_task_definition(
     Json(query): Json<PatchTaskDefinitionBody>,
 ) -> response::Response {
     let result = actions::patch_task_definition::patch_task_definition(
-        actions::patch_task_definition::PatchDefinitionParams {
+        actions::patch_task_definition::PatchDefinitionRequest {
             connection: &state.connection,
             task_definition_id,
             request: query,
@@ -153,7 +153,7 @@ pub async fn delete_task_definition(
     Extension(state): Extension<SharedContext>,
 ) -> response::Response {
     let result = actions::delete_task_definition::delete_task_definition(
-        actions::delete_task_definition::DeleteDefinitionParams {
+        actions::delete_task_definition::DeleteDefinitionRequest {
             connection: &state.connection,
             task_definition_id,
         },

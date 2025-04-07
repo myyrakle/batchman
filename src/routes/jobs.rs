@@ -7,7 +7,7 @@ use axum::{
 use serde::Deserialize;
 
 use crate::{
-    actions::{self, stop_job::StopJobParams, submit_job::SubmitJobParams},
+    actions::{self, stop_job::StopJobRequest, submit_job::SubmitJobRequest},
     context::SharedContext,
 };
 
@@ -21,7 +21,7 @@ pub async fn submit_job(
     Extension(state): Extension<SharedContext>,
     Json(body): Json<SubmitJobBody>,
 ) -> response::Response {
-    let job_id = actions::submit_job::submit_job(SubmitJobParams {
+    let job_id = actions::submit_job::submit_job(SubmitJobRequest {
         connection: &state.connection,
         request_body: body,
     })
@@ -45,7 +45,7 @@ pub async fn stop_job(
     Extension(state): Extension<SharedContext>,
     Json(body): Json<StopJobBody>,
 ) -> response::Response {
-    let result = actions::stop_job::stop_job(StopJobParams {
+    let result = actions::stop_job::stop_job(StopJobRequest {
         connection: &state.connection,
         request_body: body,
     })

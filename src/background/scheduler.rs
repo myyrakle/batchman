@@ -3,7 +3,7 @@ use std::sync::Arc;
 use sea_orm::{DatabaseConnection, EntityTrait};
 
 use crate::{
-    actions::{self, submit_job::SubmitJobParams},
+    actions::{self, submit_job::SubmitJobRequest},
     context,
     db::entities,
     routes::jobs::SubmitJobBody,
@@ -98,7 +98,7 @@ pub async fn submit_job_by_schedule(
     database_connection: &DatabaseConnection,
     schedule: &entities::schedule::Model,
 ) -> anyhow::Result<()> {
-    actions::submit_job::submit_job(SubmitJobParams {
+    actions::submit_job::submit_job(SubmitJobRequest {
         connection: database_connection,
         request_body: SubmitJobBody {
             task_definition_id: schedule.task_definition_id,
