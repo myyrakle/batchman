@@ -8,6 +8,7 @@ use axum::{
     Extension, Router,
     routing::{delete, get, patch, post},
 };
+use background::scheduler::ScheduleCDCEvent;
 use db::setup_schema;
 use sea_orm::DatabaseConnection;
 
@@ -15,6 +16,9 @@ use sea_orm::DatabaseConnection;
 async fn main() {
     let connection = db::create_database_connection().await.unwrap();
     setup_schema(&connection).await;
+
+    let (_schedule_cdc_sender, schedule_cdc_receiver) =
+        tokio::sync::mpsc::channel::<ScheduleCDCEvent>(8);
 
     let app = Router::new()
         // `GET /` goes to `root`
@@ -46,7 +50,7 @@ async fn main() {
 
     let (server, _) = tokio::join!(
         axum::serve(listener, app),
-        background::start_background_loop(connection.clone()),
+        background::start_background_loop(connection.clone(), schedule_cdc_receiver),
     );
 
     server.unwrap();
