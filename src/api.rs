@@ -17,7 +17,7 @@ async fn main() {
     let connection = db::create_database_connection().await.unwrap();
     setup_schema(&connection).await;
 
-    let (schedule_cdc_sender, schedule_cdc_receiver) =
+    let (_schedule_cdc_sender, schedule_cdc_receiver) =
         tokio::sync::mpsc::channel::<ScheduleCDCEvent>(8);
 
     let app = Router::new()
