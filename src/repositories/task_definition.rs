@@ -6,7 +6,10 @@ use sea_orm::{
 
 use crate::db::entities;
 
-use super::{CreateTaskDefinitionParams, ListTaskDefinitionsParams, TaskDefinitionRepository};
+use super::{
+    CreateTaskDefinitionParams, DeleteTaskDefinitionParams, ListTaskDefinitionsParams,
+    TaskDefinitionRepository,
+};
 
 pub struct TaskDefinitionSeaOrmRepository {
     pub connection: sea_orm::DatabaseConnection,
@@ -58,6 +61,17 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
         let saved = new_definition.insert(&self.connection).await?;
 
         Ok(saved.id)
+    }
+
+    async fn delete_task_definition(
+        &self,
+        params: DeleteTaskDefinitionParams,
+    ) -> anyhow::Result<()> {
+        let _ = entities::task_definition::Entity::delete_by_id(params.task_definition_id)
+            .exec(&self.connection)
+            .await?;
+
+        Ok(())
     }
 }
 

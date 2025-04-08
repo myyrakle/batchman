@@ -25,6 +25,11 @@ pub struct CreateTaskDefinitionParams {
     pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
 }
 
+#[derive(Debug)]
+pub struct DeleteTaskDefinitionParams {
+    pub task_definition_id: i64,
+}
+
 #[async_trait::async_trait]
 pub trait TaskDefinitionRepository {
     async fn list_task_definitions(
@@ -36,6 +41,11 @@ pub trait TaskDefinitionRepository {
         &self,
         params: CreateTaskDefinitionParams,
     ) -> anyhow::Result<i64>;
+
+    async fn delete_task_definition(
+        &self,
+        params: DeleteTaskDefinitionParams,
+    ) -> anyhow::Result<()>;
 }
 
 pub trait JobRepository {}
