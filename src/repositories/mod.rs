@@ -4,8 +4,9 @@ pub mod job;
 pub mod schedule;
 pub mod task_definition;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ListTaskDefinitionsParams {
+    pub task_definition_ids: Vec<i64>,
     pub name: Option<String>,
     pub limit: Option<u64>,
     pub order_by_desc: Option<entities::task_definition::Column>,

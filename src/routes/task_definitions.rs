@@ -125,12 +125,13 @@ pub struct PatchTaskDefinitionBody {
 
 pub async fn patch_task_definition(
     Path(task_definition_id): Path<i64>,
-    Extension(state): Extension<SharedContext>,
+    Extension(context): Extension<SharedContext>,
     Json(query): Json<PatchTaskDefinitionBody>,
 ) -> response::Response {
     let result = actions::patch_task_definition::patch_task_definition(
+        context.clone(),
         actions::patch_task_definition::PatchDefinitionRequest {
-            connection: &state.connection,
+            connection: &context.connection,
             task_definition_id,
             request: query,
         },

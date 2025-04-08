@@ -3,7 +3,12 @@ use sea_orm::{
     IntoActiveModel, QueryFilter, QuerySelect,
 };
 
-use crate::{db::entities, routes::task_definitions::PatchTaskDefinitionBody};
+use crate::{
+    context::SharedContext,
+    db::entities::{self, task_definition},
+    repositories::ListTaskDefinitionsParams,
+    routes::task_definitions::PatchTaskDefinitionBody,
+};
 
 #[derive(Debug, Clone)]
 pub struct PatchDefinitionRequest<'a> {
@@ -12,18 +17,26 @@ pub struct PatchDefinitionRequest<'a> {
     pub request: PatchTaskDefinitionBody,
 }
 
-pub async fn patch_task_definition(params: PatchDefinitionRequest<'_>) -> anyhow::Result<()> {
+pub async fn patch_task_definition(
+    context: SharedContext,
+    params: PatchDefinitionRequest<'_>,
+) -> anyhow::Result<()> {
     // version이 없다면 동일한 이름의 task definition이 있는지 확인
 
-    let task_definition = entities::task_definition::Entity::find()
-        .filter(entities::task_definition::Column::Id.eq(params.task_definition_id))
-        .limit(1)
-        .one(params.connection)
+    let task_definitions = context
+        .task_definition_repository
+        .list_task_definitions(ListTaskDefinitionsParams {
+            task_definition_ids: vec![params.task_definition_id],
+            limit: Some(1),
+            ..Default::default()
+        })
         .await?;
 
-    let Some(task_definition) = task_definition else {
+    if task_definitions.is_empty() {
         return Err(anyhow::anyhow!("Task definition not found"));
-    };
+    }
+
+    let task_definition = task_definitions[0].clone();
 
     let mut task_definition = task_definition.into_active_model();
 

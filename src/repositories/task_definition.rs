@@ -23,6 +23,11 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
     ) -> anyhow::Result<Vec<entities::task_definition::Model>> {
         let mut find_query = entities::task_definition::Entity::find();
 
+        if !params.task_definition_ids.is_empty() {
+            find_query = find_query
+                .filter(entities::task_definition::Column::Id.is_in(params.task_definition_ids));
+        }
+
         if let Some(name) = params.name {
             find_query = find_query.filter(entities::task_definition::Column::Name.eq(name));
         }
