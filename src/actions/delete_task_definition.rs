@@ -1,25 +1,20 @@
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter, QuerySelect};
-
-use crate::db::entities;
+use crate::{context::SharedContext, repositories::DeleteTaskDefinitionParams};
 
 #[derive(Debug, Clone)]
-pub struct DeleteDefinitionParams<'a> {
-    pub connection: &'a DatabaseConnection,
+pub struct DeleteDefinitionRequest {
     pub task_definition_id: i64,
 }
 
-pub async fn delete_task_definition(params: DeleteDefinitionParams<'_>) -> anyhow::Result<()> {
-    let task_definition = entities::task_definition::Entity::find()
-        .filter(entities::task_definition::Column::Id.eq(params.task_definition_id))
-        .limit(1)
-        .one(params.connection)
+pub async fn delete_task_definition(
+    context: SharedContext,
+    params: DeleteDefinitionRequest,
+) -> anyhow::Result<()> {
+    context
+        .task_definition_repository
+        .delete_task_definition(DeleteTaskDefinitionParams {
+            task_definition_id: params.task_definition_id,
+        })
         .await?;
-
-    let Some(task_definition) = task_definition else {
-        return Err(anyhow::anyhow!("Task definition not found"));
-    };
-
-    task_definition.delete(params.connection).await?;
 
     Ok(())
 }

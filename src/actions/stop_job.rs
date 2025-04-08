@@ -7,12 +7,12 @@ use crate::{
 };
 
 #[derive(Debug, Clone)]
-pub struct StopJobParams<'a> {
+pub struct StopJobRequest<'a> {
     pub connection: &'a DatabaseConnection,
     pub request_body: StopJobBody,
 }
 
-pub async fn stop_job(params: StopJobParams<'_>) -> anyhow::Result<()> {
+pub async fn stop_job(params: StopJobRequest<'_>) -> anyhow::Result<()> {
     let job_id = params.request_body.job_id;
 
     let mut find_job_query = entities::job::Entity::find();

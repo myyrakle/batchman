@@ -7,12 +7,12 @@ use sea_orm::{
 use crate::{db::entities, routes::jobs::SubmitJobBody};
 
 #[derive(Debug, Clone)]
-pub struct SubmitJobParams<'a> {
+pub struct SubmitJobRequest<'a> {
     pub connection: &'a DatabaseConnection,
     pub request_body: SubmitJobBody,
 }
 
-pub async fn submit_job(params: SubmitJobParams<'_>) -> anyhow::Result<i64> {
+pub async fn submit_job(params: SubmitJobRequest<'_>) -> anyhow::Result<i64> {
     let task_definition =
         entities::task_definition::Entity::find_by_id(params.request_body.task_definition_id)
             .one(params.connection)
