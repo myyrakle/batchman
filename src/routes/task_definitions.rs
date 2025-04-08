@@ -148,13 +148,11 @@ pub async fn patch_task_definition(
 
 pub async fn delete_task_definition(
     Path(task_definition_id): Path<i64>,
-    Extension(state): Extension<SharedContext>,
+    Extension(context): Extension<SharedContext>,
 ) -> response::Response {
     let result = actions::delete_task_definition::delete_task_definition(
-        actions::delete_task_definition::DeleteDefinitionRequest {
-            connection: &state.connection,
-            task_definition_id,
-        },
+        context,
+        actions::delete_task_definition::DeleteDefinitionRequest { task_definition_id },
     )
     .await;
 
