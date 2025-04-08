@@ -27,6 +27,19 @@ pub struct CreateTaskDefinitionParams {
 }
 
 #[derive(Debug)]
+pub struct PatchTaskDefinitionParams {
+    pub task_definition_id: i64,
+    pub name: Option<String>,
+    pub version: Option<i64>,
+    pub image: Option<String>,
+    pub command: Option<String>,
+    pub args: Option<String>,
+    pub env: Option<String>,
+    pub memory_limit: Option<u32>,
+    pub cpu_limit: Option<u32>,
+}
+
+#[derive(Debug)]
 pub struct DeleteTaskDefinitionParams {
     pub task_definition_id: i64,
 }
@@ -42,6 +55,8 @@ pub trait TaskDefinitionRepository {
         &self,
         params: CreateTaskDefinitionParams,
     ) -> anyhow::Result<i64>;
+
+    async fn patch_task_definition(&self, params: PatchTaskDefinitionParams) -> anyhow::Result<()>;
 
     async fn delete_task_definition(
         &self,

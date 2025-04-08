@@ -1,14 +1,14 @@
 use sea_orm::{
     ActiveModelTrait,
     ActiveValue::{NotSet, Set},
-    ColumnTrait, EntityTrait, QueryFilter, QueryOrder, QuerySelect,
+    ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect,
 };
 
 use crate::db::entities;
 
 use super::{
     CreateTaskDefinitionParams, DeleteTaskDefinitionParams, ListTaskDefinitionsParams,
-    TaskDefinitionRepository,
+    PatchTaskDefinitionParams, TaskDefinitionRepository,
 };
 
 pub struct TaskDefinitionSeaOrmRepository {
@@ -66,6 +66,52 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
         let saved = new_definition.insert(&self.connection).await?;
 
         Ok(saved.id)
+    }
+
+    async fn patch_task_definition(&self, params: PatchTaskDefinitionParams) -> anyhow::Result<()> {
+        let task_definition =
+            entities::task_definition::Entity::find_by_id(params.task_definition_id)
+                .one(&self.connection)
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("Task definition not found"))?;
+
+        let mut model = task_definition.into_active_model();
+
+        if let Some(name) = params.name {
+            model.name = Set(name);
+        }
+
+        if let Some(version) = params.version {
+            model.version = Set(version);
+        }
+
+        if let Some(image) = params.image {
+            model.image = Set(image);
+        }
+
+        if let Some(command) = params.command {
+            model.command = Set(Some(command));
+        }
+
+        if let Some(args) = params.args {
+            model.args = Set(Some(args));
+        }
+
+        if let Some(env) = params.env {
+            model.env = Set(Some(env));
+        }
+
+        if let Some(memory_limit) = params.memory_limit {
+            model.memory_limit = Set(Some(memory_limit));
+        }
+
+        if let Some(cpu_limit) = params.cpu_limit {
+            model.cpu_limit = Set(Some(cpu_limit));
+        }
+
+        let _ = model.update(&self.connection).await?;
+
+        Ok(())
     }
 
     async fn delete_task_definition(
