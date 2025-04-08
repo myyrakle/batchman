@@ -131,7 +131,6 @@ pub async fn patch_task_definition(
     let result = actions::patch_task_definition::patch_task_definition(
         context.clone(),
         actions::patch_task_definition::PatchDefinitionRequest {
-            connection: &context.connection,
             task_definition_id,
             request: query,
         },

@@ -26,7 +26,7 @@ pub struct CreateTaskDefinitionParams {
     pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct PatchTaskDefinitionParams {
     pub task_definition_id: i64,
     pub name: Option<String>,

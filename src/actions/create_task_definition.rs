@@ -25,6 +25,7 @@ pub async fn create_task_definition(
                 name: Some(request.request_body.name.clone()),
                 limit: Some(1),
                 order_by_desc: Some(entities::task_definition::Column::Version),
+                ..Default::default()
             })
             .await?;
 
