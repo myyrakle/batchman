@@ -56,13 +56,11 @@ pub struct ListTaskDefinitionsResponse {
 
 pub async fn list_task_definitions(
     Query(query): Query<ListTaskDefinitionsQuery>,
-    Extension(state): Extension<SharedContext>,
+    Extension(context): Extension<SharedContext>,
 ) -> response::Response {
     let task_definitions = actions::list_task_definition::list_task_definitions(
-        actions::list_task_definition::ListTaskDefinitionsRequest {
-            connection: &state.connection,
-            query,
-        },
+        context,
+        actions::list_task_definition::ListTaskDefinitionsRequest { query },
     )
     .await;
 

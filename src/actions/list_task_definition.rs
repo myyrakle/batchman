@@ -1,34 +1,29 @@
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
-
-use crate::{db::entities, routes::task_definitions::ListTaskDefinitionsQuery};
+use crate::{
+    context::SharedContext, db::entities, repositories::ListTaskDefinitionsParams,
+    routes::task_definitions::ListTaskDefinitionsQuery,
+};
 
 #[derive(Debug, Clone)]
-pub struct ListTaskDefinitionsRequest<'a> {
-    pub connection: &'a DatabaseConnection,
+pub struct ListTaskDefinitionsRequest {
     pub query: ListTaskDefinitionsQuery,
 }
 
 pub async fn list_task_definitions(
-    params: ListTaskDefinitionsRequest<'_>,
+    context: SharedContext,
+    params: ListTaskDefinitionsRequest,
 ) -> anyhow::Result<Vec<entities::task_definition::Model>> {
-    let mut find_query = entities::task_definition::Entity::find();
-
-    if let Some(task_definition_id) = params.query.task_definition_id {
-        find_query =
-            find_query.filter(entities::task_definition::Column::Id.eq(task_definition_id));
-    }
-
-    if let Some(contains_name) = &params.query.contains_name {
-        find_query = find_query
-            .filter(entities::task_definition::Column::Name.contains(contains_name.to_string()));
-    }
-
-    if let Some(name) = &params.query.name {
-        find_query =
-            find_query.filter(entities::task_definition::Column::Name.eq(name.to_string()));
-    }
-
-    let task_definitions = find_query.all(params.connection).await?;
+    let task_definitions = context
+        .task_definition_repository
+        .list_task_definitions(ListTaskDefinitionsParams {
+            task_definition_ids: match params.query.task_definition_id {
+                Some(task_definition_id) => vec![task_definition_id],
+                None => vec![],
+            },
+            name: params.query.name.clone(),
+            contains_name: params.query.contains_name,
+            ..Default::default()
+        })
+        .await?;
 
     Ok(task_definitions)
 }

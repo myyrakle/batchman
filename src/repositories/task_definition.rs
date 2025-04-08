@@ -32,6 +32,11 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
             find_query = find_query.filter(entities::task_definition::Column::Name.eq(name));
         }
 
+        if let Some(contains_name) = params.contains_name {
+            find_query =
+                find_query.filter(entities::task_definition::Column::Name.contains(contains_name));
+        }
+
         if let Some(order_by_desc) = params.order_by_desc {
             find_query = find_query.order_by_desc(order_by_desc);
         }

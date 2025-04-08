@@ -1,5 +1,3 @@
-use sea_orm::DatabaseConnection;
-
 use crate::{
     context::SharedContext,
     repositories::{ListTaskDefinitionsParams, PatchTaskDefinitionParams},
@@ -31,7 +29,7 @@ pub async fn patch_task_definition(
         return Err(anyhow::anyhow!("Task definition not found"));
     }
 
-    context
+    let _ = context
         .task_definition_repository
         .patch_task_definition(PatchTaskDefinitionParams {
             task_definition_id: request.task_definition_id,
