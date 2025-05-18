@@ -15,6 +15,6 @@ pub async fn start_background_loop(
     tokio::join!(
         runner::start_runner_loop(context.clone()),
         scheduler::start_scheduler_loop(context.clone(), schedule_cdc_receiver),
-        job_tracker::start_status_tracker_loop(context.connection.clone()),
+        job_tracker::start_status_tracker_loop(context.clone()),
     );
 }
