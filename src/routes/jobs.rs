@@ -42,11 +42,7 @@ pub async fn stop_job(
     Extension(state): Extension<SharedContext>,
     Json(body): Json<StopJobBody>,
 ) -> response::Response {
-    let result = actions::stop_job::stop_job(StopJobRequest {
-        connection: &state.connection,
-        request_body: body,
-    })
-    .await;
+    let result = actions::stop_job::stop_job(state, StopJobRequest { request_body: body }).await;
 
     match result {
         Ok(_) => Json(()).into_response(),

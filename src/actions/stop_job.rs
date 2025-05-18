@@ -1,25 +1,24 @@
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
-
 use crate::{
-    db::entities::{self, job::JobStatus},
-    docker,
+    context::SharedContext, db::entities::job::JobStatus, docker, repositories::ListJobsParams,
     routes::jobs::StopJobBody,
 };
 
 #[derive(Debug, Clone)]
-pub struct StopJobRequest<'a> {
-    pub connection: &'a DatabaseConnection,
+pub struct StopJobRequest {
     pub request_body: StopJobBody,
 }
 
-pub async fn stop_job(params: StopJobRequest<'_>) -> anyhow::Result<()> {
+pub async fn stop_job(context: SharedContext, params: StopJobRequest) -> anyhow::Result<()> {
     let job_id = params.request_body.job_id;
 
-    let mut find_job_query = entities::job::Entity::find();
+    let mut jobs = context
+        .job_repository
+        .list_jobs(ListJobsParams {
+            job_ids: vec![job_id],
+        })
+        .await?;
 
-    find_job_query = find_job_query.filter(entities::job::Column::Id.eq(job_id));
-
-    let Some(job) = find_job_query.one(params.connection).await? else {
+    let Some(job) = jobs.pop() else {
         return Err(anyhow::anyhow!("Job not found: {}", job_id));
     };
 
