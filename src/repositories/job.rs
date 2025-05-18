@@ -1,12 +1,12 @@
 use sea_orm::{
     ActiveModelTrait,
     ActiveValue::{NotSet, Set},
-    EntityTrait, IntoActiveModel,
+    ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter,
 };
 
 use crate::db::entities;
 
-use super::{CreateJobParams, JobRepository, PatchJobParams};
+use super::{CreateJobParams, JobRepository, ListJobsParams, PatchJobParams};
 
 pub struct JobSeaOrmRepository {
     pub connection: sea_orm::DatabaseConnection,
@@ -20,6 +20,18 @@ impl JobSeaOrmRepository {
 
 #[async_trait::async_trait]
 impl JobRepository for JobSeaOrmRepository {
+    async fn list_jobs(&self, params: ListJobsParams) -> anyhow::Result<Vec<entities::job::Model>> {
+        let mut find_job_query = entities::job::Entity::find();
+
+        if !params.job_ids.is_empty() {
+            find_job_query = find_job_query.filter(entities::job::Column::Id.is_in(params.job_ids));
+        }
+
+        let jobs = find_job_query.all(&self.connection).await?;
+
+        Ok(jobs)
+    }
+
     async fn create_job(&self, params: CreateJobParams) -> anyhow::Result<i64> {
         let new_job = entities::job::ActiveModel {
             id: NotSet,
