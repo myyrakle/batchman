@@ -80,6 +80,7 @@ pub struct CreateJobParams {
     pub error_message: Option<String>,              // batch error message
 }
 
+#[async_trait::async_trait]
 pub trait JobRepository {
     async fn create_job(&self, params: CreateJobParams) -> anyhow::Result<i64>;
 }
