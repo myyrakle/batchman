@@ -1,12 +1,12 @@
 use sea_orm::{
     ActiveModelTrait,
     ActiveValue::{NotSet, Set},
-    IntoActiveModel,
+    EntityTrait, IntoActiveModel,
 };
 
 use crate::db::entities;
 
-use super::{CreateJobParams, JobRepository};
+use super::{CreateJobParams, JobRepository, PatchJobParams};
 
 pub struct JobSeaOrmRepository {
     pub connection: sea_orm::DatabaseConnection,
@@ -37,5 +37,54 @@ impl JobRepository for JobSeaOrmRepository {
         let model = new_job.into_active_model().insert(&self.connection).await?;
 
         Ok(model.id)
+    }
+
+    async fn patch_job(&self, params: PatchJobParams) -> anyhow::Result<()> {
+        let task_definition = entities::job::Entity::find_by_id(params.job_id)
+            .one(&self.connection)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Job not found"))?;
+
+        let mut model = task_definition.into_active_model();
+
+        if let Some(name) = params.name {
+            model.name = Set(name);
+        }
+
+        if let Some(task_definition_id) = params.task_definition_id {
+            model.task_definition_id = Set(task_definition_id);
+        }
+
+        if let Some(status) = params.status {
+            model.status = Set(status);
+        }
+
+        if let Some(submited_at) = params.submited_at {
+            model.submited_at = Set(Some(submited_at));
+        }
+
+        if let Some(started_at) = params.started_at {
+            model.started_at = Set(Some(started_at));
+        }
+
+        if let Some(finished_at) = params.finished_at {
+            model.finished_at = Set(Some(finished_at));
+        }
+
+        if let Some(container_id) = params.container_id {
+            model.container_id = Set(Some(container_id));
+        }
+
+        if let Some(exit_code) = params.exit_code {
+            model.exit_code = Set(Some(exit_code));
+        }
+
+        if let Some(error_message) = params.error_message {
+            model.error_message = Set(Some(error_message));
+        }
+
+        model.update(&self.connection).await?;
+
+        Ok(())
     }
 }
