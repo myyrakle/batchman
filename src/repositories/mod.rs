@@ -112,6 +112,7 @@ pub struct ListSchedulesParams {
     pub limit: Option<u64>,
 }
 
+#[async_trait::async_trait]
 pub trait ScheduleRepository {
     async fn list_schedules(
         &self,
