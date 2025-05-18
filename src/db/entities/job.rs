@@ -1,10 +1,11 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-#[derive(EnumIter, DeriveActiveEnum, Clone, Debug, PartialEq, Eq)]
+#[derive(EnumIter, DeriveActiveEnum, Clone, Debug, PartialEq, Eq, Default)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::N(1))")]
 pub enum JobStatus {
     #[sea_orm(string_value = "Pending")]
+    #[default]
     Pending,
     #[sea_orm(string_value = "Starting")]
     Starting,
