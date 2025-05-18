@@ -21,11 +21,8 @@ pub async fn submit_job(
     Extension(state): Extension<SharedContext>,
     Json(body): Json<SubmitJobBody>,
 ) -> response::Response {
-    let job_id = actions::submit_job::submit_job(SubmitJobRequest {
-        connection: &state.connection,
-        request_body: body,
-    })
-    .await;
+    let job_id =
+        actions::submit_job::submit_job(state, SubmitJobRequest { request_body: body }).await;
 
     match job_id {
         Ok(job_id) => Json(job_id).into_response(),
@@ -45,11 +42,7 @@ pub async fn stop_job(
     Extension(state): Extension<SharedContext>,
     Json(body): Json<StopJobBody>,
 ) -> response::Response {
-    let result = actions::stop_job::stop_job(StopJobRequest {
-        connection: &state.connection,
-        request_body: body,
-    })
-    .await;
+    let result = actions::stop_job::stop_job(state, StopJobRequest { request_body: body }).await;
 
     match result {
         Ok(_) => Json(()).into_response(),
