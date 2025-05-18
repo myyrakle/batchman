@@ -1,7 +1,7 @@
-use sea_orm::EntityTrait;
-
 use crate::{
-    context::SharedContext, db::entities, repositories::CreateJobParams,
+    context::SharedContext,
+    db::entities,
+    repositories::{CreateJobParams, ListTaskDefinitionsParams},
     routes::jobs::SubmitJobBody,
 };
 
@@ -11,12 +11,15 @@ pub struct SubmitJobRequest {
 }
 
 pub async fn submit_job(context: SharedContext, params: SubmitJobRequest) -> anyhow::Result<i64> {
-    let task_definition =
-        entities::task_definition::Entity::find_by_id(params.request_body.task_definition_id)
-            .one(&context.connection)
-            .await?;
+    let task_definitions = context
+        .task_definition_repository
+        .list_task_definitions(ListTaskDefinitionsParams {
+            task_definition_ids: vec![params.request_body.task_definition_id],
+            ..Default::default()
+        })
+        .await?;
 
-    let Some(_) = task_definition else {
+    if task_definitions.is_empty() {
         return Err(anyhow::anyhow!("Task definition not found"));
     };
 
