@@ -1,41 +1,53 @@
-use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait,
-    IntoActiveModel, QueryFilter,
-};
-
 use crate::{
+    context::SharedContext,
     db::entities::{self, job::JobStatus},
     docker::run_container,
+    repositories::{ListTaskDefinitionsParams, PatchJobParams},
 };
 
 pub async fn run_pending_job(
-    database_connection: &DatabaseConnection,
+    context: SharedContext,
     pending_job: &entities::job::Model,
 ) -> anyhow::Result<()> {
     // TODO: 리소스 제한이나 실행 제한 등에 걸리지 않는지 확인 (차후 개발)
 
-    // job 상태를 START로 변경
-    let mut job_active_model = pending_job.clone().into_active_model();
-    job_active_model.status = Set(JobStatus::Starting);
-    job_active_model.started_at = Set(Some(chrono::Utc::now()));
-    let pending_job = job_active_model.clone().update(database_connection).await?;
+    // 1. job 상태를 START로 변경
+    context
+        .job_repository
+        .patch_job(PatchJobParams {
+            job_id: pending_job.id,
+            status: Some(JobStatus::Starting),
+            started_at: Some(chrono::Utc::now()),
+            ..Default::default()
+        })
+        .await?;
 
-    let Ok(Some(task_definition)) = entities::task_definition::Entity::find()
-        .filter(entities::task_definition::Column::Id.eq(pending_job.task_definition_id))
-        .one(database_connection)
-        .await
-    else {
-        return Err(anyhow::anyhow!("Error fetching task definition"));
+    // 2. 컨테이너 실행을 위해 task definition을 가져옴
+    let mut task_definitions = context
+        .task_definition_repository
+        .list_task_definitions(ListTaskDefinitionsParams {
+            task_definition_ids: vec![pending_job.task_definition_id],
+            ..Default::default()
+        })
+        .await?;
+
+    let Some(task_definition) = task_definitions.pop() else {
+        return Err(anyhow::anyhow!("Task definition not found"));
     };
 
-    // 컨테이너 실행
+    // 3. 컨테이너 실행
     let container_id = run_container(task_definition)?;
 
-    // 컨테이너 정보를 job에 업데이트, job 상태를 RUNNING으로 변경
-    let mut job_active_model = pending_job.into_active_model();
-    job_active_model.container_id = Set(Some(container_id));
-    job_active_model.status = Set(JobStatus::Running);
-    job_active_model.update(database_connection).await?;
+    // 4. 컨테이너 정보를 job에 업데이트, job 상태를 RUNNING으로 변경
+    context
+        .job_repository
+        .patch_job(PatchJobParams {
+            job_id: pending_job.id,
+            container_id: Some(container_id.clone()),
+            status: Some(JobStatus::Running),
+            ..Default::default()
+        })
+        .await?;
 
     Ok(())
 }
