@@ -97,6 +97,8 @@ pub struct PatchJobParams {
 #[derive(Debug, Default)]
 pub struct ListJobsParams {
     pub job_ids: Vec<i64>,
+    pub statuses: Vec<JobStatus>,
+    pub limit: Option<u64>,
 }
 
 #[async_trait::async_trait]
@@ -106,4 +108,16 @@ pub trait JobRepository {
     async fn patch_job(&self, params: PatchJobParams) -> anyhow::Result<()>;
 }
 
-pub trait ScheduleRepository {}
+#[derive(Debug, Default)]
+pub struct ListSchedulesParams {
+    pub schedule_ids: Vec<i64>,
+    pub limit: Option<u64>,
+}
+
+#[async_trait::async_trait]
+pub trait ScheduleRepository {
+    async fn list_schedules(
+        &self,
+        params: ListSchedulesParams,
+    ) -> anyhow::Result<Vec<entities::schedule::Model>>;
+}
