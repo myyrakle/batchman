@@ -97,6 +97,8 @@ pub struct PatchJobParams {
 #[derive(Debug, Default)]
 pub struct ListJobsParams {
     pub job_ids: Vec<i64>,
+    pub statuses: Vec<JobStatus>,
+    pub limit: Option<u64>,
 }
 
 #[async_trait::async_trait]

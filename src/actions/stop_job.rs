@@ -15,6 +15,7 @@ pub async fn stop_job(context: SharedContext, params: StopJobRequest) -> anyhow:
         .job_repository
         .list_jobs(ListJobsParams {
             job_ids: vec![job_id],
+            ..Default::default()
         })
         .await?;
 

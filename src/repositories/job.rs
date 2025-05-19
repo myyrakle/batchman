@@ -1,7 +1,7 @@
 use sea_orm::{
     ActiveModelTrait,
     ActiveValue::{NotSet, Set},
-    ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter,
+    ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QuerySelect,
 };
 
 use crate::db::entities;
@@ -25,6 +25,15 @@ impl JobRepository for JobSeaOrmRepository {
 
         if !params.job_ids.is_empty() {
             find_job_query = find_job_query.filter(entities::job::Column::Id.is_in(params.job_ids));
+        }
+
+        if !params.statuses.is_empty() {
+            find_job_query =
+                find_job_query.filter(entities::job::Column::Status.is_in(params.statuses));
+        }
+
+        if let Some(limit) = params.limit {
+            find_job_query = find_job_query.limit(limit);
         }
 
         let jobs = find_job_query.all(&self.connection).await?;
