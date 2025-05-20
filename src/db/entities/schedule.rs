@@ -11,6 +11,8 @@ pub struct Model {
     pub cron_expression: String,                   // cron expression
     pub task_definition_id: i64,                   // task definition id
     pub command: Option<String>,                   // docker run command
+    pub timezone: Option<String>,                  // timezone text (example: "Asia/Seoul")
+    pub timezone_offset: Option<i32>, // timezone offset (in minutes) (example: 540=9:00 for "Asia/Seoul")
     pub created_at: Option<chrono::DateTime<Utc>>, // job submited time
 }
 
