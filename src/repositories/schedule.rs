@@ -1,4 +1,4 @@
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QuerySelect};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, QuerySelect};
 
 use crate::db::entities;
 
@@ -27,6 +27,24 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
         let schedules = query.all(&self.connection).await?;
 
         Ok(schedules)
+    }
+
+    async fn create_schedule(&self, params: super::CreateScheduleParams) -> anyhow::Result<i64> {
+        let schedule = entities::schedule::ActiveModel {
+            name: sea_orm::Set(params.name),
+            job_name: sea_orm::Set(params.job_name),
+            cron_expression: sea_orm::Set(params.cron_expression),
+            task_definition_id: sea_orm::Set(params.task_definition_id),
+            command: sea_orm::Set(params.command),
+            timezone: sea_orm::Set(params.timezone),
+            timezone_offset: sea_orm::Set(params.timezone_offset),
+            created_at: sea_orm::Set(Some(chrono::Utc::now())),
+            ..Default::default()
+        };
+
+        let schedule = schedule.insert(&self.connection).await?;
+
+        Ok(schedule.id)
     }
 }
 

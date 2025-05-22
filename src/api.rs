@@ -48,6 +48,7 @@ async fn main() {
         )
         .route("/jobs/submit", post(routes::jobs::submit_job))
         .route("/jobs/stop", post(routes::jobs::stop_job))
+        .route("/schedules", post(routes::schedules::create_schedule))
         .layer(Extension(context.clone()));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:13939")
