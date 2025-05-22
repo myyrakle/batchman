@@ -114,10 +114,23 @@ pub struct ListSchedulesParams {
     pub limit: Option<u64>,
 }
 
+#[derive(Debug, Default)]
+pub struct CreateScheduleParams {
+    pub name: String,                 // schedule name
+    pub job_name: String,             // job name
+    pub cron_expression: String,      // cron expression
+    pub task_definition_id: i64,      // task definition id
+    pub command: Option<String>,      // docker run command
+    pub timezone: Option<String>,     // timezone text (example: "Asia/Seoul")
+    pub timezone_offset: Option<i32>, // timezone offset (in minutes) (example: 540=9:00 for "Asia/Seoul")
+}
+
 #[async_trait::async_trait]
 pub trait ScheduleRepository {
     async fn list_schedules(
         &self,
         params: ListSchedulesParams,
     ) -> anyhow::Result<Vec<entities::schedule::Model>>;
+
+    async fn create_schedule(&self, params: CreateScheduleParams) -> anyhow::Result<i64>;
 }
