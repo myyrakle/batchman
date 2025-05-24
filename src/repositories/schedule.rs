@@ -23,8 +23,16 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
             query = query.filter(entities::schedule::Column::Id.is_in(params.schedule_ids));
         }
 
+        if let Some(enabled) = params.enabled {
+            query = query.filter(entities::schedule::Column::Enabled.eq(enabled));
+        }
+
         if let Some(limit) = params.limit {
             query = query.limit(limit);
+        }
+
+        if let Some(offset) = params.offset {
+            query = query.offset(offset);
         }
 
         let schedules = query.all(&self.connection).await?;
