@@ -1,10 +1,10 @@
 use axum::{
+    Extension, Json,
     body::Body,
     extract::Path,
+    http::StatusCode,
     response::{IntoResponse, Response},
-    Extension, Json,
 };
-use http::StatusCode;
 use serde::Deserialize;
 
 use crate::{

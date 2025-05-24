@@ -2,13 +2,12 @@ use sea_orm::{
     ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QuerySelect, Set,
 };
 
-use crate::{background::scheduler::ScheduleCDCEvent, db::entities};
+use crate::db::entities;
 
 use super::{ListSchedulesParams, PatchScheduleParams, ScheduleRepository};
 
 pub struct ScheduleSeaOrmRepository {
     pub connection: sea_orm::DatabaseConnection,
-    pub schedule_cdc_sender: tokio::sync::mpsc::Sender<ScheduleCDCEvent>,
 }
 
 #[async_trait::async_trait]
@@ -58,70 +57,42 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
 
         let mut schedule_active_model = schedule_model.into_active_model();
 
-        let mut time_fields_changed = false;
-
         if let Some(name) = params.name {
             schedule_active_model.name = Set(name);
         }
+
         if let Some(job_name) = params.job_name {
             schedule_active_model.job_name = Set(job_name);
         }
+
         if let Some(cron_expression) = params.cron_expression {
-            if schedule_active_model.cron_expression.as_ref() != &cron_expression {
-                schedule_active_model.cron_expression = Set(cron_expression);
-                time_fields_changed = true;
-            }
+            schedule_active_model.cron_expression = Set(cron_expression);
         }
+
         if let Some(task_definition_id) = params.task_definition_id {
             schedule_active_model.task_definition_id = Set(task_definition_id);
         }
+
         if let Some(command) = params.command {
-            schedule_active_model.command = Set(command);
+            schedule_active_model.command = Set(Some(command));
         }
+
         if let Some(timezone) = params.timezone {
-            if schedule_active_model.timezone.as_ref().as_ref() != Some(&timezone) {
-                schedule_active_model.timezone = Set(Some(timezone));
-                time_fields_changed = true;
-            }
-        } else if params.timezone.is_some() && schedule_active_model.timezone.as_ref().is_some() { // Handles explicit None
-             schedule_active_model.timezone = Set(None);
-             time_fields_changed = true;
+            schedule_active_model.timezone = Set(Some(timezone));
         }
 
         if let Some(timezone_offset) = params.timezone_offset {
-            if schedule_active_model.timezone_offset.as_ref().as_ref() != Some(&timezone_offset) {
-                schedule_active_model.timezone_offset = Set(Some(timezone_offset));
-                time_fields_changed = true;
-            }
-        } else if params.timezone_offset.is_some() && schedule_active_model.timezone_offset.as_ref().is_some() { // Handles explicit None
-            schedule_active_model.timezone_offset = Set(None);
-            time_fields_changed = true;
+            schedule_active_model.timezone_offset = Set(Some(timezone_offset));
         }
-        
-        schedule_active_model.updated_at = Set(Some(chrono::Utc::now()));
-        schedule_active_model.update(&self.connection).await?;
 
-        if time_fields_changed {
-            self.schedule_cdc_sender
-                .send(ScheduleCDCEvent::Updated {
-                    schedule_id: params.schedule_id,
-                })
-                .await
-                .map_err(|e| anyhow::anyhow!("Failed to send ScheduleCDCEvent: {}", e))?;
-        }
+        schedule_active_model.update(&self.connection).await?;
 
         Ok(())
     }
 }
 
 impl ScheduleSeaOrmRepository {
-    pub fn new(
-        connection: sea_orm::DatabaseConnection,
-        schedule_cdc_sender: tokio::sync::mpsc::Sender<ScheduleCDCEvent>,
-    ) -> Self {
-        Self {
-            connection,
-            schedule_cdc_sender,
-        }
+    pub fn new(connection: sea_orm::DatabaseConnection) -> Self {
+        Self { connection }
     }
 }

@@ -15,8 +15,6 @@ use axum::{
 use background::scheduler::ScheduleCDCEvent;
 use context::SharedContext;
 use db::setup_schema;
-use sea_orm::DatabaseConnection;
-use tokio::sync::mpsc::Receiver;
 
 pub fn app(context: SharedContext) -> Router {
     Router::new()

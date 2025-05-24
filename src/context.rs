@@ -34,7 +34,6 @@ impl Context {
             )),
             schedule_repository: Box::new(repositories::schedule::ScheduleSeaOrmRepository::new(
                 connection,
-                schedule_cdc_sender.clone(),
             )),
         }
     }
