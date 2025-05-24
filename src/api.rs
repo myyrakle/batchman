@@ -44,6 +44,10 @@ pub fn app(context: SharedContext) -> Router {
             "/schedules/{schedule_id}",
             patch(routes::schedules::patch_schedule),
         )
+        .route(
+            "/schedules/{schedule_id}",
+            delete(routes::schedules::delete_schedule),
+        )
         .layer(Extension(context))
 }
 
