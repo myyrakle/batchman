@@ -1,5 +1,6 @@
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QuerySelect, Set,
+    ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter,
+    QuerySelect, Set,
 };
 
 use crate::db::entities;
@@ -86,6 +87,17 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
         }
 
         schedule_active_model.update(&self.connection).await?;
+
+        Ok(())
+    }
+
+    async fn delete_schedule(&self, schedule_id: i64) -> anyhow::Result<()> {
+        let schedule = entities::schedule::Entity::find_by_id(schedule_id)
+            .one(&self.connection)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Schedule not found with id {}", schedule_id))?;
+
+        schedule.delete(&self.connection).await?;
 
         Ok(())
     }

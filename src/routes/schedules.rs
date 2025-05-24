@@ -83,3 +83,31 @@ pub async fn patch_schedule(
         }
     }
 }
+
+pub async fn delete_schedule(
+    Path(schedule_id): Path<i64>,
+    Extension(context): Extension<SharedContext>,
+) -> impl IntoResponse {
+    let result = actions::delete_schedule::delete_schedule(context, schedule_id).await;
+
+    match result {
+        Ok(_) => Response::builder()
+            .status(StatusCode::OK)
+            .body(Body::empty())
+            .unwrap(),
+        Err(error) => {
+            // Check if the error message indicates "Schedule not found"
+            if error.to_string().starts_with("Schedule not found") {
+                Response::builder()
+                    .status(StatusCode::NOT_FOUND)
+                    .body(Body::new(error.to_string()))
+                    .unwrap()
+            } else {
+                Response::builder()
+                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .body(Body::new(error.to_string()))
+                    .unwrap()
+            }
+        }
+    }
+}
