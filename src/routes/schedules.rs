@@ -1,16 +1,28 @@
 use axum::{
     Extension, Json,
     body::Body,
-    extract::Path,
+    extract::{Path, Query},
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
-    actions::{self, create_schdule::CreateSchduleRequest, patch_schedule::PatchScheduleRequest},
+    actions::{
+        self, create_schdule::CreateSchduleRequest, list_schedules::ListSchedulesRequest,
+        patch_schedule::PatchScheduleRequest,
+    },
     context::SharedContext,
+    db::entities,
 };
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct ListSchedulesQuery {
+    pub schedule_id: Option<i64>,      // schedule id
+    pub contains_name: Option<String>, // name contains text
+    pub name: Option<String>,          // exact name
+    pub enabled: Option<bool>,         // enabled status
+}
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct CreateScheduleBody {
@@ -109,5 +121,60 @@ pub async fn delete_schedule(
                     .unwrap()
             }
         }
+    }
+}
+
+#[derive(Serialize)]
+pub struct ListSchedulesItem {
+    pub id: i64,
+    pub name: String,
+    pub job_name: String,
+    pub cron_expression: String,
+    pub task_definition_id: i64,
+    pub command: Option<String>,
+    pub timezone: Option<String>,
+    pub timezone_offset: Option<i32>,
+    pub enabled: bool,
+}
+
+impl From<entities::schedule::Model> for ListSchedulesItem {
+    fn from(schedule: entities::schedule::Model) -> Self {
+        ListSchedulesItem {
+            id: schedule.id,
+            name: schedule.name,
+            job_name: schedule.job_name,
+            cron_expression: schedule.cron_expression,
+            task_definition_id: schedule.task_definition_id,
+            command: schedule.command,
+            timezone: schedule.timezone,
+            timezone_offset: schedule.timezone_offset,
+            enabled: schedule.enabled,
+        }
+    }
+}
+
+#[derive(Serialize)]
+pub struct ListSchedulesResponse {
+    schedules: Vec<ListSchedulesItem>,
+}
+
+pub async fn list_schedules(
+    Query(query): Query<ListSchedulesQuery>,
+    Extension(context): Extension<SharedContext>,
+) -> impl IntoResponse {
+    let schedules =
+        actions::list_schedules::list_schedules(context, ListSchedulesRequest { query }).await;
+
+    match schedules {
+        Ok(schedules) => {
+            let response = ListSchedulesResponse {
+                schedules: schedules.into_iter().map(ListSchedulesItem::from).collect(),
+            };
+            Json(response).into_response()
+        }
+        Err(error) => Response::builder()
+            .status(500)
+            .body(Body::new(error.to_string()))
+            .unwrap(),
     }
 }

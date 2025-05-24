@@ -111,7 +111,11 @@ pub trait JobRepository {
 #[derive(Debug, Default)]
 pub struct ListSchedulesParams {
     pub schedule_ids: Vec<i64>,
+    pub enabled: Option<bool>,
+    pub name: Option<String>,
+    pub contains_name: Option<String>,
     pub limit: Option<u64>,
+    pub offset: Option<u64>,
 }
 
 #[derive(Debug, Default)]
