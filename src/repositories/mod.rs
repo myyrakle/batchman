@@ -123,6 +123,7 @@ pub struct CreateScheduleParams {
     pub command: Option<String>,      // docker run command
     pub timezone: Option<String>,     // timezone text (example: "Asia/Seoul")
     pub timezone_offset: Option<i32>, // timezone offset (in minutes) (example: 540=9:00 for "Asia/Seoul")
+    pub enabled: bool,                // schedule enabled
 }
 
 #[derive(Debug, Clone, Default)]
@@ -135,6 +136,7 @@ pub struct PatchScheduleParams {
     pub command: Option<String>,
     pub timezone: Option<String>,
     pub timezone_offset: Option<i32>,
+    pub enabled: Option<bool>,
 }
 
 #[async_trait::async_trait]

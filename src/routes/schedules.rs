@@ -21,6 +21,7 @@ pub struct CreateScheduleBody {
     pub command: Option<String>,      // docker run command
     pub timezone: Option<String>,     // timezone text (example: "Asia/Seoul")
     pub timezone_offset: Option<i32>, // timezone offset (in minutes) (example: 540=9:00 for "Asia/Seoul")
+    pub enabled: bool,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -32,6 +33,7 @@ pub struct PatchScheduleBody {
     pub command: Option<String>,
     pub timezone: Option<String>,
     pub timezone_offset: Option<i32>,
+    pub enabled: Option<bool>,
 }
 
 pub async fn create_schedule(

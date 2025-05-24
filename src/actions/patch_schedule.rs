@@ -40,6 +40,7 @@ pub async fn patch_schedule(
         command: request.body.command,
         timezone: request.body.timezone,
         timezone_offset: request.body.timezone_offset,
+        enabled: request.body.enabled,
     };
 
     context.schedule_repository.patch_schedule(params).await?;
