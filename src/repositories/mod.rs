@@ -123,6 +123,20 @@ pub struct CreateScheduleParams {
     pub command: Option<String>,      // docker run command
     pub timezone: Option<String>,     // timezone text (example: "Asia/Seoul")
     pub timezone_offset: Option<i32>, // timezone offset (in minutes) (example: 540=9:00 for "Asia/Seoul")
+    pub enabled: bool,                // schedule enabled
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct PatchScheduleParams {
+    pub schedule_id: i64,
+    pub name: Option<String>,
+    pub job_name: Option<String>,
+    pub cron_expression: Option<String>,
+    pub task_definition_id: Option<i64>,
+    pub command: Option<String>,
+    pub timezone: Option<String>,
+    pub timezone_offset: Option<i32>,
+    pub enabled: Option<bool>,
 }
 
 #[async_trait::async_trait]
@@ -133,4 +147,6 @@ pub trait ScheduleRepository {
     ) -> anyhow::Result<Vec<entities::schedule::Model>>;
 
     async fn create_schedule(&self, params: CreateScheduleParams) -> anyhow::Result<i64>;
+
+    async fn patch_schedule(&self, params: PatchScheduleParams) -> anyhow::Result<()>;
 }

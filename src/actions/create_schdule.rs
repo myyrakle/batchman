@@ -35,6 +35,7 @@ pub async fn create_schdule(
             command: params.request_body.command,
             timezone: params.request_body.timezone,
             timezone_offset: params.request_body.timezone_offset,
+            enabled: params.request_body.enabled,
         })
         .await?;
 

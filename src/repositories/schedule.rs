@@ -1,8 +1,10 @@
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, QuerySelect};
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QuerySelect, Set,
+};
 
 use crate::db::entities;
 
-use super::{ListSchedulesParams, ScheduleRepository};
+use super::{ListSchedulesParams, PatchScheduleParams, ScheduleRepository};
 
 pub struct ScheduleSeaOrmRepository {
     pub connection: sea_orm::DatabaseConnection,
@@ -45,6 +47,47 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
         let schedule = schedule.insert(&self.connection).await?;
 
         Ok(schedule.id)
+    }
+
+    async fn patch_schedule(&self, params: PatchScheduleParams) -> anyhow::Result<()> {
+        let schedule_model = entities::schedule::Entity::find_by_id(params.schedule_id)
+            .one(&self.connection)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Schedule not found with id {}", params.schedule_id))?;
+
+        let mut schedule_active_model = schedule_model.into_active_model();
+
+        if let Some(name) = params.name {
+            schedule_active_model.name = Set(name);
+        }
+
+        if let Some(job_name) = params.job_name {
+            schedule_active_model.job_name = Set(job_name);
+        }
+
+        if let Some(cron_expression) = params.cron_expression {
+            schedule_active_model.cron_expression = Set(cron_expression);
+        }
+
+        if let Some(task_definition_id) = params.task_definition_id {
+            schedule_active_model.task_definition_id = Set(task_definition_id);
+        }
+
+        if let Some(command) = params.command {
+            schedule_active_model.command = Set(Some(command));
+        }
+
+        if let Some(timezone) = params.timezone {
+            schedule_active_model.timezone = Set(Some(timezone));
+        }
+
+        if let Some(timezone_offset) = params.timezone_offset {
+            schedule_active_model.timezone_offset = Set(Some(timezone_offset));
+        }
+
+        schedule_active_model.update(&self.connection).await?;
+
+        Ok(())
     }
 }
 
