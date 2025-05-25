@@ -140,3 +140,74 @@ impl CronExpression {
         Ok(CronExpressionElement::Single(value))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cron_parse() {
+        struct TestCase {
+            expression: &'static str,
+            expected: Result<CronExpression, CronExpressionParseError>,
+        }
+
+        let test_cases = vec![
+            TestCase {
+                expression: "* * * * ? *",
+                expected: Ok(CronExpression {
+                    minutes: CronExpressionField::All,
+                    hours: CronExpressionField::All,
+                    day_of_month: CronExpressionField::All,
+                    month: CronExpressionField::All,
+                    day_of_week: CronExpressionField::All,
+                    year: Some(CronExpressionField::All),
+                }),
+            },
+            TestCase {
+                expression: "0 12 * * ? *",
+                expected: Ok(CronExpression {
+                    minutes: CronExpressionField::Elements(vec![CronExpressionElement::Single(0)]),
+                    hours: CronExpressionField::Elements(vec![CronExpressionElement::Single(12)]),
+                    day_of_month: CronExpressionField::All,
+                    month: CronExpressionField::All,
+                    day_of_week: CronExpressionField::All,
+                    year: Some(CronExpressionField::All),
+                }),
+            },
+            TestCase {
+                expression: "0 0/15 * * ? *",
+                expected: Ok(CronExpression {
+                    minutes: CronExpressionField::Elements(vec![CronExpressionElement::Single(0)]),
+                    hours: CronExpressionField::Elements(vec![CronExpressionElement::Step(0, 15)]),
+                    day_of_month: CronExpressionField::All,
+                    month: CronExpressionField::All,
+                    day_of_week: CronExpressionField::All,
+                    year: Some(CronExpressionField::All),
+                }),
+            },
+            TestCase {
+                expression: "5-10 1-3 * * ? *",
+                expected: Ok(CronExpression {
+                    minutes: CronExpressionField::Elements(vec![CronExpressionElement::Range(
+                        5, 10,
+                    )]),
+                    hours: CronExpressionField::Elements(vec![CronExpressionElement::Range(1, 3)]),
+                    day_of_month: CronExpressionField::All,
+                    month: CronExpressionField::All,
+                    day_of_week: CronExpressionField::All,
+                    year: Some(CronExpressionField::All),
+                }),
+            },
+        ];
+
+        for test_case in test_cases {
+            let result = CronExpression::parse(test_case.expression);
+            assert_eq!(
+                result, test_case.expected,
+                "Failed for expression: {}",
+                test_case.expression
+            );
+        }
+    }
+}
