@@ -2,6 +2,7 @@ use crate::{
     context::SharedContext,
     repositories::{ListSchedulesParams, PatchScheduleParams},
     routes::schedules::PatchScheduleBody,
+    types::cron::CronExpression,
 };
 
 #[derive(Debug, Clone)]
@@ -14,6 +15,13 @@ pub async fn patch_schedule(
     context: SharedContext,
     request: PatchScheduleRequest,
 ) -> anyhow::Result<()> {
+    if let Some(cron_expression) = &request.body.cron_expression {
+        // Validate the cron expression
+        if let Err(error) = CronExpression::parse(cron_expression.as_str()) {
+            return Err(anyhow::anyhow!("Invalid Cron Expression: {}", error));
+        }
+    }
+
     // Check if schedule exists
     let schedules = context
         .schedule_repository

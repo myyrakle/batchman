@@ -12,16 +12,16 @@ pub struct CreateSchduleRequest {
 
 pub async fn create_schdule(
     context: SharedContext,
-    params: CreateSchduleRequest,
+    request: CreateSchduleRequest,
 ) -> anyhow::Result<i64> {
-    if let Err(error) = CronExpression::parse(params.request_body.cron_expression.as_str()) {
+    if let Err(error) = CronExpression::parse(request.request_body.cron_expression.as_str()) {
         return Err(anyhow::anyhow!("Invalid Cron Expression: {}", error));
     }
 
     let task_definitions = context
         .task_definition_repository
         .list_task_definitions(ListTaskDefinitionsParams {
-            task_definition_ids: vec![params.request_body.task_definition_id],
+            task_definition_ids: vec![request.request_body.task_definition_id],
             ..Default::default()
         })
         .await?;
@@ -33,14 +33,14 @@ pub async fn create_schdule(
     let new_job_id = context
         .schedule_repository
         .create_schedule(CreateScheduleParams {
-            name: params.request_body.name,
-            job_name: params.request_body.job_name,
-            cron_expression: params.request_body.cron_expression,
-            task_definition_id: params.request_body.task_definition_id,
-            command: params.request_body.command,
-            timezone: params.request_body.timezone,
-            timezone_offset: params.request_body.timezone_offset,
-            enabled: params.request_body.enabled,
+            name: request.request_body.name,
+            job_name: request.request_body.job_name,
+            cron_expression: request.request_body.cron_expression,
+            task_definition_id: request.request_body.task_definition_id,
+            command: request.request_body.command,
+            timezone: request.request_body.timezone,
+            timezone_offset: request.request_body.timezone_offset,
+            enabled: request.request_body.enabled,
         })
         .await?;
 
