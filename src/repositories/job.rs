@@ -6,7 +6,7 @@ use sea_orm::{
 
 use crate::{db::entities, domain::job::JobRepository};
 
-use super::{CreateJobParams, ListJobsParams, PatchJobParams};
+use crate::domain::job::dao::{CreateJobParams, ListJobsParams, PatchJobParams};
 
 pub struct JobSeaOrmRepository {
     pub connection: sea_orm::DatabaseConnection,

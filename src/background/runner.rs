@@ -2,7 +2,7 @@ use crate::{
     actions::run_pending_job::run_pending_job,
     context::SharedContext,
     db::entities::job::JobStatus,
-    repositories::{ListJobsParams, PatchJobParams},
+    domain::job::dao::{ListJobsParams, PatchJobParams},
 };
 
 pub async fn start_runner_loop(context: SharedContext) {

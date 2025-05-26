@@ -2,7 +2,7 @@ use crate::{
     actions::track_runnng_job::track_runnng_job,
     context::SharedContext,
     db::entities::job::JobStatus,
-    repositories::{ListJobsParams, PatchJobParams},
+    domain::job::dao::{ListJobsParams, PatchJobParams},
 };
 
 pub async fn start_status_tracker_loop(context: SharedContext) {

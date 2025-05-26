@@ -1,7 +1,7 @@
-use crate::{
-    db::entities,
-    repositories::{CreateScheduleParams, ListSchedulesParams, PatchScheduleParams},
-};
+use crate::db::entities;
+
+pub mod dao;
+use dao::*;
 
 #[async_trait::async_trait]
 pub trait ScheduleRepository {

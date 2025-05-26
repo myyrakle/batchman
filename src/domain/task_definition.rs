@@ -1,10 +1,7 @@
-use crate::{
-    db::entities,
-    repositories::{
-        CreateTaskDefinitionParams, DeleteTaskDefinitionParams, ListTaskDefinitionsParams,
-        PatchTaskDefinitionParams,
-    },
-};
+use crate::db::entities;
+
+pub mod dao;
+use dao::*;
 
 #[async_trait::async_trait]
 pub trait TaskDefinitionRepository {

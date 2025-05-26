@@ -1,5 +1,5 @@
 use crate::{
-    context::SharedContext, db::entities::job::JobStatus, docker, repositories::ListJobsParams,
+    context::SharedContext, db::entities::job::JobStatus, docker, domain::job::dao::ListJobsParams,
     routes::jobs::StopJobBody,
 };
 

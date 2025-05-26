@@ -2,7 +2,7 @@ use crate::{
     context::SharedContext,
     db::entities::{self, job::JobStatus},
     docker::run_container,
-    repositories::{ListTaskDefinitionsParams, PatchJobParams},
+    domain::{job::dao::PatchJobParams, task_definition::dao::ListTaskDefinitionsParams},
 };
 
 pub async fn run_pending_job(

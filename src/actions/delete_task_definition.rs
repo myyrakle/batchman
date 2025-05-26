@@ -1,4 +1,4 @@
-use crate::{context::SharedContext, repositories::DeleteTaskDefinitionParams};
+use crate::{context::SharedContext, domain::task_definition::dao::DeleteTaskDefinitionParams};
 
 #[derive(Debug, Clone)]
 pub struct DeleteDefinitionRequest {

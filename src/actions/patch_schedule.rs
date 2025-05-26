@@ -1,6 +1,6 @@
 use crate::{
     context::SharedContext,
-    repositories::{ListSchedulesParams, PatchScheduleParams},
+    domain::schedule::dao::{ListSchedulesParams, PatchScheduleParams},
     routes::schedules::PatchScheduleBody,
     types::cron::CronExpression,
 };

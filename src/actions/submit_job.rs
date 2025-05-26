@@ -1,7 +1,7 @@
 use crate::{
     context::SharedContext,
     db::entities,
-    repositories::{CreateJobParams, ListTaskDefinitionsParams},
+    domain::{job::dao::CreateJobParams, task_definition::dao::ListTaskDefinitionsParams},
     routes::jobs::SubmitJobBody,
 };
 

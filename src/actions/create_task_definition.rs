@@ -1,7 +1,7 @@
 use crate::{
     context::SharedContext,
     db::entities,
-    repositories::{CreateTaskDefinitionParams, ListTaskDefinitionsParams},
+    domain::task_definition::dao::{CreateTaskDefinitionParams, ListTaskDefinitionsParams},
     routes::task_definitions::CreateTaskDefinitionBody,
 };
 

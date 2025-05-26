@@ -3,9 +3,13 @@ use sea_orm::{
     QuerySelect, Set,
 };
 
-use crate::{db::entities, domain::schedule::ScheduleRepository};
-
-use super::{ListSchedulesParams, PatchScheduleParams};
+use crate::{
+    db::entities,
+    domain::schedule::{
+        ScheduleRepository,
+        dao::{CreateScheduleParams, ListSchedulesParams, PatchScheduleParams},
+    },
+};
 
 pub struct ScheduleSeaOrmRepository {
     pub connection: sea_orm::DatabaseConnection,
@@ -48,7 +52,7 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
         Ok(schedules)
     }
 
-    async fn create_schedule(&self, params: super::CreateScheduleParams) -> anyhow::Result<i64> {
+    async fn create_schedule(&self, params: CreateScheduleParams) -> anyhow::Result<i64> {
         let schedule = entities::schedule::ActiveModel {
             name: sea_orm::Set(params.name),
             job_name: sea_orm::Set(params.job_name),

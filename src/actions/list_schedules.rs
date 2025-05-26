@@ -1,5 +1,5 @@
 use crate::{
-    context::SharedContext, repositories::ListSchedulesParams,
+    context::SharedContext, domain::schedule::dao::ListSchedulesParams,
     routes::schedules::ListSchedulesQuery,
 };
 

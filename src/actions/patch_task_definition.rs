@@ -1,6 +1,6 @@
 use crate::{
     context::SharedContext,
-    repositories::{ListTaskDefinitionsParams, PatchTaskDefinitionParams},
+    domain::task_definition::dao::{ListTaskDefinitionsParams, PatchTaskDefinitionParams},
     routes::task_definitions::PatchTaskDefinitionBody,
 };
 

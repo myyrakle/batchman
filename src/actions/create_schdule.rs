@@ -1,6 +1,8 @@
 use crate::{
     context::SharedContext,
-    repositories::{CreateScheduleParams, ListTaskDefinitionsParams},
+    domain::{
+        schedule::dao::CreateScheduleParams, task_definition::dao::ListTaskDefinitionsParams,
+    },
     routes::schedules::CreateScheduleBody,
     types::cron::CronExpression,
 };

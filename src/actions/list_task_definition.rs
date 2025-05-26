@@ -1,5 +1,5 @@
 use crate::{
-    context::SharedContext, db::entities, repositories::ListTaskDefinitionsParams,
+    context::SharedContext, db::entities, domain::task_definition::dao::ListTaskDefinitionsParams,
     routes::task_definitions::ListTaskDefinitionsQuery,
 };
 
