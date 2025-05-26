@@ -1,16 +1,11 @@
 use crate::{
     context::SharedContext,
     domain::{
-        schedule::dao::CreateScheduleParams, task_definition::dao::ListTaskDefinitionsParams,
+        schedule::{dao::CreateScheduleParams, dto::CreateSchduleRequest},
+        task_definition::dao::ListTaskDefinitionsParams,
     },
-    routes::schedules::CreateScheduleBody,
     types::cron::CronExpression,
 };
-
-#[derive(Debug, Clone)]
-pub struct CreateSchduleRequest {
-    pub request_body: CreateScheduleBody,
-}
 
 pub async fn create_schdule(
     context: SharedContext,

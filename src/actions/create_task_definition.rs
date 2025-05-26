@@ -1,14 +1,11 @@
 use crate::{
     context::SharedContext,
     db::entities,
-    domain::task_definition::dao::{CreateTaskDefinitionParams, ListTaskDefinitionsParams},
-    routes::task_definitions::CreateTaskDefinitionBody,
+    domain::task_definition::{
+        dao::{CreateTaskDefinitionParams, ListTaskDefinitionsParams},
+        dto::CreateDefinitionRequest,
+    },
 };
-
-#[derive(Debug, Clone)]
-pub struct CreateDefinitionRequest {
-    pub request_body: CreateTaskDefinitionBody,
-}
 
 pub async fn create_task_definition(
     context: SharedContext,

@@ -5,31 +5,17 @@ use axum::{
     http::Response,
     response::{self, IntoResponse},
 };
-use serde::{Deserialize, Serialize};
 
-use crate::{actions, context::SharedContext, db::entities};
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct ListTaskDefinitionsQuery {
-    pub task_definition_id: Option<i64>,
-    pub contains_name: Option<String>,
-    pub name: Option<String>,
-}
-
-#[derive(Serialize)]
-pub struct ListTaskDefinitionsItem {
-    pub id: i64,      // primary key
-    pub name: String, // task name
-    pub version: i64, // task version
-
-    pub image: String,                // docker image
-    pub command: Option<Vec<String>>, // docker run command
-    pub args: Option<String>,         // docker run arguments
-    pub env: Option<String>,          // environment variables
-
-    pub memory_limit: Option<u32>, // memory limit in MB
-    pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
-}
+use crate::{
+    actions,
+    context::SharedContext,
+    db::entities,
+    domain::task_definition::dto::{
+        CreateDefinitionRequest, CreateTaskDefinitionBody, DeleteDefinitionRequest,
+        ListTaskDefinitionsItem, ListTaskDefinitionsQuery, ListTaskDefinitionsRequest,
+        ListTaskDefinitionsResponse, PatchTaskDefinitionBody,
+    },
+};
 
 impl From<entities::task_definition::Model> for ListTaskDefinitionsItem {
     fn from(model: entities::task_definition::Model) -> Self {
@@ -49,18 +35,13 @@ impl From<entities::task_definition::Model> for ListTaskDefinitionsItem {
     }
 }
 
-#[derive(Serialize)]
-pub struct ListTaskDefinitionsResponse {
-    task_definitions: Vec<ListTaskDefinitionsItem>,
-}
-
 pub async fn list_task_definitions(
     Query(query): Query<ListTaskDefinitionsQuery>,
     Extension(context): Extension<SharedContext>,
 ) -> response::Response {
     let task_definitions = actions::list_task_definition::list_task_definitions(
         context,
-        actions::list_task_definition::ListTaskDefinitionsRequest { query },
+        ListTaskDefinitionsRequest { query },
     )
     .await;
 
@@ -81,24 +62,13 @@ pub async fn list_task_definitions(
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
-pub struct CreateTaskDefinitionBody {
-    pub name: String,                 // task name
-    pub image: String,                // docker image
-    pub command: Option<Vec<String>>, // docker run command
-    pub args: Option<String>,         // docker run arguments
-    pub env: Option<String>,          // environment variables
-    pub memory_limit: Option<u32>,    // memory limit in MB
-    pub cpu_limit: Option<u32>,       // cpu limit (default 1024)
-}
-
 pub async fn create_task_definition(
     Extension(state): Extension<SharedContext>,
     Json(body): Json<CreateTaskDefinitionBody>,
 ) -> response::Response {
     let task_definition_id = actions::create_task_definition::create_task_definition(
         state,
-        actions::create_task_definition::CreateDefinitionRequest { request_body: body },
+        CreateDefinitionRequest { request_body: body },
     )
     .await;
 
@@ -109,16 +79,6 @@ pub async fn create_task_definition(
             .body(Body::new(error.to_string()))
             .unwrap(),
     }
-}
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct PatchTaskDefinitionBody {
-    pub image: Option<String>,     // docker image
-    pub command: Option<String>,   // docker run command
-    pub args: Option<String>,      // docker run arguments
-    pub env: Option<String>,       // environment variables
-    pub memory_limit: Option<u32>, // memory limit in MB
-    pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
 }
 
 pub async fn patch_task_definition(
@@ -150,7 +110,7 @@ pub async fn delete_task_definition(
 ) -> response::Response {
     let result = actions::delete_task_definition::delete_task_definition(
         context,
-        actions::delete_task_definition::DeleteDefinitionRequest { task_definition_id },
+        DeleteDefinitionRequest { task_definition_id },
     )
     .await;
 

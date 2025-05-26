@@ -1,12 +1,7 @@
 use crate::{
-    context::SharedContext, domain::schedule::dao::ListSchedulesParams,
-    routes::schedules::ListSchedulesQuery,
+    context::SharedContext,
+    domain::schedule::{dao::ListSchedulesParams, dto::ListSchedulesRequest},
 };
-
-#[derive(Debug, Clone)]
-pub struct ListSchedulesRequest {
-    pub query: ListSchedulesQuery,
-}
 
 pub async fn list_schedules(
     context: SharedContext,

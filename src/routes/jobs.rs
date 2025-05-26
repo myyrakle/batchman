@@ -4,18 +4,12 @@ use axum::{
     http::Response,
     response::{self, IntoResponse},
 };
-use serde::Deserialize;
 
 use crate::{
-    actions::{self, stop_job::StopJobRequest, submit_job::SubmitJobRequest},
+    actions,
     context::SharedContext,
+    domain::job::dto::{StopJobBody, StopJobRequest, SubmitJobBody, SubmitJobRequest},
 };
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct SubmitJobBody {
-    pub task_definition_id: i64,
-    pub job_name: String,
-}
 
 pub async fn submit_job(
     Extension(state): Extension<SharedContext>,
@@ -31,11 +25,6 @@ pub async fn submit_job(
             .body(Body::new(error.to_string()))
             .unwrap(),
     }
-}
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct StopJobBody {
-    pub job_id: i64,
 }
 
 pub async fn stop_job(

@@ -1,9 +1,7 @@
-use crate::{context::SharedContext, domain::task_definition::dao::DeleteTaskDefinitionParams};
-
-#[derive(Debug, Clone)]
-pub struct DeleteDefinitionRequest {
-    pub task_definition_id: i64,
-}
+use crate::{
+    context::SharedContext,
+    domain::task_definition::{dao::DeleteTaskDefinitionParams, dto::DeleteDefinitionRequest},
+};
 
 pub async fn delete_task_definition(
     context: SharedContext,

@@ -1,7 +1,9 @@
 use crate::{
     context::SharedContext,
-    domain::task_definition::dao::{ListTaskDefinitionsParams, PatchTaskDefinitionParams},
-    routes::task_definitions::PatchTaskDefinitionBody,
+    domain::task_definition::{
+        dao::{ListTaskDefinitionsParams, PatchTaskDefinitionParams},
+        dto::PatchTaskDefinitionBody,
+    },
 };
 
 #[derive(Debug, Clone)]

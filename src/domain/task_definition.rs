@@ -1,6 +1,8 @@
 use crate::db::entities;
 
 pub mod dao;
+pub mod dto;
+
 use dao::*;
 
 #[async_trait::async_trait]

@@ -1,14 +1,11 @@
 use crate::{
     context::SharedContext,
     db::entities,
-    domain::{job::dao::CreateJobParams, task_definition::dao::ListTaskDefinitionsParams},
-    routes::jobs::SubmitJobBody,
+    domain::{
+        job::{dao::CreateJobParams, dto::SubmitJobRequest},
+        task_definition::dao::ListTaskDefinitionsParams,
+    },
 };
-
-#[derive(Debug, Clone)]
-pub struct SubmitJobRequest {
-    pub request_body: SubmitJobBody,
-}
 
 pub async fn submit_job(context: SharedContext, params: SubmitJobRequest) -> anyhow::Result<i64> {
     let task_definitions = context

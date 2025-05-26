@@ -1,12 +1,8 @@
 use crate::{
-    context::SharedContext, db::entities, domain::task_definition::dao::ListTaskDefinitionsParams,
-    routes::task_definitions::ListTaskDefinitionsQuery,
+    context::SharedContext,
+    db::entities,
+    domain::task_definition::{dao::ListTaskDefinitionsParams, dto::ListTaskDefinitionsRequest},
 };
-
-#[derive(Debug, Clone)]
-pub struct ListTaskDefinitionsRequest {
-    pub query: ListTaskDefinitionsQuery,
-}
 
 pub async fn list_task_definitions(
     context: SharedContext,

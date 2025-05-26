@@ -1,12 +1,9 @@
 use crate::{
-    context::SharedContext, db::entities::job::JobStatus, docker, domain::job::dao::ListJobsParams,
-    routes::jobs::StopJobBody,
+    context::SharedContext,
+    db::entities::job::JobStatus,
+    docker,
+    domain::job::{dao::ListJobsParams, dto::StopJobRequest},
 };
-
-#[derive(Debug, Clone)]
-pub struct StopJobRequest {
-    pub request_body: StopJobBody,
-}
 
 pub async fn stop_job(context: SharedContext, params: StopJobRequest) -> anyhow::Result<()> {
     let job_id = params.request_body.job_id;

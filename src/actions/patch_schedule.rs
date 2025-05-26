@@ -1,15 +1,11 @@
 use crate::{
     context::SharedContext,
-    domain::schedule::dao::{ListSchedulesParams, PatchScheduleParams},
-    routes::schedules::PatchScheduleBody,
+    domain::schedule::{
+        dao::{ListSchedulesParams, PatchScheduleParams},
+        dto::PatchScheduleRequest,
+    },
     types::cron::CronExpression,
 };
-
-#[derive(Debug, Clone)]
-pub struct PatchScheduleRequest {
-    pub schedule_id: i64,
-    pub body: PatchScheduleBody,
-}
 
 pub async fn patch_schedule(
     context: SharedContext,
