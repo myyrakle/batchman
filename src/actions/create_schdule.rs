@@ -2,6 +2,7 @@ use crate::{
     context::SharedContext,
     repositories::{CreateScheduleParams, ListTaskDefinitionsParams},
     routes::schedules::CreateScheduleBody,
+    types::cron::CronExpression,
 };
 
 #[derive(Debug, Clone)]
@@ -13,6 +14,10 @@ pub async fn create_schdule(
     context: SharedContext,
     params: CreateSchduleRequest,
 ) -> anyhow::Result<i64> {
+    if let Err(error) = CronExpression::parse(params.request_body.cron_expression.as_str()) {
+        return Err(anyhow::anyhow!("Invalid Cron Expression: {}", error));
+    }
+
     let task_definitions = context
         .task_definition_repository
         .list_task_definitions(ListTaskDefinitionsParams {
