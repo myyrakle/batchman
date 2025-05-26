@@ -1,8 +1,7 @@
 use crate::{
     context::SharedContext,
-    db::entities,
     domain::{
-        job::{dao::CreateJobParams, dto::SubmitJobRequest},
+        job::{dao::CreateJobParams, dto::SubmitJobRequest, entities},
         task_definition::dao::ListTaskDefinitionsParams,
     },
 };

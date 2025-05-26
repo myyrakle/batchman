@@ -3,8 +3,10 @@ use std::sync::Arc;
 use crate::{
     actions::{self},
     context::{self, SharedContext},
-    db::entities,
-    domain::job::dto::{SubmitJobBody, SubmitJobRequest},
+    domain::{
+        job::dto::{SubmitJobBody, SubmitJobRequest},
+        schedule::entities,
+    },
 };
 
 #[derive(Debug)]

@@ -1,12 +1,12 @@
 use crate::{
     context::SharedContext,
-    domain::schedule::{dao::ListSchedulesParams, dto::ListSchedulesRequest},
+    domain::schedule::{dao::ListSchedulesParams, dto::ListSchedulesRequest, entities},
 };
 
 pub async fn list_schedules(
     context: SharedContext,
     request: ListSchedulesRequest,
-) -> anyhow::Result<Vec<crate::db::entities::schedule::Model>> {
+) -> anyhow::Result<Vec<entities::schedule::Model>> {
     let result = context
         .schedule_repository
         .list_schedules(ListSchedulesParams {

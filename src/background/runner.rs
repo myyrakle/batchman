@@ -1,8 +1,10 @@
 use crate::{
     actions::run_pending_job::run_pending_job,
     context::SharedContext,
-    db::entities::job::JobStatus,
-    domain::job::dao::{ListJobsParams, PatchJobParams},
+    domain::job::{
+        dao::{ListJobsParams, PatchJobParams},
+        entities::job::JobStatus,
+    },
 };
 
 pub async fn start_runner_loop(context: SharedContext) {

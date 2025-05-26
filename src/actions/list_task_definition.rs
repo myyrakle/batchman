@@ -1,7 +1,8 @@
 use crate::{
     context::SharedContext,
-    db::entities,
-    domain::task_definition::{dao::ListTaskDefinitionsParams, dto::ListTaskDefinitionsRequest},
+    domain::task_definition::{
+        dao::ListTaskDefinitionsParams, dto::ListTaskDefinitionsRequest, entities,
+    },
 };
 
 pub async fn list_task_definitions(

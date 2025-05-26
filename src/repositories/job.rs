@@ -4,7 +4,7 @@ use sea_orm::{
     ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QuerySelect,
 };
 
-use crate::{db::entities, domain::job::JobRepository};
+use crate::domain::job::{JobRepository, entities};
 
 use crate::domain::job::dao::{CreateJobParams, ListJobsParams, PatchJobParams};
 

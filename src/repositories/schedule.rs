@@ -3,12 +3,10 @@ use sea_orm::{
     QuerySelect, Set,
 };
 
-use crate::{
-    db::entities,
-    domain::schedule::{
-        ScheduleRepository,
-        dao::{CreateScheduleParams, ListSchedulesParams, PatchScheduleParams},
-    },
+use crate::domain::schedule::{
+    ScheduleRepository,
+    dao::{CreateScheduleParams, ListSchedulesParams, PatchScheduleParams},
+    entities,
 };
 
 pub struct ScheduleSeaOrmRepository {

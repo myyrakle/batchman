@@ -9,11 +9,13 @@ use axum::{
 use crate::{
     actions,
     context::SharedContext,
-    db::entities,
-    domain::task_definition::dto::{
-        CreateDefinitionRequest, CreateTaskDefinitionBody, DeleteDefinitionRequest,
-        ListTaskDefinitionsItem, ListTaskDefinitionsQuery, ListTaskDefinitionsRequest,
-        ListTaskDefinitionsResponse, PatchTaskDefinitionBody,
+    domain::task_definition::{
+        dto::{
+            CreateDefinitionRequest, CreateTaskDefinitionBody, DeleteDefinitionRequest,
+            ListTaskDefinitionsItem, ListTaskDefinitionsQuery, ListTaskDefinitionsRequest,
+            ListTaskDefinitionsResponse, PatchTaskDefinitionBody,
+        },
+        entities,
     },
 };
 

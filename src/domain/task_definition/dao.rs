@@ -1,4 +1,4 @@
-use crate::db::entities;
+use super::entities;
 
 #[derive(Debug, Default)]
 pub struct ListTaskDefinitionsParams {

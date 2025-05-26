@@ -1,7 +1,6 @@
-use crate::db::entities;
-
 pub mod dao;
 pub mod dto;
+pub mod entities;
 
 use dao::*;
 

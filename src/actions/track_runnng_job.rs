@@ -1,4 +1,8 @@
-use crate::{context::SharedContext, db::entities, docker, domain::job::dao::PatchJobParams};
+use crate::{
+    context::SharedContext,
+    docker,
+    domain::job::{dao::PatchJobParams, entities},
+};
 
 pub async fn track_runnng_job(
     context: SharedContext,

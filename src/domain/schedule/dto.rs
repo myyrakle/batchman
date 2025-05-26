@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::db::entities;
+use crate::domain::schedule::entities;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct CreateScheduleBody {

@@ -1,9 +1,9 @@
 use crate::{
     context::SharedContext,
-    db::entities,
     domain::task_definition::{
         dao::{CreateTaskDefinitionParams, ListTaskDefinitionsParams},
         dto::CreateDefinitionRequest,
+        entities,
     },
 };
 

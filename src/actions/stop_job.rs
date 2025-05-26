@@ -1,8 +1,7 @@
 use crate::{
     context::SharedContext,
-    db::entities::job::JobStatus,
     docker,
-    domain::job::{dao::ListJobsParams, dto::StopJobRequest},
+    domain::job::{dao::ListJobsParams, dto::StopJobRequest, entities::job::JobStatus},
 };
 
 pub async fn stop_job(context: SharedContext, params: StopJobRequest) -> anyhow::Result<()> {

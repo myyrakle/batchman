@@ -1,6 +1,6 @@
 use chrono::Utc;
 
-use crate::db::entities::job::JobStatus;
+use super::entities::job::JobStatus;
 
 #[derive(Debug, Default)]
 pub struct CreateJobParams {
