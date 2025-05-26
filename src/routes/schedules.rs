@@ -58,10 +58,19 @@ pub async fn create_schedule(
 
     match result {
         Ok(_) => Json(()).into_response(),
-        Err(error) => Response::builder()
-            .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Body::new(error.to_string()))
-            .unwrap(),
+        Err(error) => {
+            if error.to_string().starts_with("Invalid Cron Expression") {
+                return Response::builder()
+                    .status(StatusCode::BAD_REQUEST)
+                    .body(Body::new(error.to_string()))
+                    .unwrap();
+            }
+
+            Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(Body::new(error.to_string()))
+                .unwrap()
+        }
     }
 }
 
@@ -81,7 +90,12 @@ pub async fn patch_schedule(
             .unwrap(),
         Err(error) => {
             // Check if the error message indicates "Schedule not found"
-            if error.to_string().starts_with("Schedule not found") {
+            if error.to_string().starts_with("Invalid Cron Expression") {
+                return Response::builder()
+                    .status(StatusCode::BAD_REQUEST)
+                    .body(Body::new(error.to_string()))
+                    .unwrap();
+            } else if error.to_string().starts_with("Schedule not found") {
                 Response::builder()
                     .status(StatusCode::NOT_FOUND)
                     .body(Body::new(error.to_string()))

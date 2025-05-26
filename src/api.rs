@@ -5,6 +5,7 @@ pub(crate) mod db;
 pub(crate) mod docker;
 pub(crate) mod repositories;
 pub(crate) mod routes;
+pub(crate) mod types;
 
 use std::sync::Arc;
 
