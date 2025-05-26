@@ -2,16 +2,22 @@ use std::sync::Arc;
 
 use sea_orm::DatabaseConnection;
 
-use crate::{background::scheduler::ScheduleCDCEvent, repositories};
+use crate::{
+    background::scheduler::ScheduleCDCEvent,
+    domain::{
+        job::JobRepository, schedule::ScheduleRepository, task_definition::TaskDefinitionRepository,
+    },
+    repositories,
+};
 
 pub struct Context {
     pub connection: DatabaseConnection,
 
     pub schedule_cdc_sender: tokio::sync::mpsc::Sender<ScheduleCDCEvent>,
 
-    pub task_definition_repository: Box<dyn repositories::TaskDefinitionRepository + Send + Sync>,
-    pub job_repository: Box<dyn repositories::JobRepository + Send + Sync>,
-    pub schedule_repository: Box<dyn repositories::ScheduleRepository + Send + Sync>,
+    pub task_definition_repository: Box<dyn TaskDefinitionRepository + Send + Sync>,
+    pub job_repository: Box<dyn JobRepository + Send + Sync>,
+    pub schedule_repository: Box<dyn ScheduleRepository + Send + Sync>,
 }
 
 pub type SharedContext = Arc<Context>;

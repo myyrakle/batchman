@@ -1,0 +1,27 @@
+use crate::{
+    db::entities,
+    repositories::{
+        CreateTaskDefinitionParams, DeleteTaskDefinitionParams, ListTaskDefinitionsParams,
+        PatchTaskDefinitionParams,
+    },
+};
+
+#[async_trait::async_trait]
+pub trait TaskDefinitionRepository {
+    async fn list_task_definitions(
+        &self,
+        params: ListTaskDefinitionsParams,
+    ) -> anyhow::Result<Vec<entities::task_definition::Model>>;
+
+    async fn create_task_definition(
+        &self,
+        params: CreateTaskDefinitionParams,
+    ) -> anyhow::Result<i64>;
+
+    async fn patch_task_definition(&self, params: PatchTaskDefinitionParams) -> anyhow::Result<()>;
+
+    async fn delete_task_definition(
+        &self,
+        params: DeleteTaskDefinitionParams,
+    ) -> anyhow::Result<()>;
+}

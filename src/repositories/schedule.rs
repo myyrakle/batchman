@@ -3,9 +3,9 @@ use sea_orm::{
     QuerySelect, Set,
 };
 
-use crate::db::entities;
+use crate::{db::entities, domain::schedule::ScheduleRepository};
 
-use super::{ListSchedulesParams, PatchScheduleParams, ScheduleRepository};
+use super::{ListSchedulesParams, PatchScheduleParams};
 
 pub struct ScheduleSeaOrmRepository {
     pub connection: sea_orm::DatabaseConnection,

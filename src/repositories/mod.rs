@@ -47,26 +47,6 @@ pub struct DeleteTaskDefinitionParams {
     pub task_definition_id: i64,
 }
 
-#[async_trait::async_trait]
-pub trait TaskDefinitionRepository {
-    async fn list_task_definitions(
-        &self,
-        params: ListTaskDefinitionsParams,
-    ) -> anyhow::Result<Vec<entities::task_definition::Model>>;
-
-    async fn create_task_definition(
-        &self,
-        params: CreateTaskDefinitionParams,
-    ) -> anyhow::Result<i64>;
-
-    async fn patch_task_definition(&self, params: PatchTaskDefinitionParams) -> anyhow::Result<()>;
-
-    async fn delete_task_definition(
-        &self,
-        params: DeleteTaskDefinitionParams,
-    ) -> anyhow::Result<()>;
-}
-
 #[derive(Debug, Default)]
 pub struct CreateJobParams {
     pub name: String,                               // job name
@@ -99,13 +79,6 @@ pub struct ListJobsParams {
     pub job_ids: Vec<i64>,
     pub statuses: Vec<JobStatus>,
     pub limit: Option<u64>,
-}
-
-#[async_trait::async_trait]
-pub trait JobRepository {
-    async fn list_jobs(&self, params: ListJobsParams) -> anyhow::Result<Vec<entities::job::Model>>;
-    async fn create_job(&self, params: CreateJobParams) -> anyhow::Result<i64>;
-    async fn patch_job(&self, params: PatchJobParams) -> anyhow::Result<()>;
 }
 
 #[derive(Debug, Default)]
@@ -141,18 +114,4 @@ pub struct PatchScheduleParams {
     pub timezone: Option<String>,
     pub timezone_offset: Option<i32>,
     pub enabled: Option<bool>,
-}
-
-#[async_trait::async_trait]
-pub trait ScheduleRepository {
-    async fn list_schedules(
-        &self,
-        params: ListSchedulesParams,
-    ) -> anyhow::Result<Vec<entities::schedule::Model>>;
-
-    async fn create_schedule(&self, params: CreateScheduleParams) -> anyhow::Result<i64>;
-
-    async fn patch_schedule(&self, params: PatchScheduleParams) -> anyhow::Result<()>;
-
-    async fn delete_schedule(&self, schedule_id: i64) -> anyhow::Result<()>;
 }

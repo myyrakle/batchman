@@ -4,9 +4,9 @@ use sea_orm::{
     ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QuerySelect,
 };
 
-use crate::db::entities;
+use crate::{db::entities, domain::job::JobRepository};
 
-use super::{CreateJobParams, JobRepository, ListJobsParams, PatchJobParams};
+use super::{CreateJobParams, ListJobsParams, PatchJobParams};
 
 pub struct JobSeaOrmRepository {
     pub connection: sea_orm::DatabaseConnection,
