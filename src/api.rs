@@ -4,7 +4,6 @@ pub(crate) mod context;
 pub(crate) mod db;
 pub(crate) mod docker;
 pub(crate) mod domain;
-pub(crate) mod repositories;
 pub(crate) mod routes;
 pub(crate) mod types;
 

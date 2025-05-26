@@ -5,9 +5,9 @@ use sea_orm::DatabaseConnection;
 use crate::{
     background::scheduler::ScheduleCDCEvent,
     domain::{
-        job::JobRepository, schedule::ScheduleRepository, task_definition::TaskDefinitionRepository,
+        self, job::JobRepository, schedule::ScheduleRepository,
+        task_definition::TaskDefinitionRepository,
     },
-    repositories,
 };
 
 pub struct Context {
@@ -31,16 +31,16 @@ impl Context {
             connection: connection.clone(),
             schedule_cdc_sender,
             task_definition_repository: Box::new(
-                repositories::task_definition::TaskDefinitionSeaOrmRepository::new(
+                domain::task_definition::repository::TaskDefinitionSeaOrmRepository::new(
                     connection.clone(),
                 ),
             ),
-            job_repository: Box::new(repositories::job::JobSeaOrmRepository::new(
+            job_repository: Box::new(domain::job::repository::JobSeaOrmRepository::new(
                 connection.clone(),
             )),
-            schedule_repository: Box::new(repositories::schedule::ScheduleSeaOrmRepository::new(
-                connection,
-            )),
+            schedule_repository: Box::new(
+                domain::schedule::repository::ScheduleSeaOrmRepository::new(connection),
+            ),
         }
     }
 }

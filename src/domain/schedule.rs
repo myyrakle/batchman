@@ -1,6 +1,7 @@
 pub mod dao;
 pub mod dto;
 pub mod entities;
+pub mod repository;
 use dao::*;
 
 #[async_trait::async_trait]
