@@ -5,56 +5,23 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use serde::{Deserialize, Serialize};
 
 use crate::{
-    actions::{
-        self, create_schdule::CreateSchduleRequest, list_schedules::ListSchedulesRequest,
-        patch_schedule::PatchScheduleRequest,
-    },
     context::SharedContext,
-    db::entities,
+    domain::schedule::dto::{
+        CreateSchduleRequest, CreateScheduleBody, ListSchedulesItem, ListSchedulesQuery,
+        ListSchedulesRequest, ListSchedulesResponse, PatchScheduleBody, PatchScheduleRequest,
+    },
 };
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct ListSchedulesQuery {
-    pub schedule_id: Option<i64>,      // schedule id
-    pub contains_name: Option<String>, // name contains text
-    pub name: Option<String>,          // exact name
-    pub enabled: Option<bool>,         // enabled status
-}
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct CreateScheduleBody {
-    pub name: String,                 // schedule name
-    pub job_name: String,             // job name
-    pub cron_expression: String,      // cron expression
-    pub task_definition_id: i64,      // task definition id
-    pub command: Option<String>,      // docker run command
-    pub timezone: Option<String>,     // timezone text (example: "Asia/Seoul")
-    pub timezone_offset: Option<i32>, // timezone offset (in minutes) (example: 540=9:00 for "Asia/Seoul")
-    pub enabled: bool,
-}
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct PatchScheduleBody {
-    pub name: Option<String>,
-    pub job_name: Option<String>,
-    pub cron_expression: Option<String>,
-    pub task_definition_id: Option<i64>,
-    pub command: Option<String>,
-    pub timezone: Option<String>,
-    pub timezone_offset: Option<i32>,
-    pub enabled: Option<bool>,
-}
 
 pub async fn create_schedule(
     Extension(state): Extension<SharedContext>,
     Json(body): Json<CreateScheduleBody>,
 ) -> impl IntoResponse {
-    let result =
-        actions::create_schdule::create_schdule(state, CreateSchduleRequest { request_body: body })
-            .await;
+    let result = state
+        .schedule_service
+        .create_schdule(CreateSchduleRequest { request_body: body })
+        .await;
 
     match result {
         Ok(_) => Json(()).into_response(),
@@ -79,9 +46,10 @@ pub async fn patch_schedule(
     Extension(context): Extension<SharedContext>,
     Json(body): Json<PatchScheduleBody>,
 ) -> impl IntoResponse {
-    let request = PatchScheduleRequest { schedule_id, body };
-
-    let result = actions::patch_schedule::patch_schedule(context, request).await;
+    let result = context
+        .schedule_service
+        .patch_schedule(PatchScheduleRequest { schedule_id, body })
+        .await;
 
     match result {
         Ok(_) => Response::builder()
@@ -114,7 +82,7 @@ pub async fn delete_schedule(
     Path(schedule_id): Path<i64>,
     Extension(context): Extension<SharedContext>,
 ) -> impl IntoResponse {
-    let result = actions::delete_schedule::delete_schedule(context, schedule_id).await;
+    let result = context.schedule_service.delete_schedule(schedule_id).await;
 
     match result {
         Ok(_) => Response::builder()
@@ -138,46 +106,14 @@ pub async fn delete_schedule(
     }
 }
 
-#[derive(Serialize)]
-pub struct ListSchedulesItem {
-    pub id: i64,
-    pub name: String,
-    pub job_name: String,
-    pub cron_expression: String,
-    pub task_definition_id: i64,
-    pub command: Option<String>,
-    pub timezone: Option<String>,
-    pub timezone_offset: Option<i32>,
-    pub enabled: bool,
-}
-
-impl From<entities::schedule::Model> for ListSchedulesItem {
-    fn from(schedule: entities::schedule::Model) -> Self {
-        ListSchedulesItem {
-            id: schedule.id,
-            name: schedule.name,
-            job_name: schedule.job_name,
-            cron_expression: schedule.cron_expression,
-            task_definition_id: schedule.task_definition_id,
-            command: schedule.command,
-            timezone: schedule.timezone,
-            timezone_offset: schedule.timezone_offset,
-            enabled: schedule.enabled,
-        }
-    }
-}
-
-#[derive(Serialize)]
-pub struct ListSchedulesResponse {
-    schedules: Vec<ListSchedulesItem>,
-}
-
 pub async fn list_schedules(
     Query(query): Query<ListSchedulesQuery>,
     Extension(context): Extension<SharedContext>,
 ) -> impl IntoResponse {
-    let schedules =
-        actions::list_schedules::list_schedules(context, ListSchedulesRequest { query }).await;
+    let schedules = context
+        .schedule_service
+        .list_schedules(ListSchedulesRequest { query })
+        .await;
 
     match schedules {
         Ok(schedules) => {

@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use crate::db::entities;
+use crate::domain::task_definition::entities;
 
 pub fn run_container(task_definition: entities::task_definition::Model) -> anyhow::Result<String> {
     // Docker 컨테이너 실행

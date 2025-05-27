@@ -1,10 +1,10 @@
-pub(crate) mod entities;
-
 use std::time::Duration;
 
 use sea_orm::{
     ConnectOptions, ConnectionTrait, Database, DatabaseConnection, DbBackend, Schema, sea_query,
 };
+
+use crate::domain;
 
 pub async fn create_database_connection() -> anyhow::Result<DatabaseConnection> {
     let mut opt = ConnectOptions::new("sqlite://./db.sqlite?mode=rwc");
@@ -42,6 +42,7 @@ pub async fn setup_schema(db: &DatabaseConnection) {
 
         // create index
 
+        use domain::task_definition::entities;
         let create_unique_index_query = sea_query::Index::create()
             .unique()
             .if_not_exists()
@@ -58,6 +59,7 @@ pub async fn setup_schema(db: &DatabaseConnection) {
 
     // job table generate
     {
+        use domain::job::entities;
         let mut create_table_statement = schema.create_table_from_entity(entities::job::Entity);
 
         create_table_statement.if_not_exists();
@@ -72,6 +74,7 @@ pub async fn setup_schema(db: &DatabaseConnection) {
 
     // schedule table generate
     {
+        use domain::schedule::entities;
         let mut create_table_statement =
             schema.create_table_from_entity(entities::schedule::Entity);
 

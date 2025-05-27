@@ -1,8 +1,9 @@
 use crate::{
-    actions::run_pending_job::run_pending_job,
     context::SharedContext,
-    db::entities::job::JobStatus,
-    repositories::{ListJobsParams, PatchJobParams},
+    domain::job::{
+        dao::{ListJobsParams, PatchJobParams},
+        entities::job::JobStatus,
+    },
 };
 
 pub async fn start_runner_loop(context: SharedContext) {
@@ -34,7 +35,7 @@ pub async fn start_runner_loop(context: SharedContext) {
             }
 
             for pending_job in pending_jobs {
-                if let Err(error) = run_pending_job(context.clone(), &pending_job).await {
+                if let Err(error) = context.job_service.run_pending_job(&pending_job).await {
                     println!("Error processing job: {:?}", error);
 
                     let patch_result = context

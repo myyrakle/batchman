@@ -4,25 +4,20 @@ use axum::{
     http::Response,
     response::{self, IntoResponse},
 };
-use serde::Deserialize;
 
 use crate::{
-    actions::{self, stop_job::StopJobRequest, submit_job::SubmitJobRequest},
     context::SharedContext,
+    domain::job::dto::{StopJobBody, StopJobRequest, SubmitJobBody, SubmitJobRequest},
 };
 
-#[derive(Deserialize, Debug, Clone)]
-pub struct SubmitJobBody {
-    pub task_definition_id: i64,
-    pub job_name: String,
-}
-
 pub async fn submit_job(
-    Extension(state): Extension<SharedContext>,
+    Extension(context): Extension<SharedContext>,
     Json(body): Json<SubmitJobBody>,
 ) -> response::Response {
-    let job_id =
-        actions::submit_job::submit_job(state, SubmitJobRequest { request_body: body }).await;
+    let job_id = context
+        .job_service
+        .submit_job(SubmitJobRequest { request_body: body })
+        .await;
 
     match job_id {
         Ok(job_id) => Json(job_id).into_response(),
@@ -33,16 +28,14 @@ pub async fn submit_job(
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
-pub struct StopJobBody {
-    pub job_id: i64,
-}
-
 pub async fn stop_job(
-    Extension(state): Extension<SharedContext>,
+    Extension(context): Extension<SharedContext>,
     Json(body): Json<StopJobBody>,
 ) -> response::Response {
-    let result = actions::stop_job::stop_job(state, StopJobRequest { request_body: body }).await;
+    let result = context
+        .job_service
+        .stop_job(StopJobRequest { request_body: body })
+        .await;
 
     match result {
         Ok(_) => Json(()).into_response(),

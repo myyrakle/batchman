@@ -1,8 +1,9 @@
 use crate::{
-    actions::track_runnng_job::track_runnng_job,
     context::SharedContext,
-    db::entities::job::JobStatus,
-    repositories::{ListJobsParams, PatchJobParams},
+    domain::job::{
+        dao::{ListJobsParams, PatchJobParams},
+        entities::job::JobStatus,
+    },
 };
 
 pub async fn start_status_tracker_loop(context: SharedContext) {
@@ -33,7 +34,7 @@ pub async fn start_status_tracker_loop(context: SharedContext) {
             }
 
             for running_job in running_jobs {
-                if let Err(error) = track_runnng_job(context.clone(), &running_job).await {
+                if let Err(error) = context.job_service.track_running_job(&running_job).await {
                     println!("Error processing job: {:?}", error);
 
                     let patch_result = context

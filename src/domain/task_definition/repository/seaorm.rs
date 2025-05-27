@@ -4,11 +4,13 @@ use sea_orm::{
     ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect,
 };
 
-use crate::db::entities;
-
-use super::{
-    CreateTaskDefinitionParams, DeleteTaskDefinitionParams, ListTaskDefinitionsParams,
-    PatchTaskDefinitionParams, TaskDefinitionRepository,
+use crate::domain::task_definition::{
+    TaskDefinitionRepository,
+    dao::{
+        CreateTaskDefinitionParams, DeleteTaskDefinitionParams, ListTaskDefinitionsParams,
+        PatchTaskDefinitionParams,
+    },
+    entities,
 };
 
 pub struct TaskDefinitionSeaOrmRepository {
