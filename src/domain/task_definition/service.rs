@@ -2,8 +2,14 @@ use std::sync::Arc;
 
 use super::{
     TaskDefinitionRepository,
-    dao::{CreateTaskDefinitionParams, ListTaskDefinitionsParams, PatchTaskDefinitionParams},
-    dto::{CreateDefinitionRequest, ListTaskDefinitionsRequest, PatchDefinitionRequest},
+    dao::{
+        CreateTaskDefinitionParams, DeleteTaskDefinitionParams, ListTaskDefinitionsParams,
+        PatchTaskDefinitionParams,
+    },
+    dto::{
+        CreateDefinitionRequest, DeleteDefinitionRequest, ListTaskDefinitionsRequest,
+        PatchDefinitionRequest,
+    },
     entities,
 };
 
@@ -96,6 +102,16 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                 ..Default::default()
             })
             .await;
+
+        Ok(())
+    }
+
+    async fn delete_task_definition(&self, params: DeleteDefinitionRequest) -> anyhow::Result<()> {
+        self.task_definition_repository
+            .delete_task_definition(DeleteTaskDefinitionParams {
+                task_definition_id: params.task_definition_id,
+            })
+            .await?;
 
         Ok(())
     }

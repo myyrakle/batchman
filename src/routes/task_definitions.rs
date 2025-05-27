@@ -7,7 +7,6 @@ use axum::{
 };
 
 use crate::{
-    actions,
     context::SharedContext,
     domain::task_definition::{
         dto::{
@@ -107,11 +106,10 @@ pub async fn delete_task_definition(
     Path(task_definition_id): Path<i64>,
     Extension(context): Extension<SharedContext>,
 ) -> response::Response {
-    let result = actions::delete_task_definition::delete_task_definition(
-        context,
-        DeleteDefinitionRequest { task_definition_id },
-    )
-    .await;
+    let result = context
+        .task_definition_service
+        .delete_task_definition(DeleteDefinitionRequest { task_definition_id })
+        .await;
 
     match result {
         Ok(_) => Response::builder().status(200).body(Body::empty()).unwrap(),
