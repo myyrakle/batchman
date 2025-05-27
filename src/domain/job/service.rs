@@ -132,7 +132,7 @@ impl JobService for JobServiceImpl {
         Ok(())
     }
 
-    async fn track_runnng_job(&self, job: &entities::job::Model) -> anyhow::Result<()> {
+    async fn track_running_job(&self, job: &entities::job::Model) -> anyhow::Result<()> {
         let Some(container_id) = &job.container_id else {
             return Err(anyhow::anyhow!("Container ID not found"));
         };

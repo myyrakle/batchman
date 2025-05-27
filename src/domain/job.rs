@@ -19,5 +19,5 @@ pub trait JobService {
     async fn submit_job(&self, params: SubmitJobRequest) -> anyhow::Result<i64>;
     async fn stop_job(&self, params: StopJobRequest) -> anyhow::Result<()>;
     async fn run_pending_job(&self, pending_job: &entities::job::Model) -> anyhow::Result<()>;
-    async fn track_runnng_job(&self, job: &entities::job::Model) -> anyhow::Result<()>;
+    async fn track_running_job(&self, job: &entities::job::Model) -> anyhow::Result<()>;
 }
