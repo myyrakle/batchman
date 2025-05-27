@@ -22,6 +22,7 @@ pub struct Context {
     pub schedule_repository: Arc<dyn ScheduleRepository + Send + Sync>,
 
     pub task_definition_service: Box<dyn TaskDefinitionService + Send + Sync>,
+    pub job_service: Box<dyn domain::job::JobService + Send + Sync>,
     pub schedule_service: Box<dyn domain::schedule::ScheduleService + Send + Sync>,
 }
 
@@ -50,7 +51,7 @@ impl Context {
             connection: connection.clone(),
             schedule_cdc_sender,
             task_definition_repository: task_definition_repository.clone(),
-            job_repository,
+            job_repository: job_repository.clone(),
             schedule_repository: schedule_repository.clone(),
             task_definition_service: Box::new(
                 domain::task_definition::service::TaskDefinitionServiceImpl::new(
@@ -59,6 +60,10 @@ impl Context {
             ),
             schedule_service: Box::new(domain::schedule::service::ScheduleServiceImpl::new(
                 schedule_repository,
+                task_definition_repository.clone(),
+            )),
+            job_service: Box::new(domain::job::service::JobServiceImpl::new(
+                job_repository,
                 task_definition_repository,
             )),
         }

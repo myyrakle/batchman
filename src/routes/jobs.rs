@@ -12,11 +12,13 @@ use crate::{
 };
 
 pub async fn submit_job(
-    Extension(state): Extension<SharedContext>,
+    Extension(context): Extension<SharedContext>,
     Json(body): Json<SubmitJobBody>,
 ) -> response::Response {
-    let job_id =
-        actions::submit_job::submit_job(state, SubmitJobRequest { request_body: body }).await;
+    let job_id = context
+        .job_service
+        .submit_job(SubmitJobRequest { request_body: body })
+        .await;
 
     match job_id {
         Ok(job_id) => Json(job_id).into_response(),

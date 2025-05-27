@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use crate::{
-    actions::{self},
     context::{self, SharedContext},
     domain::{
         job::dto::{SubmitJobBody, SubmitJobRequest},
@@ -91,16 +90,15 @@ pub async fn submit_job_by_schedule(
     context: SharedContext,
     schedule: &entities::schedule::Model,
 ) -> anyhow::Result<()> {
-    actions::submit_job::submit_job(
-        context,
-        SubmitJobRequest {
+    context
+        .job_service
+        .submit_job(SubmitJobRequest {
             request_body: SubmitJobBody {
                 task_definition_id: schedule.task_definition_id,
                 job_name: schedule.job_name.clone(),
             },
-        },
-    )
-    .await?;
+        })
+        .await?;
 
     Ok(())
 }
