@@ -2,7 +2,6 @@ pub mod create_schdule;
 pub mod delete_schedule;
 pub mod delete_task_definition;
 pub mod list_schedules;
-pub mod list_task_definition;
 pub mod patch_schedule;
 pub mod run_pending_job;
 pub mod stop_job;

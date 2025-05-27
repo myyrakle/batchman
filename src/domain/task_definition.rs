@@ -5,7 +5,7 @@ pub mod repository;
 pub mod service;
 
 use dao::*;
-use dto::{CreateDefinitionRequest, PatchDefinitionRequest};
+use dto::{CreateDefinitionRequest, ListTaskDefinitionsRequest, PatchDefinitionRequest};
 
 #[async_trait::async_trait]
 pub trait TaskDefinitionRepository {
@@ -33,4 +33,9 @@ pub trait TaskDefinitionService {
     -> anyhow::Result<i64>;
 
     async fn patch_task_definition(&self, request: PatchDefinitionRequest) -> anyhow::Result<()>;
+
+    async fn list_task_definitions(
+        &self,
+        params: ListTaskDefinitionsRequest,
+    ) -> anyhow::Result<Vec<entities::task_definition::Model>>;
 }

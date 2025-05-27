@@ -41,11 +41,10 @@ pub async fn list_task_definitions(
     Query(query): Query<ListTaskDefinitionsQuery>,
     Extension(context): Extension<SharedContext>,
 ) -> response::Response {
-    let task_definitions = actions::list_task_definition::list_task_definitions(
-        context,
-        ListTaskDefinitionsRequest { query },
-    )
-    .await;
+    let task_definitions = context
+        .task_definition_service
+        .list_task_definitions(ListTaskDefinitionsRequest { query })
+        .await;
 
     match task_definitions {
         Ok(task_definitions) => {
