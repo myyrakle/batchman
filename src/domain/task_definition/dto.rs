@@ -26,6 +26,12 @@ pub struct PatchTaskDefinitionBody {
     pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
 }
 
+#[derive(Debug, Clone)]
+pub struct PatchDefinitionRequest {
+    pub task_definition_id: i64,
+    pub request: PatchTaskDefinitionBody,
+}
+
 #[derive(Deserialize, Debug, Clone)]
 pub struct ListTaskDefinitionsQuery {
     pub task_definition_id: Option<i64>,
