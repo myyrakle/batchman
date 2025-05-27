@@ -7,7 +7,6 @@ use axum::{
 };
 
 use crate::{
-    actions::{self},
     context::SharedContext,
     domain::schedule::dto::{
         CreateSchduleRequest, CreateScheduleBody, ListSchedulesItem, ListSchedulesQuery,
@@ -111,8 +110,10 @@ pub async fn list_schedules(
     Query(query): Query<ListSchedulesQuery>,
     Extension(context): Extension<SharedContext>,
 ) -> impl IntoResponse {
-    let schedules =
-        actions::list_schedules::list_schedules(context, ListSchedulesRequest { query }).await;
+    let schedules = context
+        .schedule_service
+        .list_schedules(ListSchedulesRequest { query })
+        .await;
 
     match schedules {
         Ok(schedules) => {
