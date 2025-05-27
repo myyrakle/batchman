@@ -2,7 +2,10 @@ pub mod dao;
 pub mod dto;
 pub mod entities;
 pub mod repository;
+pub mod service;
+
 use dao::*;
+use dto::CreateSchduleRequest;
 
 #[async_trait::async_trait]
 pub trait ScheduleRepository {
@@ -16,4 +19,9 @@ pub trait ScheduleRepository {
     async fn patch_schedule(&self, params: PatchScheduleParams) -> anyhow::Result<()>;
 
     async fn delete_schedule(&self, schedule_id: i64) -> anyhow::Result<()>;
+}
+
+#[async_trait::async_trait]
+pub trait ScheduleService {
+    async fn create_schdule(&self, request: CreateSchduleRequest) -> anyhow::Result<i64>;
 }

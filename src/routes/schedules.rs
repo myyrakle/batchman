@@ -19,9 +19,10 @@ pub async fn create_schedule(
     Extension(state): Extension<SharedContext>,
     Json(body): Json<CreateScheduleBody>,
 ) -> impl IntoResponse {
-    let result =
-        actions::create_schdule::create_schdule(state, CreateSchduleRequest { request_body: body })
-            .await;
+    let result = state
+        .schedule_service
+        .create_schdule(CreateSchduleRequest { request_body: body })
+        .await;
 
     match result {
         Ok(_) => Json(()).into_response(),

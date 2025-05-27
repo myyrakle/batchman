@@ -1,4 +1,3 @@
-pub mod create_schdule;
 pub mod delete_schedule;
 pub mod list_schedules;
 pub mod patch_schedule;

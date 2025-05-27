@@ -22,6 +22,7 @@ pub struct Context {
     pub schedule_repository: Arc<dyn ScheduleRepository + Send + Sync>,
 
     pub task_definition_service: Box<dyn TaskDefinitionService + Send + Sync>,
+    pub schedule_service: Box<dyn domain::schedule::ScheduleService + Send + Sync>,
 }
 
 pub type SharedContext = Arc<Context>;
@@ -50,12 +51,16 @@ impl Context {
             schedule_cdc_sender,
             task_definition_repository: task_definition_repository.clone(),
             job_repository,
-            schedule_repository,
+            schedule_repository: schedule_repository.clone(),
             task_definition_service: Box::new(
                 domain::task_definition::service::TaskDefinitionServiceImpl::new(
-                    task_definition_repository,
+                    task_definition_repository.clone(),
                 ),
             ),
+            schedule_service: Box::new(domain::schedule::service::ScheduleServiceImpl::new(
+                schedule_repository,
+                task_definition_repository,
+            )),
         }
     }
 }
