@@ -83,7 +83,7 @@ pub async fn delete_schedule(
     Path(schedule_id): Path<i64>,
     Extension(context): Extension<SharedContext>,
 ) -> impl IntoResponse {
-    let result = actions::delete_schedule::delete_schedule(context, schedule_id).await;
+    let result = context.schedule_service.delete_schedule(schedule_id).await;
 
     match result {
         Ok(_) => Response::builder()

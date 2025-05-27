@@ -1,4 +1,3 @@
-pub mod delete_schedule;
 pub mod list_schedules;
 pub mod run_pending_job;
 pub mod stop_job;

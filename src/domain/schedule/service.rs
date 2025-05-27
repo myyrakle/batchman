@@ -105,4 +105,12 @@ impl ScheduleService for ScheduleServiceImpl {
 
         Ok(())
     }
+
+    async fn delete_schedule(&self, schedule_id: i64) -> anyhow::Result<()> {
+        self.schedule_repository
+            .delete_schedule(schedule_id)
+            .await?;
+
+        Ok(())
+    }
 }

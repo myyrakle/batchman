@@ -24,6 +24,6 @@ pub trait ScheduleRepository {
 #[async_trait::async_trait]
 pub trait ScheduleService {
     async fn create_schdule(&self, request: CreateSchduleRequest) -> anyhow::Result<i64>;
-
     async fn patch_schedule(&self, request: PatchScheduleRequest) -> anyhow::Result<()>;
+    async fn delete_schedule(&self, schedule_id: i64) -> anyhow::Result<()>;
 }
