@@ -6,7 +6,6 @@ use axum::{
 };
 
 use crate::{
-    actions,
     context::SharedContext,
     domain::job::dto::{StopJobBody, StopJobRequest, SubmitJobBody, SubmitJobRequest},
 };
@@ -30,10 +29,13 @@ pub async fn submit_job(
 }
 
 pub async fn stop_job(
-    Extension(state): Extension<SharedContext>,
+    Extension(context): Extension<SharedContext>,
     Json(body): Json<StopJobBody>,
 ) -> response::Response {
-    let result = actions::stop_job::stop_job(state, StopJobRequest { request_body: body }).await;
+    let result = context
+        .job_service
+        .stop_job(StopJobRequest { request_body: body })
+        .await;
 
     match result {
         Ok(_) => Json(()).into_response(),

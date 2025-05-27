@@ -5,7 +5,7 @@ pub mod repository;
 pub mod service;
 
 use dao::*;
-use dto::SubmitJobRequest;
+use dto::{StopJobRequest, SubmitJobRequest};
 
 #[async_trait::async_trait]
 pub trait JobRepository {
@@ -17,4 +17,5 @@ pub trait JobRepository {
 #[async_trait::async_trait]
 pub trait JobService {
     async fn submit_job(&self, params: SubmitJobRequest) -> anyhow::Result<i64>;
+    async fn stop_job(&self, params: StopJobRequest) -> anyhow::Result<()>;
 }

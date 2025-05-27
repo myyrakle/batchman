@@ -1,8 +1,16 @@
 use std::sync::Arc;
 
-use crate::domain::task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams};
+use crate::{
+    docker,
+    domain::task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
+};
 
-use super::{JobRepository, JobService, dao::CreateJobParams, dto::SubmitJobRequest, entities};
+use super::{
+    JobRepository, JobService,
+    dao::{CreateJobParams, ListJobsParams},
+    dto::{StopJobRequest, SubmitJobRequest},
+    entities::{self, job::JobStatus},
+};
 
 pub struct JobServiceImpl {
     pub job_repository: Arc<dyn JobRepository + Send + Sync>,
@@ -48,5 +56,37 @@ impl JobService for JobServiceImpl {
             .await?;
 
         Ok(new_job_id)
+    }
+
+    async fn stop_job(&self, params: StopJobRequest) -> anyhow::Result<()> {
+        let job_id = params.request_body.job_id;
+
+        let mut jobs = self
+            .job_repository
+            .list_jobs(ListJobsParams {
+                job_ids: vec![job_id],
+                ..Default::default()
+            })
+            .await?;
+
+        let Some(job) = jobs.pop() else {
+            return Err(anyhow::anyhow!("Job not found: {}", job_id));
+        };
+
+        if job.status == JobStatus::Finished {
+            return Err(anyhow::anyhow!("Job already finished"));
+        }
+
+        if job.status == JobStatus::Failed {
+            return Err(anyhow::anyhow!("Job already failed"));
+        }
+
+        let Some(container_id) = job.container_id.as_ref() else {
+            return Err(anyhow::anyhow!("Job has no container ID"));
+        };
+
+        docker::stop::stop_container(container_id, 3)?;
+
+        Ok(())
     }
 }
