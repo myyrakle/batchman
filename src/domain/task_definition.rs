@@ -2,8 +2,10 @@ pub mod dao;
 pub mod dto;
 pub mod entities;
 pub mod repository;
+pub mod service;
 
 use dao::*;
+use dto::CreateDefinitionRequest;
 
 #[async_trait::async_trait]
 pub trait TaskDefinitionRepository {
@@ -23,4 +25,10 @@ pub trait TaskDefinitionRepository {
         &self,
         params: DeleteTaskDefinitionParams,
     ) -> anyhow::Result<()>;
+}
+
+#[async_trait::async_trait]
+pub trait TaskDefinitionService {
+    async fn create_task_definition(&self, request: CreateDefinitionRequest)
+    -> anyhow::Result<i64>;
 }

@@ -65,14 +65,13 @@ pub async fn list_task_definitions(
 }
 
 pub async fn create_task_definition(
-    Extension(state): Extension<SharedContext>,
+    Extension(context): Extension<SharedContext>,
     Json(body): Json<CreateTaskDefinitionBody>,
 ) -> response::Response {
-    let task_definition_id = actions::create_task_definition::create_task_definition(
-        state,
-        CreateDefinitionRequest { request_body: body },
-    )
-    .await;
+    let task_definition_id = context
+        .task_definition_service
+        .create_task_definition(CreateDefinitionRequest { request_body: body })
+        .await;
 
     match task_definition_id {
         Ok(task_definition_id) => Json(task_definition_id).into_response(),
