@@ -5,7 +5,7 @@ pub mod repository;
 pub mod service;
 
 use dao::*;
-use dto::CreateSchduleRequest;
+use dto::{CreateSchduleRequest, PatchScheduleRequest};
 
 #[async_trait::async_trait]
 pub trait ScheduleRepository {
@@ -24,4 +24,6 @@ pub trait ScheduleRepository {
 #[async_trait::async_trait]
 pub trait ScheduleService {
     async fn create_schdule(&self, request: CreateSchduleRequest) -> anyhow::Result<i64>;
+
+    async fn patch_schedule(&self, request: PatchScheduleRequest) -> anyhow::Result<()>;
 }

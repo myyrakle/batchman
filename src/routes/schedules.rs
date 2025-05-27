@@ -47,9 +47,10 @@ pub async fn patch_schedule(
     Extension(context): Extension<SharedContext>,
     Json(body): Json<PatchScheduleBody>,
 ) -> impl IntoResponse {
-    let request = PatchScheduleRequest { schedule_id, body };
-
-    let result = actions::patch_schedule::patch_schedule(context, request).await;
+    let result = context
+        .schedule_service
+        .patch_schedule(PatchScheduleRequest { schedule_id, body })
+        .await;
 
     match result {
         Ok(_) => Response::builder()
