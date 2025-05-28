@@ -1,8 +1,8 @@
 use std::process::Command;
 
-use crate::domain::task_definition::entities;
+use crate::{domain::task_definition::entities, errors};
 
-pub fn run_container(task_definition: entities::task_definition::Model) -> anyhow::Result<String> {
+pub fn run_container(task_definition: entities::task_definition::Model) -> errors::Result<String> {
     // Docker 컨테이너 실행
     let image_name = &task_definition.image;
 
@@ -52,9 +52,8 @@ pub fn run_container(task_definition: entities::task_definition::Model) -> anyho
     let output = command.output()?;
 
     if !output.status.success() {
-        return Err(anyhow::anyhow!(
-            "Failed to start Docker container: {}",
-            String::from_utf8_lossy(&output.stderr)
+        return Err(errors::Error::ContainerFailedToStart(
+            String::from_utf8_lossy(&output.stderr).to_string(),
         ));
     }
 

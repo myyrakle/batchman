@@ -8,7 +8,13 @@ pub enum Error {
     ContainerIDNotFound,
     ScheduleNotFound,
     CronExpressionIsInvalid(String),
+    ContainerNotFound,
+    ContainerFailedToKill(String),
+    ContainerFailedToStart(String),
+    ContainerFailedToInspect(String),
+    IOError(std::io::Error),
     SeaormError(sea_orm::DbErr),
+    SerdeJsonError(serde_json::Error),
 }
 
 impl From<Error> for String {
@@ -22,7 +28,15 @@ impl From<Error> for String {
             Error::ContainerIDNotFound => "Container ID not found".to_string(),
             Error::ScheduleNotFound => "Schedule not found".to_string(),
             Error::CronExpressionIsInvalid(expr) => format!("Invalid Cron Expression: {}", expr),
+            Error::ContainerNotFound => "Container not found".to_string(),
+            Error::ContainerFailedToKill(err) => format!("Failed to kill container: {}", err),
+            Error::ContainerFailedToStart(err) => format!("Failed to start container: {}", err),
+            Error::ContainerFailedToInspect(err) => format!("Failed to inspect container: {}", err),
+            Error::IOError(err) => format!("I/O error: {}", err),
             Error::SeaormError(err) => format!("Database error: {}", err),
+            Error::SerdeJsonError(err) => {
+                format!("JSON serialization/deserialization error: {}", err)
+            }
         }
     }
 }
@@ -36,6 +50,18 @@ impl std::fmt::Display for Error {
 impl From<sea_orm::DbErr> for Error {
     fn from(err: sea_orm::DbErr) -> Self {
         Error::SeaormError(err)
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(err: std::io::Error) -> Self {
+        Error::IOError(err)
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(err: serde_json::Error) -> Self {
+        Error::SerdeJsonError(err)
     }
 }
 
