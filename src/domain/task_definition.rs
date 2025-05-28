@@ -2,6 +2,7 @@ pub mod dao;
 pub mod dto;
 pub mod entities;
 pub mod repository;
+pub mod routes;
 pub mod service;
 
 use dao::*;

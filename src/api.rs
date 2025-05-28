@@ -23,19 +23,19 @@ pub fn app(context: SharedContext) -> Router {
         .route("/database-check", get(database_check))
         .route(
             "/task-definitions",
-            get(routes::task_definitions::list_task_definitions),
+            get(domain::task_definition::routes::http::list_task_definitions),
         )
         .route(
             "/task-definitions",
-            post(routes::task_definitions::create_task_definition),
+            post(domain::task_definition::routes::http::create_task_definition),
         )
         .route(
             "/task-definitions/{task_definition_id}",
-            patch(routes::task_definitions::patch_task_definition),
+            patch(domain::task_definition::routes::http::patch_task_definition),
         )
         .route(
             "/task-definitions/{task_definition_id}",
-            delete(routes::task_definitions::delete_task_definition),
+            delete(domain::task_definition::routes::http::delete_task_definition),
         )
         .route("/jobs/submit", post(routes::jobs::submit_job))
         .route("/jobs/stop", post(routes::jobs::stop_job))
