@@ -4,10 +4,13 @@ use sea_orm::{
     ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QuerySelect,
 };
 
-use crate::domain::job::{
-    JobRepository,
-    dao::{CreateJobParams, ListJobsParams, PatchJobParams},
-    entities,
+use crate::{
+    domain::job::{
+        JobRepository,
+        dao::{CreateJobParams, ListJobsParams, PatchJobParams},
+        entities,
+    },
+    errors,
 };
 
 pub struct JobSeaOrmRepository {
@@ -22,7 +25,7 @@ impl JobSeaOrmRepository {
 
 #[async_trait::async_trait]
 impl JobRepository for JobSeaOrmRepository {
-    async fn list_jobs(&self, params: ListJobsParams) -> anyhow::Result<Vec<entities::job::Model>> {
+    async fn list_jobs(&self, params: ListJobsParams) -> errors::Result<Vec<entities::job::Model>> {
         let mut find_job_query = entities::job::Entity::find();
 
         if !params.job_ids.is_empty() {
@@ -43,7 +46,7 @@ impl JobRepository for JobSeaOrmRepository {
         Ok(jobs)
     }
 
-    async fn create_job(&self, params: CreateJobParams) -> anyhow::Result<i64> {
+    async fn create_job(&self, params: CreateJobParams) -> errors::Result<i64> {
         let new_job = entities::job::ActiveModel {
             id: NotSet,
             name: Set(params.name),
@@ -62,13 +65,13 @@ impl JobRepository for JobSeaOrmRepository {
         Ok(model.id)
     }
 
-    async fn patch_job(&self, params: PatchJobParams) -> anyhow::Result<()> {
-        let task_definition = entities::job::Entity::find_by_id(params.job_id)
+    async fn patch_job(&self, params: PatchJobParams) -> errors::Result<()> {
+        let job = entities::job::Entity::find_by_id(params.job_id)
             .one(&self.connection)
             .await?
-            .ok_or_else(|| anyhow::anyhow!("Job not found"))?;
+            .ok_or_else(|| errors::Error::JobNotFound)?;
 
-        let mut model = task_definition.into_active_model();
+        let mut model = job.into_active_model();
 
         if let Some(name) = params.name {
             model.name = Set(name);

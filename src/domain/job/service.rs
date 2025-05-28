@@ -3,6 +3,7 @@ use std::sync::Arc;
 use crate::{
     docker::{self, run_container},
     domain::task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
+    errors,
 };
 
 use super::{
@@ -31,7 +32,7 @@ impl JobServiceImpl {
 
 #[async_trait::async_trait]
 impl JobService for JobServiceImpl {
-    async fn submit_job(&self, params: SubmitJobRequest) -> anyhow::Result<i64> {
+    async fn submit_job(&self, params: SubmitJobRequest) -> errors::Result<i64> {
         let task_definitions = self
             .task_definition_repository
             .list_task_definitions(ListTaskDefinitionsParams {
@@ -41,7 +42,7 @@ impl JobService for JobServiceImpl {
             .await?;
 
         if task_definitions.is_empty() {
-            return Err(anyhow::anyhow!("Task definition not found"));
+            return Err(errors::Error::TaskDefinitionNotFound);
         };
 
         let new_job_id = self
@@ -58,7 +59,7 @@ impl JobService for JobServiceImpl {
         Ok(new_job_id)
     }
 
-    async fn stop_job(&self, params: StopJobRequest) -> anyhow::Result<()> {
+    async fn stop_job(&self, params: StopJobRequest) -> errors::Result<()> {
         let job_id = params.request_body.job_id;
 
         let mut jobs = self
@@ -70,19 +71,19 @@ impl JobService for JobServiceImpl {
             .await?;
 
         let Some(job) = jobs.pop() else {
-            return Err(anyhow::anyhow!("Job not found: {}", job_id));
+            return Err(errors::Error::JobNotFound);
         };
 
         if job.status == JobStatus::Finished {
-            return Err(anyhow::anyhow!("Job already finished"));
+            return Err(errors::Error::JobAlreadyFinished);
         }
 
         if job.status == JobStatus::Failed {
-            return Err(anyhow::anyhow!("Job already failed"));
+            return Err(errors::Error::JobAlreadyFailed);
         }
 
         let Some(container_id) = job.container_id.as_ref() else {
-            return Err(anyhow::anyhow!("Job has no container ID"));
+            return Err(errors::Error::JobHasNoContainerID);
         };
 
         docker::stop::stop_container(container_id, 3)?;
@@ -90,7 +91,7 @@ impl JobService for JobServiceImpl {
         Ok(())
     }
 
-    async fn run_pending_job(&self, pending_job: &entities::job::Model) -> anyhow::Result<()> {
+    async fn run_pending_job(&self, pending_job: &entities::job::Model) -> errors::Result<()> {
         // TODO: 리소스 제한이나 실행 제한 등에 걸리지 않는지 확인 (차후 개발)
 
         // 1. job 상태를 START로 변경
@@ -113,7 +114,7 @@ impl JobService for JobServiceImpl {
             .await?;
 
         let Some(task_definition) = task_definitions.pop() else {
-            return Err(anyhow::anyhow!("Task definition not found"));
+            return Err(errors::Error::JobNotFound);
         };
 
         // 3. 컨테이너 실행
@@ -132,9 +133,9 @@ impl JobService for JobServiceImpl {
         Ok(())
     }
 
-    async fn track_running_job(&self, job: &entities::job::Model) -> anyhow::Result<()> {
+    async fn track_running_job(&self, job: &entities::job::Model) -> errors::Result<()> {
         let Some(container_id) = &job.container_id else {
-            return Err(anyhow::anyhow!("Container ID not found"));
+            return Err(errors::Error::ContainerIDNotFound);
         };
 
         let inspect_result = docker::inspect_container(&container_id)?;
