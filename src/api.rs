@@ -37,8 +37,8 @@ pub fn app(context: SharedContext) -> Router {
             "/task-definitions/{task_definition_id}",
             delete(domain::task_definition::routes::http::delete_task_definition),
         )
-        .route("/jobs/submit", post(routes::jobs::submit_job))
-        .route("/jobs/stop", post(routes::jobs::stop_job))
+        .route("/jobs/submit", post(domain::job::routes::http::submit_job))
+        .route("/jobs/stop", post(domain::job::routes::http::stop_job))
         .route("/schedules", get(routes::schedules::list_schedules))
         .route("/schedules", post(routes::schedules::create_schedule))
         .route(
