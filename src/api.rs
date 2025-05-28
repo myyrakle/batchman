@@ -3,7 +3,6 @@ pub(crate) mod context;
 pub(crate) mod db;
 pub(crate) mod docker;
 pub(crate) mod domain;
-pub(crate) mod routes;
 pub(crate) mod types;
 
 use std::sync::Arc;
@@ -23,31 +22,37 @@ pub fn app(context: SharedContext) -> Router {
         .route("/database-check", get(database_check))
         .route(
             "/task-definitions",
-            get(routes::task_definitions::list_task_definitions),
+            get(domain::task_definition::routes::http::list_task_definitions),
         )
         .route(
             "/task-definitions",
-            post(routes::task_definitions::create_task_definition),
+            post(domain::task_definition::routes::http::create_task_definition),
         )
         .route(
             "/task-definitions/{task_definition_id}",
-            patch(routes::task_definitions::patch_task_definition),
+            patch(domain::task_definition::routes::http::patch_task_definition),
         )
         .route(
             "/task-definitions/{task_definition_id}",
-            delete(routes::task_definitions::delete_task_definition),
+            delete(domain::task_definition::routes::http::delete_task_definition),
         )
-        .route("/jobs/submit", post(routes::jobs::submit_job))
-        .route("/jobs/stop", post(routes::jobs::stop_job))
-        .route("/schedules", get(routes::schedules::list_schedules))
-        .route("/schedules", post(routes::schedules::create_schedule))
+        .route("/jobs/submit", post(domain::job::routes::http::submit_job))
+        .route("/jobs/stop", post(domain::job::routes::http::stop_job))
         .route(
-            "/schedules/{schedule_id}",
-            patch(routes::schedules::patch_schedule),
+            "/schedules",
+            get(domain::schedule::routes::http::list_schedules),
         )
         .route(
+            "/schedules",
+            post(domain::schedule::routes::http::create_schedule),
+        )
+        .route(
             "/schedules/{schedule_id}",
-            delete(routes::schedules::delete_schedule),
+            patch(domain::schedule::routes::http::patch_schedule),
+        )
+        .route(
+            "/schedules/{schedule_id}",
+            delete(domain::schedule::routes::http::delete_schedule),
         )
         .layer(Extension(context))
 }
