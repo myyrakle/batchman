@@ -1,5 +1,7 @@
 use std::process::Command;
 
+use crate::errors;
+
 /// Forcefully stops a Docker container by sending a SIGKILL signal
 ///
 /// # Arguments
@@ -11,7 +13,7 @@ use std::process::Command;
 /// * `Ok(())` if the container was successfully stopped
 /// * `Err` with an error message if the operation failed
 ///
-pub fn kill_container(container_id: &str) -> anyhow::Result<()> {
+pub fn kill_container(container_id: &str) -> errors::Result<()> {
     let mut command = Command::new("docker");
 
     command.arg("kill");
@@ -23,13 +25,10 @@ pub fn kill_container(container_id: &str) -> anyhow::Result<()> {
         let error = String::from_utf8_lossy(&output.stderr);
 
         if error.contains("No such container") {
-            return Err(anyhow::anyhow!("Container not found: {}", container_id));
+            return Err(errors::Error::ContainerNotFound);
         }
 
-        return Err(anyhow::anyhow!(
-            "Failed to kill Docker container: {}",
-            error
-        ));
+        return Err(errors::Error::ContainerFailedToKill(error.to_string()));
     }
 
     Ok(())
@@ -51,7 +50,7 @@ pub fn kill_container(container_id: &str) -> anyhow::Result<()> {
 /// * `Ok(())` if the container was successfully stopped
 /// * `Err` with an error message if both stop and kill operations failed
 ///
-pub fn stop_container(container_id: &str, timeout_seconds: u32) -> anyhow::Result<()> {
+pub fn stop_container(container_id: &str, timeout_seconds: u32) -> errors::Result<()> {
     // First try to stop gracefully with timeout
     let mut command = Command::new("docker");
 

@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use crate::errors;
+
 use super::{
     TaskDefinitionRepository,
     dao::{
@@ -32,7 +34,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
     async fn create_task_definition(
         &self,
         request: CreateDefinitionRequest,
-    ) -> anyhow::Result<i64> {
+    ) -> errors::Result<i64> {
         // version이 없다면 동일한 이름의 task definition이 있는지 확인
 
         let mut version = 1;
@@ -73,7 +75,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
         Ok(task_definition_id)
     }
 
-    async fn patch_task_definition(&self, request: PatchDefinitionRequest) -> anyhow::Result<()> {
+    async fn patch_task_definition(&self, request: PatchDefinitionRequest) -> errors::Result<()> {
         // version이 없다면 동일한 이름의 task definition이 있는지 확인
 
         let task_definitions = self
@@ -86,7 +88,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
             .await?;
 
         if task_definitions.is_empty() {
-            return Err(anyhow::anyhow!("Task definition not found"));
+            return Err(errors::Error::TaskDefinitionNotFound);
         }
 
         let _ = self
@@ -106,7 +108,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
         Ok(())
     }
 
-    async fn delete_task_definition(&self, params: DeleteDefinitionRequest) -> anyhow::Result<()> {
+    async fn delete_task_definition(&self, params: DeleteDefinitionRequest) -> errors::Result<()> {
         self.task_definition_repository
             .delete_task_definition(DeleteTaskDefinitionParams {
                 task_definition_id: params.task_definition_id,
@@ -119,7 +121,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
     async fn list_task_definitions(
         &self,
         params: ListTaskDefinitionsRequest,
-    ) -> anyhow::Result<Vec<entities::task_definition::Model>> {
+    ) -> errors::Result<Vec<entities::task_definition::Model>> {
         let task_definitions = self
             .task_definition_repository
             .list_task_definitions(ListTaskDefinitionsParams {

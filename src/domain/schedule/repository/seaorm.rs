@@ -3,10 +3,13 @@ use sea_orm::{
     QuerySelect, Set,
 };
 
-use crate::domain::schedule::{
-    ScheduleRepository,
-    dao::{CreateScheduleParams, ListSchedulesParams, PatchScheduleParams},
-    entities,
+use crate::{
+    domain::schedule::{
+        ScheduleRepository,
+        dao::{CreateScheduleParams, ListSchedulesParams, PatchScheduleParams},
+        entities,
+    },
+    errors,
 };
 
 pub struct ScheduleSeaOrmRepository {
@@ -18,7 +21,7 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
     async fn list_schedules(
         &self,
         params: ListSchedulesParams,
-    ) -> anyhow::Result<Vec<entities::schedule::Model>> {
+    ) -> errors::Result<Vec<entities::schedule::Model>> {
         let mut query = entities::schedule::Entity::find();
 
         if !params.schedule_ids.is_empty() {
@@ -50,7 +53,7 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
         Ok(schedules)
     }
 
-    async fn create_schedule(&self, params: CreateScheduleParams) -> anyhow::Result<i64> {
+    async fn create_schedule(&self, params: CreateScheduleParams) -> errors::Result<i64> {
         let schedule = entities::schedule::ActiveModel {
             name: sea_orm::Set(params.name),
             job_name: sea_orm::Set(params.job_name),
@@ -68,11 +71,11 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
         Ok(schedule.id)
     }
 
-    async fn patch_schedule(&self, params: PatchScheduleParams) -> anyhow::Result<()> {
+    async fn patch_schedule(&self, params: PatchScheduleParams) -> errors::Result<()> {
         let schedule_model = entities::schedule::Entity::find_by_id(params.schedule_id)
             .one(&self.connection)
             .await?
-            .ok_or_else(|| anyhow::anyhow!("Schedule not found with id {}", params.schedule_id))?;
+            .ok_or_else(|| errors::Error::ScheduleNotFound)?;
 
         let mut schedule_active_model = schedule_model.into_active_model();
 
@@ -109,11 +112,11 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
         Ok(())
     }
 
-    async fn delete_schedule(&self, schedule_id: i64) -> anyhow::Result<()> {
+    async fn delete_schedule(&self, schedule_id: i64) -> errors::Result<()> {
         let schedule = entities::schedule::Entity::find_by_id(schedule_id)
             .one(&self.connection)
             .await?
-            .ok_or_else(|| anyhow::anyhow!("Schedule not found with id {}", schedule_id))?;
+            .ok_or_else(|| errors::Error::ScheduleNotFound)?;
 
         schedule.delete(&self.connection).await?;
 

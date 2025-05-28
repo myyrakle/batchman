@@ -6,6 +6,7 @@ use crate::{
         job::dto::{SubmitJobBody, SubmitJobRequest},
         schedule::entities,
     },
+    errors,
 };
 
 #[derive(Debug)]
@@ -89,7 +90,7 @@ fn is_time_to_trigger(_schedule: &entities::schedule::Model) -> bool {
 pub async fn submit_job_by_schedule(
     context: SharedContext,
     schedule: &entities::schedule::Model,
-) -> anyhow::Result<()> {
+) -> errors::Result<()> {
     context
         .job_service
         .submit_job(SubmitJobRequest {

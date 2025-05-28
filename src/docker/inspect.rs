@@ -2,6 +2,8 @@ use std::process::Command;
 
 use serde::Deserialize;
 
+use crate::errors;
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct ContainerInspectResult {
     #[serde(rename = "State")]
@@ -33,7 +35,7 @@ pub struct ContainerState {
     pub error: Option<String>,
 }
 
-pub fn inspect_container(container_id: &str) -> anyhow::Result<ContainerInspectResult> {
+pub fn inspect_container(container_id: &str) -> errors::Result<ContainerInspectResult> {
     let mut command = Command::new("docker");
 
     command.arg("inspect");
@@ -45,12 +47,10 @@ pub fn inspect_container(container_id: &str) -> anyhow::Result<ContainerInspectR
         let error = String::from_utf8_lossy(&output.stderr);
 
         if error.contains("No such object") {
-            return Err(anyhow::anyhow!("Container not found"));
+            return Err(errors::Error::ContainerNotFound);
         }
 
-        return Err(anyhow::anyhow!(
-            "Failed to inspect Docker container: {error}"
-        ));
+        return Err(errors::Error::ContainerFailedToInspect(error.to_string()));
     }
 
     let inspect_raw_response = String::from_utf8_lossy(&output.stdout).trim().to_owned();
@@ -59,7 +59,7 @@ pub fn inspect_container(container_id: &str) -> anyhow::Result<ContainerInspectR
         serde_json::from_str(&inspect_raw_response)?;
 
     if inspect_response.is_empty() {
-        return Err(anyhow::anyhow!("No container found"));
+        return Err(errors::Error::ContainerNotFound);
     }
 
     return Ok(inspect_response[0].clone());

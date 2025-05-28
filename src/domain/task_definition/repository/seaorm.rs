@@ -4,13 +4,16 @@ use sea_orm::{
     ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect,
 };
 
-use crate::domain::task_definition::{
-    TaskDefinitionRepository,
-    dao::{
-        CreateTaskDefinitionParams, DeleteTaskDefinitionParams, ListTaskDefinitionsParams,
-        PatchTaskDefinitionParams,
+use crate::{
+    domain::task_definition::{
+        TaskDefinitionRepository,
+        dao::{
+            CreateTaskDefinitionParams, DeleteTaskDefinitionParams, ListTaskDefinitionsParams,
+            PatchTaskDefinitionParams,
+        },
+        entities,
     },
-    entities,
+    errors,
 };
 
 pub struct TaskDefinitionSeaOrmRepository {
@@ -22,7 +25,7 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
     async fn list_task_definitions(
         &self,
         params: ListTaskDefinitionsParams,
-    ) -> anyhow::Result<Vec<entities::task_definition::Model>> {
+    ) -> crate::errors::Result<Vec<entities::task_definition::Model>> {
         let mut find_query = entities::task_definition::Entity::find();
 
         if !params.task_definition_ids.is_empty() {
@@ -55,7 +58,7 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
     async fn create_task_definition(
         &self,
         params: CreateTaskDefinitionParams,
-    ) -> anyhow::Result<i64> {
+    ) -> crate::errors::Result<i64> {
         let new_definition = entities::task_definition::ActiveModel {
             id: NotSet,
             name: Set(params.name),
@@ -75,12 +78,15 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
         Ok(saved.id)
     }
 
-    async fn patch_task_definition(&self, params: PatchTaskDefinitionParams) -> anyhow::Result<()> {
+    async fn patch_task_definition(
+        &self,
+        params: PatchTaskDefinitionParams,
+    ) -> crate::errors::Result<()> {
         let task_definition =
             entities::task_definition::Entity::find_by_id(params.task_definition_id)
                 .one(&self.connection)
                 .await?
-                .ok_or_else(|| anyhow::anyhow!("Task definition not found"))?;
+                .ok_or_else(|| errors::Error::TaskDefinitionNotFound)?;
 
         let mut model = task_definition.into_active_model();
 
@@ -124,7 +130,7 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
     async fn delete_task_definition(
         &self,
         params: DeleteTaskDefinitionParams,
-    ) -> anyhow::Result<()> {
+    ) -> crate::errors::Result<()> {
         let _ = entities::task_definition::Entity::delete_by_id(params.task_definition_id)
             .exec(&self.connection)
             .await?;

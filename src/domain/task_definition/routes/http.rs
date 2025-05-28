@@ -16,6 +16,7 @@ use crate::{
         },
         entities,
     },
+    errors,
 };
 
 impl From<entities::task_definition::Model> for ListTaskDefinitionsItem {
@@ -95,6 +96,10 @@ pub async fn patch_task_definition(
 
     match result {
         Ok(_) => Response::builder().status(200).body(Body::empty()).unwrap(),
+        Err(errors::Error::TaskDefinitionNotFound) => Response::builder()
+            .status(404)
+            .body(Body::new(errors::Error::TaskDefinitionNotFound.to_string()))
+            .unwrap(),
         Err(error) => Response::builder()
             .status(500)
             .body(Body::new(error.to_string()))

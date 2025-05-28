@@ -4,9 +4,9 @@ use sea_orm::{
     ConnectOptions, ConnectionTrait, Database, DatabaseConnection, DbBackend, Schema, sea_query,
 };
 
-use crate::domain;
+use crate::{domain, errors};
 
-pub async fn create_database_connection() -> anyhow::Result<DatabaseConnection> {
+pub async fn create_database_connection() -> errors::Result<DatabaseConnection> {
     let mut opt = ConnectOptions::new("sqlite://./db.sqlite?mode=rwc");
     opt.max_connections(100)
         .min_connections(5)
