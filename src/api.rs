@@ -3,7 +3,6 @@ pub(crate) mod context;
 pub(crate) mod db;
 pub(crate) mod docker;
 pub(crate) mod domain;
-pub(crate) mod routes;
 pub(crate) mod types;
 
 use std::sync::Arc;
@@ -39,15 +38,21 @@ pub fn app(context: SharedContext) -> Router {
         )
         .route("/jobs/submit", post(domain::job::routes::http::submit_job))
         .route("/jobs/stop", post(domain::job::routes::http::stop_job))
-        .route("/schedules", get(routes::schedules::list_schedules))
-        .route("/schedules", post(routes::schedules::create_schedule))
         .route(
-            "/schedules/{schedule_id}",
-            patch(routes::schedules::patch_schedule),
+            "/schedules",
+            get(domain::schedule::routes::http::list_schedules),
+        )
+        .route(
+            "/schedules",
+            post(domain::schedule::routes::http::create_schedule),
         )
         .route(
             "/schedules/{schedule_id}",
-            delete(routes::schedules::delete_schedule),
+            patch(domain::schedule::routes::http::patch_schedule),
+        )
+        .route(
+            "/schedules/{schedule_id}",
+            delete(domain::schedule::routes::http::delete_schedule),
         )
         .layer(Extension(context))
 }
