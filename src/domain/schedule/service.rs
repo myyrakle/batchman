@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     domain::task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
+    errors,
     types::cron::CronExpression,
 };
 
@@ -31,9 +32,9 @@ impl ScheduleServiceImpl {
 
 #[async_trait::async_trait]
 impl ScheduleService for ScheduleServiceImpl {
-    async fn create_schdule(&self, request: CreateSchduleRequest) -> anyhow::Result<i64> {
+    async fn create_schdule(&self, request: CreateSchduleRequest) -> errors::Result<i64> {
         if let Err(error) = CronExpression::parse(request.request_body.cron_expression.as_str()) {
-            return Err(anyhow::anyhow!("Invalid Cron Expression: {}", error));
+            return Err(errors::Error::CronExpressionIsInvalid(error.to_string()));
         }
 
         let task_definitions = self
@@ -45,7 +46,7 @@ impl ScheduleService for ScheduleServiceImpl {
             .await?;
 
         if task_definitions.is_empty() {
-            return Err(anyhow::anyhow!("Task definition not found"));
+            return Err(errors::Error::TaskDefinitionNotFound);
         };
 
         let new_job_id = self
@@ -65,11 +66,11 @@ impl ScheduleService for ScheduleServiceImpl {
         Ok(new_job_id)
     }
 
-    async fn patch_schedule(&self, request: PatchScheduleRequest) -> anyhow::Result<()> {
+    async fn patch_schedule(&self, request: PatchScheduleRequest) -> errors::Result<()> {
         if let Some(cron_expression) = &request.body.cron_expression {
             // Validate the cron expression
             if let Err(error) = CronExpression::parse(cron_expression.as_str()) {
-                return Err(anyhow::anyhow!("Invalid Cron Expression: {}", error));
+                return Err(errors::Error::CronExpressionIsInvalid(error.to_string()));
             }
         }
 
@@ -84,10 +85,7 @@ impl ScheduleService for ScheduleServiceImpl {
             .await?;
 
         if schedules.is_empty() {
-            return Err(anyhow::anyhow!(
-                "Schedule not found with id {}",
-                request.schedule_id
-            ));
+            return Err(errors::Error::ScheduleNotFound);
         }
 
         let params = PatchScheduleParams {
@@ -107,7 +105,7 @@ impl ScheduleService for ScheduleServiceImpl {
         Ok(())
     }
 
-    async fn delete_schedule(&self, schedule_id: i64) -> anyhow::Result<()> {
+    async fn delete_schedule(&self, schedule_id: i64) -> errors::Result<()> {
         self.schedule_repository
             .delete_schedule(schedule_id)
             .await?;
@@ -118,7 +116,7 @@ impl ScheduleService for ScheduleServiceImpl {
     async fn list_schedules(
         &self,
         request: ListSchedulesRequest,
-    ) -> anyhow::Result<Vec<entities::schedule::Model>> {
+    ) -> errors::Result<Vec<entities::schedule::Model>> {
         let result = self
             .schedule_repository
             .list_schedules(ListSchedulesParams {

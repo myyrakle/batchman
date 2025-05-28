@@ -6,20 +6,30 @@ pub enum Error {
     JobAlreadyFailed,
     JobHasNoContainerID,
     ContainerIDNotFound,
+    ScheduleNotFound,
+    CronExpressionIsInvalid(String),
     SeaormError(sea_orm::DbErr),
 }
 
-impl ToString for Error {
-    fn to_string(&self) -> String {
-        match self {
+impl From<Error> for String {
+    fn from(error: Error) -> String {
+        match error {
             Error::TaskDefinitionNotFound => "Task definition not found".to_string(),
             Error::JobNotFound => "Job not found".to_string(),
             Error::JobAlreadyFinished => "Job is already finished".to_string(),
             Error::JobAlreadyFailed => "Job is already failed".to_string(),
             Error::JobHasNoContainerID => "Job has no container ID".to_string(),
             Error::ContainerIDNotFound => "Container ID not found".to_string(),
+            Error::ScheduleNotFound => "Schedule not found".to_string(),
+            Error::CronExpressionIsInvalid(expr) => format!("Invalid Cron Expression: {}", expr),
             Error::SeaormError(err) => format!("Database error: {}", err),
         }
+    }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
     }
 }
 
