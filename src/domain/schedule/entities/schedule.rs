@@ -18,6 +18,14 @@ pub struct Model {
     pub last_triggered_at: Option<chrono::DateTime<Utc>>, // last triggered time
 }
 
+impl Model {
+    pub fn is_time_to_trigger(&self, _now: &chrono::DateTime<Utc>) -> bool {
+        // TODO: cron expression을 파싱해서 현재 시간과 비교
+
+        return false;
+    }
+}
+
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {}
 
