@@ -98,6 +98,7 @@ impl ScheduleService for ScheduleServiceImpl {
             timezone: request.body.timezone,
             timezone_offset: request.body.timezone_offset,
             enabled: request.body.enabled,
+            ..Default::default()
         };
 
         self.schedule_repository.patch_schedule(params).await?;

@@ -33,7 +33,7 @@ pub struct DeleteSchedule {
     pub id: i64,
 }
 
-pub type ScheduleCDCSender = tokio::sync::mpsc::Sender<ScheduleCDCEvent>;
+pub type _ScheduleCDCSender = tokio::sync::mpsc::Sender<ScheduleCDCEvent>;
 pub type ScheduleCDCReceiver = tokio::sync::mpsc::Receiver<ScheduleCDCEvent>;
 
 pub async fn start_scheduler_loop(
