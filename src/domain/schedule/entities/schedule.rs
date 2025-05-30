@@ -1,6 +1,8 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
+use crate::{errors, types::cron::CronExpression};
+
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 #[sea_orm(table_name = "schedule")]
 pub struct Model {
@@ -18,10 +20,27 @@ pub struct Model {
     pub last_triggered_at: Option<chrono::DateTime<Utc>>, // last triggered time
 }
 
-impl Model {
-    pub fn is_time_to_trigger(&self, _now: &chrono::DateTime<Utc>) -> bool {
-        // TODO: cron expression을 파싱해서 현재 시간과 비교
+impl TryFrom<Model> for ScheduleWithStates {
+    type Error = errors::Error;
 
+    fn try_from(model: Model) -> Result<Self, Self::Error> {
+        let cron_expression = CronExpression::parse(&model.cron_expression)?;
+
+        Ok(ScheduleWithStates {
+            model,
+            cron_expression,
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ScheduleWithStates {
+    pub model: Model,
+    pub cron_expression: CronExpression,
+}
+
+impl ScheduleWithStates {
+    pub fn is_time_to_trigger(&self, _now: &chrono::DateTime<Utc>) -> bool {
         return false;
     }
 }

@@ -17,6 +17,12 @@ pub enum Error {
     SerdeJsonError(serde_json::Error),
 }
 
+impl PartialEq for Error {
+    fn eq(&self, other: &Self) -> bool {
+        std::mem::discriminant(self) == std::mem::discriminant(other)
+    }
+}
+
 impl From<Error> for String {
     fn from(error: Error) -> String {
         match error {

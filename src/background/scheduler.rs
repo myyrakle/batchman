@@ -4,7 +4,10 @@ use crate::{
     context::{self},
     domain::{
         job::dto::{SubmitJobBody, SubmitJobRequest},
-        schedule::{dao::PatchScheduleParams, entities},
+        schedule::{
+            dao::PatchScheduleParams,
+            entities::{self, schedule::ScheduleWithStates},
+        },
     },
 };
 
@@ -44,7 +47,10 @@ pub async fn start_scheduler_loop(
             .schedule_repository
             .list_schedules(Default::default())
             .await
-            .expect("Failed to load schedules");
+            .expect("Failed to load schedules")
+            .into_iter()
+            .flat_map(|e| ScheduleWithStates::try_from(e))
+            .collect::<Vec<_>>();
 
         // 스케줄링 루프
         loop {
@@ -57,7 +63,10 @@ pub async fn start_scheduler_loop(
                     .schedule_repository
                     .list_schedules(Default::default())
                     .await
-                    .expect("Failed to load schedules");
+                    .expect("Failed to load schedules")
+                    .into_iter()
+                    .flat_map(|e| ScheduleWithStates::try_from(e))
+                    .collect::<Vec<_>>();
             }
 
             // 없으면 일단 적당히 대기
@@ -72,15 +81,15 @@ pub async fn start_scheduler_loop(
                         .job_service
                         .submit_job(SubmitJobRequest {
                             request_body: SubmitJobBody {
-                                task_definition_id: schedule.task_definition_id,
-                                job_name: schedule.job_name.clone(),
+                                task_definition_id: schedule.model.task_definition_id,
+                                job_name: schedule.model.job_name.clone(),
                             },
                         })
                         .await
                     {
                         log::error!(
                             "Failed to submit job for schedule {}: {}",
-                            schedule.id,
+                            schedule.model.id,
                             error
                         );
                     }
@@ -88,7 +97,7 @@ pub async fn start_scheduler_loop(
                     if let Err(error) = context
                         .schedule_repository
                         .patch_schedule(PatchScheduleParams {
-                            schedule_id: schedule.id,
+                            schedule_id: schedule.model.id,
                             last_triggered_at: Some(now),
                             ..Default::default()
                         })
@@ -96,7 +105,7 @@ pub async fn start_scheduler_loop(
                     {
                         log::error!(
                             "Failed to update last triggered time for schedule {}: {}",
-                            schedule.id,
+                            schedule.model.id,
                             error
                         );
                     }
