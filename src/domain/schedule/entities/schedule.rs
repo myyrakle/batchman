@@ -74,7 +74,29 @@ impl ScheduleWithStates {
             }
         }
 
-        // 3. Month Check
+        // 3. Day of Week Check
+        match &self.cron_expression.day_of_week {
+            CronExpressionField::All => {
+                // OK
+            }
+            CronExpressionField::Elements(days) => {
+                let mut passed = false;
+
+                for day in days {
+                    if day.contains(now.weekday().num_days_from_sunday() as u32) {
+                        // OK
+                        passed = true;
+                        break;
+                    }
+                }
+
+                if !passed {
+                    return false; // Not matched
+                }
+            }
+        }
+
+        // 4. Month Check
         match &self.cron_expression.month {
             CronExpressionField::All => {
                 // OK
