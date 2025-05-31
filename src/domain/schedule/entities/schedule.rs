@@ -1,4 +1,4 @@
-use chrono::{Datelike, Utc};
+use chrono::{Datelike, Timelike, Utc};
 use sea_orm::entity::prelude::*;
 
 use crate::{
@@ -128,6 +128,28 @@ impl ScheduleWithStates {
 
                 for day in days {
                     if day.contains(now.day() as u32) {
+                        // OK
+                        passed = true;
+                        break;
+                    }
+                }
+
+                if !passed {
+                    return false; // Not matched
+                }
+            }
+        }
+
+        // 6. Hour Check
+        match &self.cron_expression.hours {
+            CronExpressionField::All => {
+                // OK
+            }
+            CronExpressionField::Elements(hours) => {
+                let mut passed = false;
+
+                for hour in hours {
+                    if hour.contains(now.hour()) {
                         // OK
                         passed = true;
                         break;
