@@ -138,7 +138,7 @@ impl JobService for JobServiceImpl {
             return Err(errors::Error::ContainerIDNotFound);
         };
 
-        let inspect_result = docker::inspect_container(&container_id)?;
+        let inspect_result = docker::inspect_container(container_id)?;
 
         // 1. 컨테이너가 종료되었을 경우 종료 처리
         if let Some(finished_at) = inspect_result.state.finished_at {

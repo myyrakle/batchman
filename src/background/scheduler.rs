@@ -49,7 +49,7 @@ pub async fn start_scheduler_loop(
             .await
             .expect("Failed to load schedules")
             .into_iter()
-            .flat_map(|e| ScheduleWithStates::try_from(e))
+            .flat_map(ScheduleWithStates::try_from)
             .collect::<Vec<_>>();
 
         // 스케줄링 루프
@@ -58,14 +58,14 @@ pub async fn start_scheduler_loop(
 
             // 스케줄 데이터가 변경되면 스케줄을 다시 로드
             // TODO: 추후에는 정보 기반으로 변경된 스케줄만 로드하도록 개선
-            if let Ok(_) = receiver.try_recv() {
+            if receiver.try_recv().is_ok() {
                 schedules = context
                     .schedule_repository
                     .list_schedules(Default::default())
                     .await
                     .expect("Failed to load schedules")
                     .into_iter()
-                    .flat_map(|e| ScheduleWithStates::try_from(e))
+                    .flat_map(ScheduleWithStates::try_from)
                     .collect::<Vec<_>>();
             }
 

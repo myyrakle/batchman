@@ -12,9 +12,9 @@ pub enum Error {
     ContainerFailedToKill(String),
     ContainerFailedToStart(String),
     ContainerFailedToInspect(String),
-    IOError(std::io::Error),
-    SeaormError(sea_orm::DbErr),
-    SerdeJsonError(serde_json::Error),
+    IO(std::io::Error),
+    Seaorm(sea_orm::DbErr),
+    SerdeJson(serde_json::Error),
 }
 
 impl PartialEq for Error {
@@ -23,8 +23,8 @@ impl PartialEq for Error {
     }
 }
 
-impl From<Error> for String {
-    fn from(error: Error) -> String {
+impl From<&Error> for String {
+    fn from(error: &Error) -> String {
         match error {
             Error::TaskDefinitionNotFound => "Task definition not found".to_string(),
             Error::JobNotFound => "Job not found".to_string(),
@@ -38,9 +38,9 @@ impl From<Error> for String {
             Error::ContainerFailedToKill(err) => format!("Failed to kill container: {}", err),
             Error::ContainerFailedToStart(err) => format!("Failed to start container: {}", err),
             Error::ContainerFailedToInspect(err) => format!("Failed to inspect container: {}", err),
-            Error::IOError(err) => format!("I/O error: {}", err),
-            Error::SeaormError(err) => format!("Database error: {}", err),
-            Error::SerdeJsonError(err) => {
+            Error::IO(err) => format!("I/O error: {}", err),
+            Error::Seaorm(err) => format!("Database error: {}", err),
+            Error::SerdeJson(err) => {
                 format!("JSON serialization/deserialization error: {}", err)
             }
         }
@@ -49,25 +49,25 @@ impl From<Error> for String {
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_string())
+        write!(f, "{}", String::from(self))
     }
 }
 
 impl From<sea_orm::DbErr> for Error {
     fn from(err: sea_orm::DbErr) -> Self {
-        Error::SeaormError(err)
+        Error::Seaorm(err)
     }
 }
 
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Self {
-        Error::IOError(err)
+        Error::IO(err)
     }
 }
 
 impl From<serde_json::Error> for Error {
     fn from(err: serde_json::Error) -> Self {
-        Error::SerdeJsonError(err)
+        Error::SerdeJson(err)
     }
 }
 

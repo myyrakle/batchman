@@ -59,10 +59,10 @@ pub async fn patch_schedule(
         Err(error) => {
             // Check if the error message indicates "Schedule not found"
             if error.to_string().starts_with("Invalid Cron Expression") {
-                return Response::builder()
+                Response::builder()
                     .status(StatusCode::BAD_REQUEST)
                     .body(Body::new(error.to_string()))
-                    .unwrap();
+                    .unwrap()
             } else if error.to_string().starts_with("Schedule not found") {
                 Response::builder()
                     .status(StatusCode::NOT_FOUND)

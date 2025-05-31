@@ -83,7 +83,7 @@ impl ScheduleWithStates {
                 let mut passed = false;
 
                 for day in days {
-                    if day.contains(now.weekday().num_days_from_sunday() as u32) {
+                    if day.contains(now.weekday().num_days_from_sunday()) {
                         // OK
                         passed = true;
                         break;
@@ -105,7 +105,7 @@ impl ScheduleWithStates {
                 let mut passed = false;
 
                 for month in months {
-                    if month.contains(now.month() as u32) {
+                    if month.contains(now.month()) {
                         // OK
                         passed = true;
                         break;
@@ -127,7 +127,7 @@ impl ScheduleWithStates {
                 let mut passed = false;
 
                 for day in days {
-                    if day.contains(now.day() as u32) {
+                    if day.contains(now.day()) {
                         // OK
                         passed = true;
                         break;
@@ -203,7 +203,7 @@ impl ScheduleWithStates {
             }
         }
 
-        return false;
+        false
     }
 }
 
