@@ -118,6 +118,28 @@ impl ScheduleWithStates {
             }
         }
 
+        // 5. Day of Month Check
+        match &self.cron_expression.day_of_month {
+            CronExpressionField::All => {
+                // OK
+            }
+            CronExpressionField::Elements(days) => {
+                let mut passed = false;
+
+                for day in days {
+                    if day.contains(now.day() as u32) {
+                        // OK
+                        passed = true;
+                        break;
+                    }
+                }
+
+                if !passed {
+                    return false; // Not matched
+                }
+            }
+        }
+
         match self.model.last_triggered_at {
             Some(_last_triggered_at) => {}
             None => {}

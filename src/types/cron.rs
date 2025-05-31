@@ -33,12 +33,12 @@ impl CronExpressionElement {
 // example expression: "* * * * ? *"
 #[derive(Debug, Clone, PartialEq)]
 pub struct CronExpression {
-    pub minutes: CronExpressionField,
-    pub hours: CronExpressionField,
-    pub day_of_month: CronExpressionField,
-    pub month: CronExpressionField,
-    pub day_of_week: CronExpressionField,
-    pub year: Option<CronExpressionField>,
+    pub minutes: CronExpressionField,      // 분
+    pub hours: CronExpressionField,        // 시
+    pub day_of_month: CronExpressionField, // 일
+    pub month: CronExpressionField,        // 월
+    pub day_of_week: CronExpressionField,  // 요일
+    pub year: Option<CronExpressionField>, // 년 (optional)
 }
 
 #[derive(Debug, Clone, PartialEq)]
