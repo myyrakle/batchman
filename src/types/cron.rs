@@ -13,6 +13,22 @@ pub enum CronExpressionElement {
     Step(u32, u32),  // e.g., 0/15 (every 15 minutes)
 }
 
+impl CronExpressionElement {
+    pub fn contains(&self, value: u32) -> bool {
+        match self {
+            CronExpressionElement::Single(v) => *v == value,
+            CronExpressionElement::Range(start, end) => *start <= value && value <= *end,
+            CronExpressionElement::Step(base, step) => {
+                if *step == 0 {
+                    return false; // Step cannot be zero
+                }
+
+                (value - base) % step == 0
+            }
+        }
+    }
+}
+
 // The CronExpression struct represents a cron expression.
 // example expression: "* * * * ? *"
 #[derive(Debug, Clone, PartialEq)]

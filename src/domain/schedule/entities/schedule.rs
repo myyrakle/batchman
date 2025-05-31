@@ -1,7 +1,10 @@
-use chrono::Utc;
+use chrono::{Datelike, Utc};
 use sea_orm::entity::prelude::*;
 
-use crate::{errors, types::cron::CronExpression};
+use crate::{
+    errors,
+    types::cron::{CronExpression, CronExpressionField},
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 #[sea_orm(table_name = "schedule")]
@@ -40,7 +43,42 @@ pub struct ScheduleWithStates {
 }
 
 impl ScheduleWithStates {
-    pub fn is_time_to_trigger(&self, _now: &chrono::DateTime<Utc>) -> bool {
+    pub fn is_time_to_trigger(&self, now: &chrono::DateTime<Utc>) -> bool {
+        // 1. Check if the schedule is enabled
+        if !self.model.enabled {
+            return false;
+        }
+
+        // 2. Year Check
+        match &self.cron_expression.year {
+            None => {
+                // OK
+            }
+            Some(CronExpressionField::All) => {
+                // OK
+            }
+            Some(CronExpressionField::Elements(years)) => {
+                let mut passed = false;
+
+                for year in years {
+                    if year.contains(now.year() as u32) {
+                        // OK
+                        passed = true;
+                        break;
+                    }
+                }
+
+                if !passed {
+                    return false; // Not matched
+                }
+            }
+        }
+
+        match self.model.last_triggered_at {
+            Some(_last_triggered_at) => {}
+            None => {}
+        }
+
         return false;
     }
 }
