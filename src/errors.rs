@@ -23,8 +23,8 @@ impl PartialEq for Error {
     }
 }
 
-impl From<Error> for String {
-    fn from(error: Error) -> String {
+impl From<&Error> for String {
+    fn from(error: &Error) -> String {
         match error {
             Error::TaskDefinitionNotFound => "Task definition not found".to_string(),
             Error::JobNotFound => "Job not found".to_string(),
@@ -49,7 +49,7 @@ impl From<Error> for String {
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_string())
+        write!(f, "{}", String::from(self))
     }
 }
 
