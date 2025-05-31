@@ -184,9 +184,23 @@ impl ScheduleWithStates {
             }
         }
 
+        // 8. 동일 시간에 2번 이상 트리거되지 않도록 last_triggered_at 기반으로 검증
         match self.model.last_triggered_at {
-            Some(_last_triggered_at) => {}
-            None => {}
+            None => {
+                // OK
+            }
+            Some(last_triggered_at) => {
+                // 현재 시간과 last_triggered_at이 동일한 경우, 트리거하지 않음 (분 단위로 체크)
+                if now.year() == last_triggered_at.year()
+                    && now.month() == last_triggered_at.month()
+                    && now.day() == last_triggered_at.day()
+                    && now.hour() == last_triggered_at.hour()
+                    && now.minute() == last_triggered_at.minute()
+                {
+                    // NO
+                    return false;
+                }
+            }
         }
 
         return false;
