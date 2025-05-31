@@ -74,6 +74,28 @@ impl ScheduleWithStates {
             }
         }
 
+        // 3. Month Check
+        match &self.cron_expression.month {
+            CronExpressionField::All => {
+                // OK
+            }
+            CronExpressionField::Elements(months) => {
+                let mut passed = false;
+
+                for month in months {
+                    if month.contains(now.month() as u32) {
+                        // OK
+                        passed = true;
+                        break;
+                    }
+                }
+
+                if !passed {
+                    return false; // Not matched
+                }
+            }
+        }
+
         match self.model.last_triggered_at {
             Some(_last_triggered_at) => {}
             None => {}
