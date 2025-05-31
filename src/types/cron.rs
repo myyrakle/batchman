@@ -1,3 +1,5 @@
+use crate::errors;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum CronExpressionField {
     All,                                  // * = wildcard, matches any value
@@ -11,16 +13,32 @@ pub enum CronExpressionElement {
     Step(u32, u32),  // e.g., 0/15 (every 15 minutes)
 }
 
+impl CronExpressionElement {
+    pub fn contains(&self, value: u32) -> bool {
+        match self {
+            CronExpressionElement::Single(v) => *v == value,
+            CronExpressionElement::Range(start, end) => *start <= value && value <= *end,
+            CronExpressionElement::Step(base, step) => {
+                if *step == 0 {
+                    return false; // Step cannot be zero
+                }
+
+                (value - base) % step == 0
+            }
+        }
+    }
+}
+
 // The CronExpression struct represents a cron expression.
 // example expression: "* * * * ? *"
 #[derive(Debug, Clone, PartialEq)]
 pub struct CronExpression {
-    pub minutes: CronExpressionField,
-    pub hours: CronExpressionField,
-    pub day_of_month: CronExpressionField,
-    pub month: CronExpressionField,
-    pub day_of_week: CronExpressionField,
-    pub year: Option<CronExpressionField>,
+    pub minutes: CronExpressionField,      // 분
+    pub hours: CronExpressionField,        // 시
+    pub day_of_month: CronExpressionField, // 일
+    pub month: CronExpressionField,        // 월
+    pub day_of_week: CronExpressionField,  // 요일
+    pub year: Option<CronExpressionField>, // 년 (optional)
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -36,19 +54,19 @@ impl std::fmt::Display for CronExpressionParseError {
 impl std::error::Error for CronExpressionParseError {}
 
 impl CronExpression {
-    pub fn parse(expression: &str) -> Result<Self, CronExpressionParseError> {
+    pub fn parse(expression: &str) -> Result<Self, errors::Error> {
         let parts: Vec<&str> = expression.split_whitespace().collect();
 
         if parts.len() < 5 {
-            return Err(CronExpressionParseError {
-                message: "Invalid cron expression format. Expected at least 5 fields.".to_string(),
-            });
+            return Err(errors::Error::CronExpressionIsInvalid(
+                "Invalid cron expression format. Expected at least 5 fields.".to_string(),
+            ));
         }
 
         if parts.len() > 6 {
-            return Err(CronExpressionParseError {
-                message: "Invalid cron expression format. Expected at most 6 fields.".to_string(),
-            });
+            return Err(errors::Error::CronExpressionIsInvalid(
+                "Invalid cron expression format. Expected at most 6 fields.".to_string(),
+            ));
         }
 
         let has_year = parts.len() == 6;
@@ -75,7 +93,7 @@ impl CronExpression {
         })
     }
 
-    fn parse_field(field: &str) -> Result<CronExpressionField, CronExpressionParseError> {
+    fn parse_field(field: &str) -> Result<CronExpressionField, errors::Error> {
         if field == "*" {
             return Ok(CronExpressionField::All);
         }
@@ -92,49 +110,58 @@ impl CronExpression {
         Ok(CronExpressionField::Elements(elements))
     }
 
-    fn parse_element(part: &str) -> Result<CronExpressionElement, CronExpressionParseError> {
+    fn parse_element(part: &str) -> Result<CronExpressionElement, errors::Error> {
         if part.contains('/') {
             let parts: Vec<&str> = part.split('/').collect();
             if parts.len() != 2 {
-                return Err(CronExpressionParseError {
-                    message: format!("Invalid step expression: {}", part),
-                });
+                return Err(errors::Error::CronExpressionIsInvalid(format!(
+                    "Invalid step expression: {}",
+                    part
+                )));
             }
-            let base = parts[0]
-                .parse::<u32>()
-                .map_err(|_| CronExpressionParseError {
-                    message: format!("Invalid step base in expression: {}", part),
-                })?;
-            let step = parts[1]
-                .parse::<u32>()
-                .map_err(|_| CronExpressionParseError {
-                    message: format!("Invalid step value in expression: {}", part),
-                })?;
+            let base = parts[0].parse::<u32>().map_err(|_| {
+                errors::Error::CronExpressionIsInvalid(format!(
+                    "Invalid step base in expression: {}",
+                    part
+                ))
+            })?;
+            let step = parts[1].parse::<u32>().map_err(|_| {
+                errors::Error::CronExpressionIsInvalid(format!(
+                    "Invalid step value in expression: {}",
+                    part
+                ))
+            })?;
             return Ok(CronExpressionElement::Step(base, step));
         }
 
         if part.contains('-') {
             let parts: Vec<&str> = part.split('-').collect();
             if parts.len() != 2 {
-                return Err(CronExpressionParseError {
-                    message: format!("Invalid range expression: {}", part),
-                });
+                return Err(errors::Error::CronExpressionIsInvalid(format!(
+                    "Invalid range expression: {}",
+                    part
+                )));
             }
-            let start = parts[0]
-                .parse::<u32>()
-                .map_err(|_| CronExpressionParseError {
-                    message: format!("Invalid start of range in expression: {}", part),
-                })?;
-            let end = parts[1]
-                .parse::<u32>()
-                .map_err(|_| CronExpressionParseError {
-                    message: format!("Invalid end of range in expression: {}", part),
-                })?;
+            let start = parts[0].parse::<u32>().map_err(|_| {
+                errors::Error::CronExpressionIsInvalid(format!(
+                    "Invalid start of range in expression: {}",
+                    part
+                ))
+            })?;
+            let end = parts[1].parse::<u32>().map_err(|_| {
+                errors::Error::CronExpressionIsInvalid(format!(
+                    "Invalid end of range in expression: {}",
+                    part
+                ))
+            })?;
             return Ok(CronExpressionElement::Range(start, end));
         }
 
-        let value = part.parse::<u32>().map_err(|_| CronExpressionParseError {
-            message: format!("Invalid single value in expression: {}", part),
+        let value = part.parse::<u32>().map_err(|_| {
+            errors::Error::CronExpressionIsInvalid(format!(
+                "Invalid single value in expression: {}",
+                part
+            ))
         })?;
 
         Ok(CronExpressionElement::Single(value))
@@ -149,7 +176,7 @@ mod tests {
     fn test_cron_parse() {
         struct TestCase {
             expression: &'static str,
-            expected: Result<CronExpression, CronExpressionParseError>,
+            expected: Result<CronExpression, errors::Error>,
         }
 
         let test_cases = vec![

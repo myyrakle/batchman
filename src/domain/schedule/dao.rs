@@ -31,4 +31,5 @@ pub struct PatchScheduleParams {
     pub timezone: Option<String>,
     pub timezone_offset: Option<i32>,
     pub enabled: Option<bool>,
+    pub last_triggered_at: Option<chrono::DateTime<chrono::Utc>>,
 }

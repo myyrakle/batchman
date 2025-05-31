@@ -1,12 +1,14 @@
 use std::sync::Arc;
 
 use crate::{
-    context::{self, SharedContext},
+    context::{self},
     domain::{
         job::dto::{SubmitJobBody, SubmitJobRequest},
-        schedule::entities,
+        schedule::{
+            dao::PatchScheduleParams,
+            entities::{self, schedule::ScheduleWithStates},
+        },
     },
-    errors,
 };
 
 #[derive(Debug)]
@@ -33,7 +35,7 @@ pub struct DeleteSchedule {
     pub id: i64,
 }
 
-pub type ScheduleCDCSender = tokio::sync::mpsc::Sender<ScheduleCDCEvent>;
+pub type _ScheduleCDCSender = tokio::sync::mpsc::Sender<ScheduleCDCEvent>;
 pub type ScheduleCDCReceiver = tokio::sync::mpsc::Receiver<ScheduleCDCEvent>;
 
 pub async fn start_scheduler_loop(
@@ -45,10 +47,15 @@ pub async fn start_scheduler_loop(
             .schedule_repository
             .list_schedules(Default::default())
             .await
-            .expect("Failed to load schedules");
+            .expect("Failed to load schedules")
+            .into_iter()
+            .flat_map(|e| ScheduleWithStates::try_from(e))
+            .collect::<Vec<_>>();
 
         // 스케줄링 루프
         loop {
+            let now = chrono::Utc::now();
+
             // 스케줄 데이터가 변경되면 스케줄을 다시 로드
             // TODO: 추후에는 정보 기반으로 변경된 스케줄만 로드하도록 개선
             if let Ok(_) = receiver.try_recv() {
@@ -56,7 +63,10 @@ pub async fn start_scheduler_loop(
                     .schedule_repository
                     .list_schedules(Default::default())
                     .await
-                    .expect("Failed to load schedules");
+                    .expect("Failed to load schedules")
+                    .into_iter()
+                    .flat_map(|e| ScheduleWithStates::try_from(e))
+                    .collect::<Vec<_>>();
             }
 
             // 없으면 일단 적당히 대기
@@ -66,11 +76,36 @@ pub async fn start_scheduler_loop(
             }
 
             for schedule in schedules.iter() {
-                if is_time_to_trigger(schedule) {
-                    if let Err(error) = submit_job_by_schedule(context.clone(), schedule).await {
+                if schedule.is_time_to_trigger(&now) {
+                    if let Err(error) = context
+                        .job_service
+                        .submit_job(SubmitJobRequest {
+                            request_body: SubmitJobBody {
+                                task_definition_id: schedule.model.task_definition_id,
+                                job_name: schedule.model.job_name.clone(),
+                            },
+                        })
+                        .await
+                    {
                         log::error!(
                             "Failed to submit job for schedule {}: {}",
-                            schedule.id,
+                            schedule.model.id,
+                            error
+                        );
+                    }
+
+                    if let Err(error) = context
+                        .schedule_repository
+                        .patch_schedule(PatchScheduleParams {
+                            schedule_id: schedule.model.id,
+                            last_triggered_at: Some(now),
+                            ..Default::default()
+                        })
+                        .await
+                    {
+                        log::error!(
+                            "Failed to update last triggered time for schedule {}: {}",
+                            schedule.model.id,
                             error
                         );
                     }
@@ -79,27 +114,4 @@ pub async fn start_scheduler_loop(
         }
     })
     .await;
-}
-
-fn is_time_to_trigger(_schedule: &entities::schedule::Model) -> bool {
-    // TODO: cron expression을 파싱해서 현재 시간과 비교
-
-    return false;
-}
-
-pub async fn submit_job_by_schedule(
-    context: SharedContext,
-    schedule: &entities::schedule::Model,
-) -> errors::Result<()> {
-    context
-        .job_service
-        .submit_job(SubmitJobRequest {
-            request_body: SubmitJobBody {
-                task_definition_id: schedule.task_definition_id,
-                job_name: schedule.job_name.clone(),
-            },
-        })
-        .await?;
-
-    Ok(())
 }
