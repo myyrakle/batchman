@@ -62,5 +62,5 @@ pub fn inspect_container(container_id: &str) -> errors::Result<ContainerInspectR
         return Err(errors::Error::ContainerNotFound);
     }
 
-    return Ok(inspect_response[0].clone());
+    Ok(inspect_response[0].clone())
 }
