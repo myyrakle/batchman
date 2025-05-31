@@ -49,7 +49,7 @@ pub async fn start_scheduler_loop(
             .await
             .expect("Failed to load schedules")
             .into_iter()
-            .flat_map(|e| ScheduleWithStates::try_from(e))
+            .flat_map(ScheduleWithStates::try_from)
             .collect::<Vec<_>>();
 
         // 스케줄링 루프
@@ -65,7 +65,7 @@ pub async fn start_scheduler_loop(
                     .await
                     .expect("Failed to load schedules")
                     .into_iter()
-                    .flat_map(|e| ScheduleWithStates::try_from(e))
+                    .flat_map(ScheduleWithStates::try_from)
                     .collect::<Vec<_>>();
             }
 

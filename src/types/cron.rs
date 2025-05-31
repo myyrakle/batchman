@@ -104,7 +104,7 @@ impl CronExpression {
 
         let elements: Vec<CronExpressionElement> = field
             .split(',')
-            .map(|part| CronExpression::parse_element(part))
+            .map(CronExpression::parse_element)
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(CronExpressionField::Elements(elements))
