@@ -162,6 +162,28 @@ impl ScheduleWithStates {
             }
         }
 
+        // 7. Minute Check
+        match &self.cron_expression.minutes {
+            CronExpressionField::All => {
+                // OK
+            }
+            CronExpressionField::Elements(minutes) => {
+                let mut passed = false;
+
+                for minute in minutes {
+                    if minute.contains(now.minute()) {
+                        // OK
+                        passed = true;
+                        break;
+                    }
+                }
+
+                if !passed {
+                    return false; // Not matched
+                }
+            }
+        }
+
         match self.model.last_triggered_at {
             Some(_last_triggered_at) => {}
             None => {}
