@@ -5,6 +5,7 @@ pub(crate) mod docker;
 pub(crate) mod domain;
 pub(crate) mod errors;
 pub(crate) mod types;
+pub(crate) mod web;
 
 use std::sync::Arc;
 
@@ -19,7 +20,9 @@ use db::setup_schema;
 pub fn app(context: SharedContext) -> Router {
     Router::new()
         // `GET /` goes to `root`
-        .route("/", get(root))
+        .route("/", get(web::index_html))
+        .route("/bundle.js", get(web::bundle_js))
+        .route("/healthz", get(root))
         .route("/database-check", get(database_check))
         .route(
             "/task-definitions",
