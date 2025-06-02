@@ -5,11 +5,14 @@ pub(crate) mod docker;
 pub(crate) mod domain;
 pub(crate) mod errors;
 pub(crate) mod types;
+pub(crate) mod web;
 
 use std::sync::Arc;
 
 use axum::{
     Extension, Router,
+    http::Uri,
+    response::Response,
     routing::{delete, get, patch, post},
 };
 use background::scheduler::ScheduleCDCEvent;
@@ -17,9 +20,8 @@ use context::SharedContext;
 use db::setup_schema;
 
 pub fn app(context: SharedContext) -> Router {
-    Router::new()
-        // `GET /` goes to `root`
-        .route("/", get(root))
+    let api_router = Router::new()
+        .route("/healthz", get(root))
         .route("/database-check", get(database_check))
         .route(
             "/task-definitions",
@@ -55,7 +57,14 @@ pub fn app(context: SharedContext) -> Router {
             "/schedules/{schedule_id}",
             delete(domain::schedule::routes::http::delete_schedule),
         )
-        .layer(Extension(context))
+        .layer(Extension(context));
+
+    Router::new()
+        // `GET /` goes to `root`
+        .route("/", get(web::index_html))
+        .route("/bundle.js", get(web::bundle_js))
+        .nest("/api", api_router)
+        .fallback(fallback)
 }
 
 #[tokio::main]
@@ -93,4 +102,15 @@ async fn database_check(Extension(state): Extension<SharedContext>) -> &'static 
     state.connection.ping().await.unwrap();
 
     "OK"
+}
+
+async fn fallback(uri: Uri) -> Response {
+    if uri.path().starts_with("/api") {
+        return axum::response::Response::builder()
+            .status(axum::http::StatusCode::NOT_FOUND)
+            .body(axum::body::Body::from("Not Found"))
+            .unwrap();
+    }
+
+    web::index_html().await
 }
