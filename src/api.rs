@@ -18,10 +18,7 @@ use context::SharedContext;
 use db::setup_schema;
 
 pub fn app(context: SharedContext) -> Router {
-    Router::new()
-        // `GET /` goes to `root`
-        .route("/", get(web::index_html))
-        .route("/bundle.js", get(web::bundle_js))
+    let api_router = Router::new()
         .route("/healthz", get(root))
         .route("/database-check", get(database_check))
         .route(
@@ -58,7 +55,13 @@ pub fn app(context: SharedContext) -> Router {
             "/schedules/{schedule_id}",
             delete(domain::schedule::routes::http::delete_schedule),
         )
-        .layer(Extension(context))
+        .layer(Extension(context));
+
+    Router::new()
+        // `GET /` goes to `root`
+        .route("/", get(web::index_html))
+        .route("/bundle.js", get(web::bundle_js))
+        .nest("/api", api_router)
 }
 
 #[tokio::main]
