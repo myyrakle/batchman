@@ -11,6 +11,8 @@ use std::sync::Arc;
 
 use axum::{
     Extension, Router,
+    http::Uri,
+    response::Response,
     routing::{delete, get, patch, post},
 };
 use background::scheduler::ScheduleCDCEvent;
@@ -62,6 +64,7 @@ pub fn app(context: SharedContext) -> Router {
         .route("/", get(web::index_html))
         .route("/bundle.js", get(web::bundle_js))
         .nest("/api", api_router)
+        .fallback(fallback)
 }
 
 #[tokio::main]
@@ -99,4 +102,15 @@ async fn database_check(Extension(state): Extension<SharedContext>) -> &'static 
     state.connection.ping().await.unwrap();
 
     "OK"
+}
+
+async fn fallback(uri: Uri) -> Response {
+    if uri.path().starts_with("/api") {
+        return axum::response::Response::builder()
+            .status(axum::http::StatusCode::NOT_FOUND)
+            .body(axum::body::Body::from("Not Found"))
+            .unwrap();
+    }
+
+    web::index_html().await
 }

@@ -1,7 +1,9 @@
+use axum::response::Response;
+
 #[path = "./jsbundle.rs"]
 pub mod jsbundle;
 
-pub async fn index_html() -> impl axum::response::IntoResponse {
+pub async fn index_html() -> Response {
     let html = r#"
 <!DOCTYPE html>
 <html>
@@ -16,7 +18,10 @@ pub async fn index_html() -> impl axum::response::IntoResponse {
 </html>
 "#;
 
-    axum::response::Html(html)
+    Response::builder()
+        .header("Content-Type", "text/html")
+        .body(axum::body::Body::from(html))
+        .unwrap()
 }
 
 pub async fn bundle_js() -> impl axum::response::IntoResponse {
