@@ -24,6 +24,8 @@ pub struct Context {
     pub task_definition_service: Box<dyn TaskDefinitionService + Send + Sync>,
     pub job_service: Box<dyn domain::job::JobService + Send + Sync>,
     pub schedule_service: Box<dyn domain::schedule::ScheduleService + Send + Sync>,
+
+    pub docker_repository: Arc<dyn domain::container::ContainerRepository + Send + Sync>,
 }
 
 pub type SharedContext = Arc<Context>;
@@ -47,6 +49,9 @@ impl Context {
             domain::schedule::repository::ScheduleSeaOrmRepository::new(connection.clone()),
         );
 
+        let docker_repository =
+            Arc::new(domain::container::repository::docker::ContainerDockerRepository::new());
+
         Self {
             connection: connection.clone(),
             schedule_cdc_sender,
@@ -66,6 +71,7 @@ impl Context {
                 job_repository,
                 task_definition_repository,
             )),
+            docker_repository,
         }
     }
 }
