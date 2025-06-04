@@ -70,6 +70,7 @@ impl Context {
             job_service: Box::new(domain::job::service::JobServiceImpl::new(
                 job_repository,
                 task_definition_repository,
+                docker_repository.clone(),
             )),
             docker_repository,
         }
