@@ -1,6 +1,6 @@
 use dao::{
-    ContainerInspectParams, ContainerInspectResult, ContainerRunParams, ContainerRunResult,
-    StopContainerParams,
+    InspectContainerParams, InspectContainerResult, KillContainerParams, RunContainerParams,
+    RunContainerResult, StopContainerParams,
 };
 
 use crate::errors;
@@ -12,15 +12,15 @@ pub mod repository;
 pub trait ContainerRepository {
     async fn inspect_container(
         &self,
-        params: ContainerInspectParams,
-    ) -> errors::Result<ContainerInspectResult>;
+        params: InspectContainerParams,
+    ) -> errors::Result<InspectContainerResult>;
 
     async fn run_container(
         &self,
-        task_definition: ContainerRunParams,
-    ) -> errors::Result<ContainerRunResult>;
+        task_definition: RunContainerParams,
+    ) -> errors::Result<RunContainerResult>;
 
-    async fn kill_container(&self, container_id: String) -> errors::Result<()>;
+    async fn kill_container(&self, params: KillContainerParams) -> errors::Result<()>;
 
     async fn stop_container(&self, params: StopContainerParams) -> errors::Result<()>;
 }

@@ -3,12 +3,12 @@ use serde::Deserialize;
 use crate::domain;
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct ContainerInspectParams {
+pub struct InspectContainerParams {
     pub container_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct ContainerInspectResult {
+pub struct InspectContainerResult {
     #[serde(rename = "State")]
     pub state: ContainerState,
 }
@@ -39,12 +39,17 @@ pub struct ContainerState {
 }
 
 #[derive(Debug, Clone)]
-pub struct ContainerRunParams {
+pub struct RunContainerParams {
     pub task_definition: domain::task_definition::entities::task_definition::Model,
 }
 
 #[derive(Debug, Clone)]
-pub struct ContainerRunResult {
+pub struct RunContainerResult {
+    pub container_id: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct KillContainerParams {
     pub container_id: String,
 }
 

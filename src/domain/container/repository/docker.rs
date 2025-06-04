@@ -4,8 +4,8 @@ use crate::{
     domain::container::{
         ContainerRepository,
         dao::{
-            ContainerInspectParams, ContainerInspectResult, ContainerRunParams, ContainerRunResult,
-            StopContainerParams,
+            InspectContainerParams, InspectContainerResult, KillContainerParams,
+            RunContainerParams, RunContainerResult, StopContainerParams,
         },
     },
     errors,
@@ -24,8 +24,8 @@ impl ContainerDockerRepository {
 impl ContainerRepository for ContainerDockerRepository {
     async fn inspect_container(
         &self,
-        params: ContainerInspectParams,
-    ) -> errors::Result<ContainerInspectResult> {
+        params: InspectContainerParams,
+    ) -> errors::Result<InspectContainerResult> {
         let mut command = Command::new("docker");
 
         command.arg("inspect");
@@ -45,7 +45,7 @@ impl ContainerRepository for ContainerDockerRepository {
 
         let inspect_raw_response = String::from_utf8_lossy(&output.stdout).trim().to_owned();
 
-        let inspect_response: Vec<ContainerInspectResult> =
+        let inspect_response: Vec<InspectContainerResult> =
             serde_json::from_str(&inspect_raw_response)?;
 
         if inspect_response.is_empty() {
@@ -57,8 +57,8 @@ impl ContainerRepository for ContainerDockerRepository {
 
     async fn run_container(
         &self,
-        params: ContainerRunParams,
-    ) -> errors::Result<ContainerRunResult> {
+        params: RunContainerParams,
+    ) -> errors::Result<RunContainerResult> {
         let task_definition = params.task_definition;
 
         // Docker 컨테이너 실행
@@ -117,7 +117,7 @@ impl ContainerRepository for ContainerDockerRepository {
 
         let container_id = String::from_utf8_lossy(&output.stdout).trim().to_owned();
 
-        Ok(ContainerRunResult { container_id })
+        Ok(RunContainerResult { container_id })
     }
 
     /// Forcefully stops a Docker container by sending a SIGKILL signal
@@ -131,11 +131,11 @@ impl ContainerRepository for ContainerDockerRepository {
     /// * `Ok(())` if the container was successfully stopped
     /// * `Err` with an error message if the operation failed
     ///
-    async fn kill_container(&self, container_id: String) -> errors::Result<()> {
+    async fn kill_container(&self, params: KillContainerParams) -> errors::Result<()> {
         let mut command = Command::new("docker");
 
         command.arg("kill");
-        command.arg(container_id);
+        command.arg(&params.container_id);
 
         let output = command.output()?;
 
@@ -191,7 +191,10 @@ impl ContainerRepository for ContainerDockerRepository {
         }
 
         // Fall back to kill
-        self.kill_container(params.container_id).await?;
+        self.kill_container(KillContainerParams {
+            container_id: params.container_id,
+        })
+        .await?;
 
         Ok(())
     }

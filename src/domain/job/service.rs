@@ -4,7 +4,7 @@ use crate::{
     domain::{
         container::{
             ContainerRepository,
-            dao::{ContainerInspectParams, ContainerRunParams, StopContainerParams},
+            dao::{InspectContainerParams, RunContainerParams, StopContainerParams},
         },
         task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
     },
@@ -133,7 +133,7 @@ impl JobService for JobServiceImpl {
         // 3. 컨테이너 실행
         let container_id = self
             .container_repository
-            .run_container(ContainerRunParams {
+            .run_container(RunContainerParams {
                 task_definition: task_definition.clone(),
             })
             .await?
@@ -159,7 +159,7 @@ impl JobService for JobServiceImpl {
 
         let inspect_result = self
             .container_repository
-            .inspect_container(ContainerInspectParams {
+            .inspect_container(InspectContainerParams {
                 container_id: container_id.clone(),
             })
             .await?;
