@@ -47,3 +47,9 @@ pub struct ContainerRunParams {
 pub struct ContainerRunResult {
     pub container_id: String,
 }
+
+#[derive(Debug, Clone)]
+pub struct StopContainerParams {
+    pub container_id: String,
+    pub timeout_seconds: u32,
+}

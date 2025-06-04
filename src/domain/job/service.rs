@@ -1,11 +1,10 @@
 use std::sync::Arc;
 
 use crate::{
-    docker::{self},
     domain::{
         container::{
             ContainerRepository,
-            dao::{ContainerInspectParams, ContainerRunParams},
+            dao::{ContainerInspectParams, ContainerRunParams, StopContainerParams},
         },
         task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
     },
@@ -95,7 +94,12 @@ impl JobService for JobServiceImpl {
             return Err(errors::Error::JobHasNoContainerID);
         };
 
-        docker::stop::stop_container(container_id, 3)?;
+        self.container_repository
+            .stop_container(StopContainerParams {
+                container_id: container_id.clone(),
+                timeout_seconds: 3,
+            })
+            .await?;
 
         Ok(())
     }

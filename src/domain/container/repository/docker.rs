@@ -5,6 +5,7 @@ use crate::{
         ContainerRepository,
         dao::{
             ContainerInspectParams, ContainerInspectResult, ContainerRunParams, ContainerRunResult,
+            StopContainerParams,
         },
     },
     errors,
@@ -147,6 +148,50 @@ impl ContainerRepository for ContainerDockerRepository {
 
             return Err(errors::Error::ContainerFailedToKill(error.to_string()));
         }
+
+        Ok(())
+    }
+
+    /// Forcefully stops a Docker container with a timeout
+    ///
+    /// This function first attempts to gracefully stop the container with `docker stop`
+    /// using the specified timeout. If that fails, it forcefully kills the container
+    /// with `docker kill`.
+    ///
+    /// # Arguments
+    ///
+    /// * `container_id` - The ID or name of the container to stop
+    /// * `timeout_seconds` - The timeout in seconds to wait for graceful shutdown
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(())` if the container was successfully stopped
+    /// * `Err` with an error message if both stop and kill operations failed
+    ///
+    async fn stop_container(&self, params: StopContainerParams) -> errors::Result<()> {
+        // First try to stop gracefully with timeout
+        let mut command = Command::new("docker");
+
+        command.arg("stop");
+        command.arg("--time");
+        command.arg(params.timeout_seconds.to_string());
+        command.arg(&params.container_id);
+
+        let output = command.output()?;
+
+        // If stop succeeded, return success
+        if output.status.success() {
+            return Ok(());
+        }
+
+        // If stop failed for a reason other than "container not found", log the error
+        let error = String::from_utf8_lossy(&output.stderr);
+        if !error.contains("No such container") {
+            eprintln!("Warning: Failed to gracefully stop container: {}", error);
+        }
+
+        // Fall back to kill
+        self.kill_container(params.container_id).await?;
 
         Ok(())
     }

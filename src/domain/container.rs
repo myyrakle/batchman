@@ -1,4 +1,7 @@
-use dao::{ContainerInspectParams, ContainerInspectResult, ContainerRunParams, ContainerRunResult};
+use dao::{
+    ContainerInspectParams, ContainerInspectResult, ContainerRunParams, ContainerRunResult,
+    StopContainerParams,
+};
 
 use crate::errors;
 
@@ -18,4 +21,6 @@ pub trait ContainerRepository {
     ) -> errors::Result<ContainerRunResult>;
 
     async fn kill_container(&self, container_id: String) -> errors::Result<()>;
+
+    async fn stop_container(&self, params: StopContainerParams) -> errors::Result<()>;
 }
