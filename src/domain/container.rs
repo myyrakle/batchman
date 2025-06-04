@@ -16,4 +16,6 @@ pub trait ContainerRepository {
         &self,
         task_definition: ContainerRunParams,
     ) -> errors::Result<ContainerRunResult>;
+
+    async fn kill_container(&self, container_id: String) -> errors::Result<()>;
 }

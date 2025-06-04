@@ -118,4 +118,36 @@ impl ContainerRepository for ContainerDockerRepository {
 
         Ok(ContainerRunResult { container_id })
     }
+
+    /// Forcefully stops a Docker container by sending a SIGKILL signal
+    ///
+    /// # Arguments
+    ///
+    /// * `container_id` - The ID or name of the container to stop
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(())` if the container was successfully stopped
+    /// * `Err` with an error message if the operation failed
+    ///
+    async fn kill_container(&self, container_id: String) -> errors::Result<()> {
+        let mut command = Command::new("docker");
+
+        command.arg("kill");
+        command.arg(container_id);
+
+        let output = command.output()?;
+
+        if !output.status.success() {
+            let error = String::from_utf8_lossy(&output.stderr);
+
+            if error.contains("No such container") {
+                return Err(errors::Error::ContainerNotFound);
+            }
+
+            return Err(errors::Error::ContainerFailedToKill(error.to_string()));
+        }
+
+        Ok(())
+    }
 }
