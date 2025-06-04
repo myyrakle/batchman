@@ -1,5 +1,7 @@
 use serde::Deserialize;
 
+use crate::domain;
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct ContainerInspectParams {
     pub container_id: String,
@@ -34,4 +36,14 @@ pub struct ContainerState {
     pub finished_at: Option<chrono::DateTime<chrono::Utc>>,
     #[serde(rename = "Error")]
     pub error: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ContainerRunParams {
+    pub task_definition: domain::task_definition::entities::task_definition::Model,
+}
+
+#[derive(Debug, Clone)]
+pub struct ContainerRunResult {
+    pub container_id: String,
 }

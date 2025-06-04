@@ -1,9 +1,12 @@
 use std::sync::Arc;
 
 use crate::{
-    docker::{self, run_container},
+    docker::{self},
     domain::{
-        container::{ContainerRepository, dao::ContainerInspectParams},
+        container::{
+            ContainerRepository,
+            dao::{ContainerInspectParams, ContainerRunParams},
+        },
         task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
     },
     errors,
@@ -124,7 +127,13 @@ impl JobService for JobServiceImpl {
         };
 
         // 3. 컨테이너 실행
-        let container_id = run_container(task_definition)?;
+        let container_id = self
+            .container_repository
+            .run_container(ContainerRunParams {
+                task_definition: task_definition.clone(),
+            })
+            .await?
+            .container_id;
 
         // 4. 컨테이너 정보를 job에 업데이트, job 상태를 RUNNING으로 변경
         self.job_repository

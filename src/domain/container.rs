@@ -1,4 +1,4 @@
-use dao::{ContainerInspectParams, ContainerInspectResult};
+use dao::{ContainerInspectParams, ContainerInspectResult, ContainerRunParams, ContainerRunResult};
 
 use crate::errors;
 
@@ -11,4 +11,9 @@ pub trait ContainerRepository {
         &self,
         params: ContainerInspectParams,
     ) -> errors::Result<ContainerInspectResult>;
+
+    async fn run_container(
+        &self,
+        task_definition: ContainerRunParams,
+    ) -> errors::Result<ContainerRunResult>;
 }
