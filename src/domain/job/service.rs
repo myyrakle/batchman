@@ -1,8 +1,13 @@
 use std::sync::Arc;
 
 use crate::{
-    docker::{self, run_container},
-    domain::task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
+    domain::{
+        container::{
+            ContainerRepository,
+            dao::{InspectContainerParams, RunContainerParams, StopContainerParams},
+        },
+        task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
+    },
     errors,
 };
 
@@ -16,16 +21,19 @@ use super::{
 pub struct JobServiceImpl {
     pub job_repository: Arc<dyn JobRepository + Send + Sync>,
     pub task_definition_repository: Arc<dyn TaskDefinitionRepository + Send + Sync>,
+    pub container_repository: Arc<dyn ContainerRepository + Send + Sync>,
 }
 
 impl JobServiceImpl {
     pub fn new(
         job_repository: Arc<dyn JobRepository + Send + Sync>,
         task_definition_repository: Arc<dyn TaskDefinitionRepository + Send + Sync>,
+        container_repository: Arc<dyn ContainerRepository + Send + Sync>,
     ) -> Self {
         Self {
             job_repository,
             task_definition_repository,
+            container_repository,
         }
     }
 }
@@ -86,7 +94,12 @@ impl JobService for JobServiceImpl {
             return Err(errors::Error::JobHasNoContainerID);
         };
 
-        docker::stop::stop_container(container_id, 3)?;
+        self.container_repository
+            .stop_container(StopContainerParams {
+                container_id: container_id.clone(),
+                timeout_seconds: 3,
+            })
+            .await?;
 
         Ok(())
     }
@@ -118,7 +131,13 @@ impl JobService for JobServiceImpl {
         };
 
         // 3. 컨테이너 실행
-        let container_id = run_container(task_definition)?;
+        let container_id = self
+            .container_repository
+            .run_container(RunContainerParams {
+                task_definition: task_definition.clone(),
+            })
+            .await?
+            .container_id;
 
         // 4. 컨테이너 정보를 job에 업데이트, job 상태를 RUNNING으로 변경
         self.job_repository
@@ -138,7 +157,12 @@ impl JobService for JobServiceImpl {
             return Err(errors::Error::ContainerIDNotFound);
         };
 
-        let inspect_result = docker::inspect_container(container_id)?;
+        let inspect_result = self
+            .container_repository
+            .inspect_container(InspectContainerParams {
+                container_id: container_id.clone(),
+            })
+            .await?;
 
         // 1. 컨테이너가 종료되었을 경우 종료 처리
         if let Some(finished_at) = inspect_result.state.finished_at {

@@ -1,7 +1,6 @@
 pub(crate) mod background;
 pub(crate) mod context;
 pub(crate) mod db;
-pub(crate) mod docker;
 pub(crate) mod domain;
 pub(crate) mod errors;
 pub(crate) mod types;
