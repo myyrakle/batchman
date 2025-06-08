@@ -3,6 +3,9 @@ use axum::response::Response;
 #[path = "./jsbundle.rs"]
 pub mod jsbundle;
 
+#[path = "./cssbundle.rs"]
+pub mod cssbundle;
+
 pub async fn index_html() -> Response {
     let html = r#"
 <!DOCTYPE html>
@@ -10,6 +13,7 @@ pub async fn index_html() -> Response {
   <head>
     <meta charset="UTF-8" />
     <title>React App</title>
+    <link rel="stylesheet" href="index.css" />
   </head>
   <body>
     <div id="root"></div>
@@ -30,5 +34,14 @@ pub async fn bundle_js() -> impl axum::response::IntoResponse {
     axum::response::Response::builder()
         .header("Content-Type", "application/javascript")
         .body(axum::body::Body::from(js))
+        .unwrap()
+}
+
+pub async fn index_css() -> impl axum::response::IntoResponse {
+    let code = cssbundle::CSS_BUNDLE;
+
+    axum::response::Response::builder()
+        .header("Content-Type", "text/css")
+        .body(axum::body::Body::from(code))
         .unwrap()
 }
