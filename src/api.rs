@@ -62,6 +62,7 @@ pub fn app(context: SharedContext) -> Router {
         // `GET /` goes to `root`
         .route("/", get(web::index_html))
         .route("/bundle.js", get(web::bundle_js))
+        .route("/index.css", get(web::index_css))
         .nest("/api", api_router)
         .fallback(fallback)
 }
