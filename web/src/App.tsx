@@ -8,6 +8,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import Divider from '@mui/material/Divider';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import WorkIcon from '@mui/icons-material/Work';
@@ -65,30 +66,35 @@ function Layout() {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
+          <Divider />
             <ListItem component="a" href="/dashboard">
               <ListItemIcon>
                 <DashboardIcon />
               </ListItemIcon>
               <ListItemText primary="Dashboard" />
             </ListItem>
+            <Divider />
             <ListItem component="a" href="/task-definition">
               <ListItemIcon>
                 <AssignmentIcon />
               </ListItemIcon>
               <ListItemText primary="Task Definition" />
             </ListItem>
+            <Divider />
             <ListItem component="a" href="/job">
               <ListItemIcon>
                 <WorkIcon />
               </ListItemIcon>
               <ListItemText primary="Job" />
             </ListItem>
+            <Divider />
             <ListItem component="a" href="/schedule">
               <ListItemIcon>
                 <ScheduleIcon />
               </ListItemIcon>
               <ListItemText primary="Schedule" />
             </ListItem>
+            <Divider />
           </List>
         </Box>
       </Drawer>
