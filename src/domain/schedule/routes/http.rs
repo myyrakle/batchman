@@ -29,12 +29,12 @@ pub async fn create_schedule(
         Err(errors::Error::CronExpressionIsInvalid(message)) => Response::builder()
             .status(StatusCode::NOT_FOUND)
             .body(Body::new(
-                errors::Error::CronExpressionIsInvalid(message).to_json_response(),
+                errors::Error::CronExpressionIsInvalid(message).into_json_response(),
             ))
             .unwrap(),
         Err(error) => Response::builder()
             .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Body::new(error.to_json_response()))
+            .body(Body::new(error.into_json_response()))
             .unwrap(),
     }
 }
@@ -57,18 +57,18 @@ pub async fn patch_schedule(
         Err(errors::Error::ScheduleNotFound) => Response::builder()
             .status(StatusCode::NOT_FOUND)
             .body(Body::new(
-                errors::Error::ScheduleNotFound.to_json_response(),
+                errors::Error::ScheduleNotFound.into_json_response(),
             ))
             .unwrap(),
         Err(errors::Error::CronExpressionIsInvalid(message)) => Response::builder()
             .status(StatusCode::NOT_FOUND)
             .body(Body::new(
-                errors::Error::CronExpressionIsInvalid(message).to_json_response(),
+                errors::Error::CronExpressionIsInvalid(message).into_json_response(),
             ))
             .unwrap(),
         Err(error) => Response::builder()
             .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Body::new(error.to_json_response()))
+            .body(Body::new(error.into_json_response()))
             .unwrap(),
     }
 }
@@ -87,12 +87,12 @@ pub async fn delete_schedule(
         Err(errors::Error::ScheduleNotFound) => Response::builder()
             .status(StatusCode::NOT_FOUND)
             .body(Body::new(
-                errors::Error::ScheduleNotFound.to_json_response(),
+                errors::Error::ScheduleNotFound.into_json_response(),
             ))
             .unwrap(),
         Err(error) => Response::builder()
             .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Body::new(error.to_json_response()))
+            .body(Body::new(error.into_json_response()))
             .unwrap(),
     }
 }
@@ -115,7 +115,7 @@ pub async fn list_schedules(
         }
         Err(error) => Response::builder()
             .status(500)
-            .body(Body::new(error.to_json_response()))
+            .body(Body::new(error.into_json_response()))
             .unwrap(),
     }
 }

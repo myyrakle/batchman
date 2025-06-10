@@ -40,7 +40,7 @@ impl Error {
         }
     }
 
-    pub fn to_json_response(self) -> String {
+    pub fn into_json_response(self) -> String {
         let error_response: ErrorResponse = self.into();
         serde_json::to_string(&error_response).unwrap_or("{}".to_string())
     }
