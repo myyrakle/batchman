@@ -23,7 +23,7 @@ pub async fn submit_job(
         Ok(job_id) => Json(job_id).into_response(),
         Err(error) => Response::builder()
             .status(500)
-            .body(Body::new(error.to_string()))
+            .body(Body::new(error.into_json_response()))
             .unwrap(),
     }
 }
@@ -41,7 +41,7 @@ pub async fn stop_job(
         Ok(_) => Json(()).into_response(),
         Err(error) => Response::builder()
             .status(500)
-            .body(Body::new(error.to_string()))
+            .body(Body::new(error.into_json_response()))
             .unwrap(),
     }
 }

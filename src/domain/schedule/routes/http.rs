@@ -12,6 +12,7 @@ use crate::{
         CreateSchduleRequest, CreateScheduleBody, ListSchedulesItem, ListSchedulesQuery,
         ListSchedulesRequest, ListSchedulesResponse, PatchScheduleBody, PatchScheduleRequest,
     },
+    errors,
 };
 
 pub async fn create_schedule(
@@ -25,19 +26,16 @@ pub async fn create_schedule(
 
     match result {
         Ok(_) => Json(()).into_response(),
-        Err(error) => {
-            if error.to_string().starts_with("Invalid Cron Expression") {
-                return Response::builder()
-                    .status(StatusCode::BAD_REQUEST)
-                    .body(Body::new(error.to_string()))
-                    .unwrap();
-            }
-
-            Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .body(Body::new(error.to_string()))
-                .unwrap()
-        }
+        Err(errors::Error::CronExpressionIsInvalid(message)) => Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .body(Body::new(
+                errors::Error::CronExpressionIsInvalid(message).into_json_response(),
+            ))
+            .unwrap(),
+        Err(error) => Response::builder()
+            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .body(Body::new(error.into_json_response()))
+            .unwrap(),
     }
 }
 
@@ -56,25 +54,22 @@ pub async fn patch_schedule(
             .status(StatusCode::OK)
             .body(Body::empty())
             .unwrap(),
-        Err(error) => {
-            // Check if the error message indicates "Schedule not found"
-            if error.to_string().starts_with("Invalid Cron Expression") {
-                Response::builder()
-                    .status(StatusCode::BAD_REQUEST)
-                    .body(Body::new(error.to_string()))
-                    .unwrap()
-            } else if error.to_string().starts_with("Schedule not found") {
-                Response::builder()
-                    .status(StatusCode::NOT_FOUND)
-                    .body(Body::new(error.to_string()))
-                    .unwrap()
-            } else {
-                Response::builder()
-                    .status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .body(Body::new(error.to_string()))
-                    .unwrap()
-            }
-        }
+        Err(errors::Error::ScheduleNotFound) => Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .body(Body::new(
+                errors::Error::ScheduleNotFound.into_json_response(),
+            ))
+            .unwrap(),
+        Err(errors::Error::CronExpressionIsInvalid(message)) => Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .body(Body::new(
+                errors::Error::CronExpressionIsInvalid(message).into_json_response(),
+            ))
+            .unwrap(),
+        Err(error) => Response::builder()
+            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .body(Body::new(error.into_json_response()))
+            .unwrap(),
     }
 }
 
@@ -89,20 +84,16 @@ pub async fn delete_schedule(
             .status(StatusCode::OK)
             .body(Body::empty())
             .unwrap(),
-        Err(error) => {
-            // Check if the error message indicates "Schedule not found"
-            if error.to_string().starts_with("Schedule not found") {
-                Response::builder()
-                    .status(StatusCode::NOT_FOUND)
-                    .body(Body::new(error.to_string()))
-                    .unwrap()
-            } else {
-                Response::builder()
-                    .status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .body(Body::new(error.to_string()))
-                    .unwrap()
-            }
-        }
+        Err(errors::Error::ScheduleNotFound) => Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .body(Body::new(
+                errors::Error::ScheduleNotFound.into_json_response(),
+            ))
+            .unwrap(),
+        Err(error) => Response::builder()
+            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .body(Body::new(error.into_json_response()))
+            .unwrap(),
     }
 }
 
@@ -124,7 +115,7 @@ pub async fn list_schedules(
         }
         Err(error) => Response::builder()
             .status(500)
-            .body(Body::new(error.to_string()))
+            .body(Body::new(error.into_json_response()))
             .unwrap(),
     }
 }
