@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 #[derive(Debug)]
 pub enum Error {
     TaskDefinitionNotFound,
@@ -15,6 +17,29 @@ pub enum Error {
     IO(std::io::Error),
     Seaorm(sea_orm::DbErr),
     SerdeJson(serde_json::Error),
+}
+
+impl Error {
+    pub fn error_code(&self) -> String {
+        match self {
+            Error::TaskDefinitionNotFound => "TASK_DEFINITION_NOT_FOUND".to_string(),
+            Error::JobNotFound => "JOB_NOT_FOUND".to_string(),
+            Error::JobAlreadyFinished => "JOB_ALREADY_FINISHED".to_string(),
+            Error::JobAlreadyFailed => "JOB_ALREADY_FAILED".to_string(),
+            Error::JobHasNoContainerID => "JOB_HAS_NO_CONTAINER_ID".to_string(),
+            Error::ContainerIDNotFound => "CONTAINER_ID_NOT_FOUND".to_string(),
+            Error::ScheduleNotFound => "SCHEDULE_NOT_FOUND".to_string(),
+            Error::CronExpressionIsInvalid(_) => "INVALID_CRON_EXPRESSION".to_string(),
+            Error::ContainerNotFound => "CONTAINER_NOT_FOUND".to_string(),
+            Error::ContainerFailedToKill(_) => "FAILED_TO_KILL_CONTAINER".to_string(),
+            Error::ContainerFailedToStart(_) => "FAILED_TO_START_CONTAINER".to_string(),
+            Error::ContainerFailedToInspect(_) => "FAILED_TO_INSPECT_CONTAINER".to_string(),
+            Error::IO(_) => "IO_ERROR".to_string(),
+            Error::Seaorm(_) => "DATABASE_ERROR".to_string(),
+            Error::SerdeJson(_) => "JSON_SERIALIZATION_ERROR".to_string(),
+            _ => "UNKNOWN_ERROR".to_string(),
+        }
+    }
 }
 
 impl PartialEq for Error {
@@ -72,3 +97,18 @@ impl From<serde_json::Error> for Error {
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ErrorResponse {
+    pub error_code: String,
+    pub message: String,
+}
+
+impl From<Error> for ErrorResponse {
+    fn from(error: Error) -> Self {
+        ErrorResponse {
+            error_code: error.error_code(),
+            message: error.to_string(),
+        }
+    }
+}
