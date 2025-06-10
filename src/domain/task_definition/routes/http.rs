@@ -58,7 +58,7 @@ pub async fn list_task_definitions(
         }
         Err(error) => Response::builder()
             .status(500)
-            .body(Body::new(error.to_string()))
+            .body(Body::new(error.to_json_response()))
             .unwrap(),
     }
 }
@@ -76,7 +76,7 @@ pub async fn create_task_definition(
         Ok(task_definition_id) => Json(task_definition_id).into_response(),
         Err(error) => Response::builder()
             .status(500)
-            .body(Body::new(error.to_string()))
+            .body(Body::new(error.to_json_response()))
             .unwrap(),
     }
 }
@@ -98,11 +98,13 @@ pub async fn patch_task_definition(
         Ok(_) => Response::builder().status(200).body(Body::empty()).unwrap(),
         Err(errors::Error::TaskDefinitionNotFound) => Response::builder()
             .status(404)
-            .body(Body::new(errors::Error::TaskDefinitionNotFound.to_string()))
+            .body(Body::new(
+                errors::Error::TaskDefinitionNotFound.to_json_response(),
+            ))
             .unwrap(),
         Err(error) => Response::builder()
             .status(500)
-            .body(Body::new(error.to_string()))
+            .body(Body::new(error.to_json_response()))
             .unwrap(),
     }
 }
@@ -120,7 +122,7 @@ pub async fn delete_task_definition(
         Ok(_) => Response::builder().status(200).body(Body::empty()).unwrap(),
         Err(error) => Response::builder()
             .status(500)
-            .body(Body::new(error.to_string()))
+            .body(Body::new(error.to_json_response()))
             .unwrap(),
     }
 }

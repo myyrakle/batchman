@@ -37,8 +37,12 @@ impl Error {
             Error::IO(_) => "IO_ERROR".to_string(),
             Error::Seaorm(_) => "DATABASE_ERROR".to_string(),
             Error::SerdeJson(_) => "JSON_SERIALIZATION_ERROR".to_string(),
-            _ => "UNKNOWN_ERROR".to_string(),
         }
+    }
+
+    pub fn to_json_response(self) -> String {
+        let error_response: ErrorResponse = self.into();
+        serde_json::to_string(&error_response).unwrap_or("{}".to_string())
     }
 }
 
