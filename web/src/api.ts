@@ -13,36 +13,96 @@ export interface ApiResponse<T>  {
     status_code: number;
 }
 
-
 // Task Definition 관련 타입
 export interface TaskDefinition {
-  id: number;
-  name: string;
-  description: string;
-  command: string;
-  created_at: string;
-  updated_at: string;
+    id: number;
+    name: string;
+    version: number;
+    image: string;
+    command: string[] | null;
+    args: string | null;
+    env: string | null;
+    memory_limit: number | null;
+    cpu_limit: number | null;
+}
+
+export interface CreateTaskDefinitionRequest {
+    name: string;
+    image: string;
+    command?: string[];
+    args?: string;
+    env?: string;
+    memory_limit?: number;
+    cpu_limit?: number;
+}
+
+export interface PatchTaskDefinitionRequest {
+    image?: string;
+    command?: string;
+    args?: string;
+    env?: string;
+    memory_limit?: number;
+    cpu_limit?: number;
 }
 
 // Job 관련 타입
+export type JobStatus = 'Pending' | 'Starting' | 'Running' | 'Finished' | 'Failed';
+
 export interface Job {
-  id: number;
-  task_definition_id: number;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  started_at: string;
-  ended_at: string | null;
-  output: string | null;
-  error: string | null;
+    id: number;
+    name: string;
+    task_definition_id: number;
+    status: JobStatus;
+    submited_at: string | null;
+    started_at: string | null;
+    finished_at: string | null;
+    container_id: string | null;
+    exit_code: number | null;
+    error_message: string | null;
+}
+
+export interface SubmitJobRequest {
+    task_definition_id: number;
+    job_name: string;
+}
+
+export interface StopJobRequest {
+    job_id: number;
 }
 
 // Schedule 관련 타입
 export interface Schedule {
-  id: number;
-  task_definition_id: number;
-  cron_expression: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+    id: number;
+    name: string;
+    job_name: string;
+    cron_expression: string;
+    task_definition_id: number;
+    command: string | null;
+    timezone: string;
+    timezone_offset: number;
+    enabled: boolean;
+}
+
+export interface CreateScheduleRequest {
+    name: string;
+    job_name: string;
+    cron_expression: string;
+    task_definition_id: number;
+    command?: string;
+    timezone: string;
+    timezone_offset: number;
+    enabled: boolean;
+}
+
+export interface PatchScheduleRequest {
+    name?: string;
+    job_name?: string;
+    cron_expression?: string;
+    task_definition_id?: number;
+    command?: string;
+    timezone?: string;
+    timezone_offset?: number;
+    enabled?: boolean;
 }
 
 // API 클라이언트 생성
@@ -82,7 +142,7 @@ export const listTaskDefinitions = async (): Promise<ApiResponse<TaskDefinition[
   }
 };
 
-export const createTaskDefinition = async (taskDefinition: Omit<TaskDefinition, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<TaskDefinition | ErrorResponse>> => {
+export const createTaskDefinition = async (taskDefinition: CreateTaskDefinitionRequest): Promise<ApiResponse<number | ErrorResponse>> => {
   try {
     const response = await api.post('/task-definitions', taskDefinition);
     return {
@@ -94,7 +154,7 @@ export const createTaskDefinition = async (taskDefinition: Omit<TaskDefinition, 
   }
 };
 
-export const patchTaskDefinition = async (id: number, taskDefinition: Partial<TaskDefinition>): Promise<ApiResponse<TaskDefinition | ErrorResponse>> => {
+export const patchTaskDefinition = async (id: number, taskDefinition: PatchTaskDefinitionRequest): Promise<ApiResponse<void | ErrorResponse>> => {
   try {
     const response = await api.patch(`/task-definitions/${id}`, taskDefinition);
     return {
@@ -119,9 +179,9 @@ export const deleteTaskDefinition = async (id: number): Promise<ApiResponse<void
 };
 
 // Job API
-export const submitJob = async (taskDefinitionId: number): Promise<ApiResponse<Job | ErrorResponse>> => {
+export const submitJob = async (request: SubmitJobRequest): Promise<ApiResponse<number | ErrorResponse>> => {
   try {
-    const response = await api.post('/jobs/submit', { task_definition_id: taskDefinitionId });
+    const response = await api.post('/jobs/submit', request);
     return {
       response: response.data,
       status_code: response.status
@@ -131,9 +191,9 @@ export const submitJob = async (taskDefinitionId: number): Promise<ApiResponse<J
   }
 };
 
-export const stopJob = async (jobId: number): Promise<ApiResponse<void | ErrorResponse>> => {
+export const stopJob = async (request: StopJobRequest): Promise<ApiResponse<void | ErrorResponse>> => {
   try {
-    const response = await api.post('/jobs/stop', { job_id: jobId });
+    const response = await api.post('/jobs/stop', request);
     return {
       response: response.data,
       status_code: response.status
@@ -156,7 +216,7 @@ export const listSchedules = async (): Promise<ApiResponse<Schedule[] | ErrorRes
   }
 };
 
-export const createSchedule = async (schedule: Omit<Schedule, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Schedule | ErrorResponse>> => {
+export const createSchedule = async (schedule: CreateScheduleRequest): Promise<ApiResponse<number | ErrorResponse>> => {
   try {
     const response = await api.post('/schedules', schedule);
     return {
@@ -168,7 +228,7 @@ export const createSchedule = async (schedule: Omit<Schedule, 'id' | 'created_at
   }
 };
 
-export const patchSchedule = async (id: number, schedule: Partial<Schedule>): Promise<ApiResponse<Schedule | ErrorResponse>> => {
+export const patchSchedule = async (id: number, schedule: PatchScheduleRequest): Promise<ApiResponse<void | ErrorResponse>> => {
   try {
     const response = await api.patch(`/schedules/${id}`, schedule);
     return {
