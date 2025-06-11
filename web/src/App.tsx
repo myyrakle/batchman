@@ -18,6 +18,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import TaskDefinitionList from './pages/TaskDefinitionList';
 
 const drawerWidth = 240;
 
@@ -102,7 +103,7 @@ function Layout() {
         <Toolbar />
         <Routes>
           <Route path="/dashboard" element={<div>Dashboard Page</div>} />
-          <Route path="/task-definition" element={<div>Task Definition Page</div>} />
+          <Route path="/task-definition" element={<TaskDefinitionList />} />
           <Route path="/job" element={<div>Job Page</div>} />
           <Route path="/schedule" element={<div>Schedule Page</div>} />
           <Route path="/" element={<div>Dashboard Page</div>} />
