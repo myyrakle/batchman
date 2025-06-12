@@ -12,6 +12,19 @@ export interface TaskDefinition {
     required: boolean;
     description: string;
   }[];
+  image: string;
+  command: string;
+  env: {
+    key: string;
+    value: string;
+  }[];
+  resources: {
+    memory: {
+      value: number;
+      unit: 'm' | 'g';
+    };
+    cpu: number;
+  };
 }
 
 export interface TaskDefinitionSearchParams {
@@ -19,4 +32,21 @@ export interface TaskDefinitionSearchParams {
   status?: 'ACTIVE' | 'INACTIVE';
   page: number;
   size: number;
+}
+
+export interface CreateTaskDefinitionFormData {
+  name: string;
+  image: string;
+  command: string;
+  env: {
+    key: string;
+    value: string;
+  }[];
+  resources: {
+    memory: {
+      value: number;
+      unit: 'm' | 'g';
+    };
+    cpu: number;
+  };
 } 

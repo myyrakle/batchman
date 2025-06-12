@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { TaskDefinition, TaskDefinitionSearchParams } from '../types/taskDefinition';
+import { TaskDefinition, TaskDefinitionSearchParams, CreateTaskDefinitionFormData } from '../types/taskDefinition';
 import TaskDefinitionTable from '../components/TaskDefinitionTable';
 import TaskDefinitionSearch from '../components/TaskDefinitionSearch';
 import CreateTaskDefinitionModal from '../components/CreateTaskDefinitionModal';
@@ -30,6 +30,16 @@ const TaskDefinitionList: React.FC = () => {
       updatedAt: '2024-03-20',
       status: 'ACTIVE',
       parameters: [],
+      image: 'nginx:latest',
+      command: 'nginx -g "daemon off;"',
+      env: [],
+      resources: {
+        memory: {
+          value: 1,
+          unit: 'g',
+        },
+        cpu: 1,
+      },
     },
   ];
 
@@ -47,8 +57,9 @@ const TaskDefinitionList: React.FC = () => {
     setIsVersionModalOpen(true);
   };
 
-  const handleCreateTaskSubmit = () => {
+  const handleCreateTaskSubmit = (data: CreateTaskDefinitionFormData) => {
     // TODO: API 호출 구현
+    console.log('Create task definition:', data);
     setIsCreateModalOpen(false);
   };
 
