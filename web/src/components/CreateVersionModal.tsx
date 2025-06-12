@@ -6,7 +6,7 @@ import {
   DialogActions,
   Button,
 } from '@mui/material';
-import { TaskDefinition } from '../types/taskDefinition';
+import { TaskDefinition } from '../api';
 
 interface CreateVersionModalProps {
   open: boolean;

@@ -124,7 +124,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
                   <IconButton
                     onClick={() => removeEnvField(index)}
                     size="small"
-                    disabled={formData.env.length === 1}
+                    disabled={formData?.env?.length === 1}
                   >
                     <DeleteIcon />
                   </IconButton>

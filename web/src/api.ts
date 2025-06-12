@@ -1,10 +1,17 @@
 import axios, { AxiosError } from 'axios';
 import config from './config';
 
-export interface ErrorResponse {
+export class ErrorResponse {
     error_code?: string;
     message?: string;
+
+    constructor(error_code: string, message: string) {
+        this.error_code = error_code;
+        this.message = message;
+    }
 }
+
+
 
 // API 응답 타입 정의
 export interface ApiResponse<T>  {
@@ -23,6 +30,18 @@ export interface TaskDefinition {
     env: string | null;
     memory_limit: number | null;
     cpu_limit: number | null;
+}
+
+export interface ListTaskDefinitionsParams {
+  contains_name?: string;
+  name?: string;
+  task_definition_id?: number;
+  page: number;
+  size: number;
+}
+
+export interface ListTaskDefinitionsResponse {
+    task_definitions: TaskDefinition[];
 }
 
 export interface CreateTaskDefinitionRequest {
@@ -117,20 +136,18 @@ const api = axios.create({
 const handleApiError = (error: AxiosError): ApiResponse<ErrorResponse> => {
   if (error.response) {
     return {
-      response: error.response.data as ErrorResponse,
+      response: new ErrorResponse((error.response.data as any)?.error_code, (error.response.data as any)?.message),
       status_code: error.response.status
     };
   }
   return {
-    response: {
-      message: error.message || 'Unknown error occurred'
-    },
+    response: new ErrorResponse("", error.message || 'Unknown error occurred'),
     status_code: 500
   };
 };
 
 // Task Definition API
-export const listTaskDefinitions = async (): Promise<ApiResponse<TaskDefinition[] | ErrorResponse>> => {
+export const listTaskDefinitions = async (): Promise<ApiResponse<ListTaskDefinitionsResponse | ErrorResponse>> => {
   try {
     const response = await api.get('/task-definitions');
     return {
