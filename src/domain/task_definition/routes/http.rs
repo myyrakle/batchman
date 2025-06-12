@@ -26,9 +26,7 @@ impl From<entities::task_definition::Model> for ListTaskDefinitionsItem {
             name: model.name,
             version: model.version,
             image: model.image,
-            command: model
-                .command
-                .map(|command| serde_json::from_str(&command).unwrap_or_default()),
+            command: model.command,
             args: model.args,
             env: model.env,
             memory_limit: model.memory_limit,

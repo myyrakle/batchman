@@ -18,7 +18,7 @@ export interface TaskDefinition {
     name: string;
     version: number;
     image: string;
-    command: string[] | null;
+    command: string | null;
     args: string | null;
     env: string | null;
     memory_limit: number | null;
@@ -28,7 +28,7 @@ export interface TaskDefinition {
 export interface CreateTaskDefinitionRequest {
     name: string;
     image: string;
-    command?: string[];
+    command?: string;
     args?: string;
     env?: string;
     memory_limit?: number;

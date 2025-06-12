@@ -61,10 +61,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                 name: request.request_body.name,
                 version,
                 image: request.request_body.image,
-                command: request
-                    .request_body
-                    .command
-                    .map(|command| serde_json::to_string(&command).unwrap_or_default()),
+                command: request.request_body.command,
                 args: request.request_body.args,
                 env: request.request_body.env,
                 memory_limit: request.request_body.memory_limit,
