@@ -1,6 +1,5 @@
 import axios, { AxiosError } from 'axios';
-
-const API_BASE_URL = 'http://localhost:13939/api';
+import config from './config';
 
 export interface ErrorResponse {
     error_code?: string;
@@ -105,9 +104,10 @@ export interface PatchScheduleRequest {
     enabled?: boolean;
 }
 
+
 // API 클라이언트 생성
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: config.apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
