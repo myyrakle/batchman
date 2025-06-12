@@ -1,13 +1,19 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const webpack = require("webpack");
 
 module.exports = {
   plugins: [
     new MiniCssExtractPlugin({
       filename: "index.css",
     }),
+    new webpack.DefinePlugin({
+      "process.env.NODE_ENV": JSON.stringify(
+        process.env.NODE_ENV || "development"
+      ),
+    }),
   ],
-  mode: "development",
+  mode: process.env.NODE_ENV || "development",
   entry: "./src/index.tsx",
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -36,5 +42,11 @@ module.exports = {
     compress: true,
     port: 3000,
     historyApiFallback: true,
+    proxy: [
+      {
+        context: ["/api"],
+        target: "http://localhost:13939",
+      },
+    ],
   },
 };
