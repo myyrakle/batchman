@@ -72,6 +72,7 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
             memory_limit: Set(params.memory_limit),
             cpu_limit: Set(params.cpu_limit),
             description: Set(params.description),
+            created_at: Set(chrono::Utc::now()),
         };
 
         let saved = new_definition.insert(&self.connection).await?;

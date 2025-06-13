@@ -62,7 +62,7 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
             command: sea_orm::Set(params.command),
             timezone: sea_orm::Set(params.timezone),
             timezone_offset: sea_orm::Set(params.timezone_offset),
-            created_at: sea_orm::Set(Some(chrono::Utc::now())),
+            created_at: sea_orm::Set(chrono::Utc::now()),
             ..Default::default()
         };
 

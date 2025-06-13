@@ -35,6 +35,8 @@ pub struct Model {
     pub container_id: Option<String>, // batch container id (docker container id)
     pub exit_code: Option<i32>,       // batch exit code
     pub error_message: Option<String>, // batch error message
+
+    pub created_at: chrono::DateTime<Utc>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

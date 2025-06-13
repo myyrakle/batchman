@@ -1,3 +1,4 @@
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::schedule::entities;
@@ -61,6 +62,7 @@ pub struct ListSchedulesItem {
     pub timezone: Option<String>,
     pub timezone_offset: Option<i32>,
     pub enabled: bool,
+    pub created_at: chrono::DateTime<Utc>,
 }
 
 impl From<entities::schedule::Model> for ListSchedulesItem {
@@ -75,6 +77,7 @@ impl From<entities::schedule::Model> for ListSchedulesItem {
             timezone: schedule.timezone,
             timezone_offset: schedule.timezone_offset,
             enabled: schedule.enabled,
+            created_at: schedule.created_at,
         }
     }
 }

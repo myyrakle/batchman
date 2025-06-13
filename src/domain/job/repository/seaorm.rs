@@ -58,6 +58,7 @@ impl JobRepository for JobSeaOrmRepository {
             container_id: Set(params.container_id),
             exit_code: Set(params.exit_code),
             error_message: Set(params.error_message),
+            created_at: Set(chrono::Utc::now()),
         };
 
         let model = new_job.into_active_model().insert(&self.connection).await?;
