@@ -95,6 +95,10 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
             model.name = Set(name);
         }
 
+        if let Some(description) = params.description {
+            model.description = Set(description);
+        }
+
         if let Some(version) = params.version {
             model.version = Set(version);
         }

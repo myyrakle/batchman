@@ -27,6 +27,7 @@ pub struct CreateTaskDefinitionParams {
 #[derive(Debug, Default)]
 pub struct PatchTaskDefinitionParams {
     pub task_definition_id: i64,
+    pub description: Option<String>, // task description
     pub name: Option<String>,
     pub version: Option<i64>,
     pub image: Option<String>,

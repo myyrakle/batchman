@@ -93,6 +93,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
             .task_definition_repository
             .patch_task_definition(PatchTaskDefinitionParams {
                 task_definition_id: request.task_definition_id,
+                description: request.request.description,
                 image: request.request.image,
                 command: request.request.command,
                 args: request.request.args,
