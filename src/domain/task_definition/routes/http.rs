@@ -25,6 +25,7 @@ impl From<entities::task_definition::Model> for ListTaskDefinitionsItem {
             id: model.id,
             name: model.name,
             version: model.version,
+            description: model.description,
             image: model.image,
             command: model.command,
             args: model.args,

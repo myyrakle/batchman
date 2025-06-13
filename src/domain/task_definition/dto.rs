@@ -48,9 +48,10 @@ pub struct ListTaskDefinitionsRequest {
 
 #[derive(Serialize)]
 pub struct ListTaskDefinitionsItem {
-    pub id: i64,      // primary key
-    pub name: String, // task name
-    pub version: i64, // task version
+    pub id: i64,             // primary key
+    pub name: String,        // task name
+    pub version: i64,        // task version
+    pub description: String, // task description
 
     pub image: String,           // docker image
     pub command: Option<String>, // docker run command
