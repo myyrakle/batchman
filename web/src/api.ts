@@ -31,6 +31,7 @@ export interface TaskDefinition {
     env: string | null;
     memory_limit: number | null;
     cpu_limit: number | null;
+    created_at: string;
 }
 
 export interface ListTaskDefinitionsParams {

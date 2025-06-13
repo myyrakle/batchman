@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { TaskDefinition } from '../api';
+import { formatDate } from '../utils';
 
 interface TaskDefinitionTableProps {
   taskDefinitions: TaskDefinition[];
@@ -33,9 +34,7 @@ const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
             <TableCell>이름</TableCell>
             <TableCell>설명</TableCell>
             <TableCell>버전</TableCell>
-            <TableCell>상태</TableCell>
             <TableCell>생성일</TableCell>
-            <TableCell>수정일</TableCell>
             <TableCell>작업</TableCell>
           </TableRow>
         </TableHead>
@@ -60,9 +59,7 @@ const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
                 <TableCell>{task.name}</TableCell>
                 <TableCell>{task.description}</TableCell>
                 <TableCell>{task.version}</TableCell>
-                <TableCell>{"task.status"}</TableCell>
-                <TableCell>{"task.createdAt"}</TableCell>
-                <TableCell>{"task.updatedAt"}</TableCell>
+                <TableCell>{formatDate(task.created_at)}</TableCell>
                 <TableCell>
                   <IconButton
                     size="small"
