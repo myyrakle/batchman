@@ -59,6 +59,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
             .task_definition_repository
             .create_task_definition(CreateTaskDefinitionParams {
                 name: request.request_body.name,
+                description: request.request_body.description,
                 version,
                 image: request.request_body.image,
                 command: request.request_body.command,

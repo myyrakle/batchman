@@ -11,8 +11,9 @@ pub struct ListTaskDefinitionsParams {
 
 #[derive(Debug)]
 pub struct CreateTaskDefinitionParams {
-    pub name: String, // task name
-    pub version: i64, // task version
+    pub name: String,        // task name
+    pub version: i64,        // task version
+    pub description: String, // task description
 
     pub image: String,           // docker image
     pub command: Option<String>, // docker run command

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Debug, Clone)]
 pub struct CreateTaskDefinitionBody {
     pub name: String,              // task name
+    pub description: String,       // task description
     pub image: String,             // docker image
     pub command: Option<String>,   // docker run command
     pub args: Option<String>,      // docker run arguments
