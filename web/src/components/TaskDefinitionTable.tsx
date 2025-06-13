@@ -58,7 +58,7 @@ const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
             taskDefinitions.map((task) => (
               <TableRow key={task.id}>
                 <TableCell>{task.name}</TableCell>
-                <TableCell>{"task.description"}</TableCell>
+                <TableCell>{task.description}</TableCell>
                 <TableCell>{task.version}</TableCell>
                 <TableCell>{"task.status"}</TableCell>
                 <TableCell>{"task.createdAt"}</TableCell>

@@ -41,6 +41,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
       },
       cpu: 1,
     },
+    description: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -77,6 +78,13 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
+              fullWidth
+            />
+
+            <TextField
+              label="설명"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               fullWidth
             />
 
