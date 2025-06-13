@@ -23,6 +23,7 @@ export interface ApiResponse<T>  {
 export interface TaskDefinition {
     id: number;
     name: string;
+    description: string;
     version: number;
     image: string;
     command: string | null;
@@ -46,6 +47,7 @@ export interface ListTaskDefinitionsResponse {
 
 export interface CreateTaskDefinitionRequest {
     name: string;
+    description: string;
     image: string;
     command?: string;
     args?: string;

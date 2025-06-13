@@ -69,6 +69,7 @@ const TaskDefinitionList: React.FC = () => {
       setIsLoading(true);
       await createTaskDefinition({
         name: data.name,
+        description: data.description,
         image: data.image,
         command: data.command,
         env: JSON.stringify(data.env),

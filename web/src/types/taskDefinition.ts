@@ -7,6 +7,7 @@ export interface TaskDefinitionSearchParams {
 
 export interface CreateTaskDefinitionFormData {
   name: string;
+  description: string;
   image: string;
   command: string;
   env: {
