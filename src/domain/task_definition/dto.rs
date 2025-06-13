@@ -1,3 +1,4 @@
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug, Clone)]
@@ -60,6 +61,8 @@ pub struct ListTaskDefinitionsItem {
 
     pub memory_limit: Option<u32>, // memory limit in MB
     pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
+
+    pub created_at: chrono::DateTime<Utc>,
 }
 
 #[derive(Serialize)]
