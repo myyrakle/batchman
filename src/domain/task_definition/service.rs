@@ -121,6 +121,9 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
         &self,
         params: ListTaskDefinitionsRequest,
     ) -> errors::Result<Vec<entities::task_definition::Model>> {
+        let limit = params.query.page_size;
+        let offset = (params.query.page_number - 1) * params.query.page_size;
+
         let task_definitions = self
             .task_definition_repository
             .list_task_definitions(ListTaskDefinitionsParams {
@@ -130,6 +133,8 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                 },
                 name: params.query.name.clone(),
                 contains_name: params.query.contains_name,
+                limit : Some(limit),
+                offset: Some(offset),
                 ..Default::default()
             })
             .await?;

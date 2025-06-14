@@ -50,6 +50,10 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
             find_query = find_query.limit(limit);
         }
 
+        if let Some(offset) = params.offset {
+            find_query = find_query.offset(offset);
+        }
+
         let task_definitions = find_query.all(&self.connection).await?;
 
         Ok(task_definitions)

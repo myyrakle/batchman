@@ -40,6 +40,8 @@ pub struct ListTaskDefinitionsQuery {
     pub task_definition_id: Option<i64>,
     pub contains_name: Option<String>,
     pub name: Option<String>,
+    pub page_number: u64,
+    pub page_size: u64
 }
 
 #[derive(Debug, Clone)]
