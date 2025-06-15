@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -29,7 +29,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const [formData, setFormData] = useState<CreateTaskDefinitionFormData>({
+  const initialFormData: CreateTaskDefinitionFormData = {
     name: '',
     image: '',
     command: '',
@@ -42,7 +42,20 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
       cpu: 1,
     },
     description: '',
-  });
+  };
+
+  const [formData, setFormData] = useState<CreateTaskDefinitionFormData>(initialFormData);
+
+  useEffect(() => {
+    if (open) {
+      setFormData(initialFormData);
+    }
+  }, [open]);
+
+  const handleClose = () => {
+    setFormData(initialFormData);
+    onClose();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +81,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <form onSubmit={handleSubmit}>
         <DialogTitle>새 작업정의 생성</DialogTitle>
         <DialogContent>
