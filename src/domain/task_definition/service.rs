@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use crate::errors;
+use crate::{
+    domain::task_definition::dto::{ListTaskDefinitionsItem, ListTaskDefinitionsResponse},
+    errors,
+};
 
 use super::{
     TaskDefinitionRepository,
@@ -120,7 +123,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
     async fn list_task_definitions(
         &self,
         params: ListTaskDefinitionsRequest,
-    ) -> errors::Result<Vec<entities::task_definition::Model>> {
+    ) -> errors::Result<ListTaskDefinitionsResponse> {
         let limit = params.query.page_size;
         let offset = (params.query.page_number - 1) * params.query.page_size;
 
@@ -133,12 +136,19 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                 },
                 name: params.query.name.clone(),
                 contains_name: params.query.contains_name,
-                limit : Some(limit),
+                limit: Some(limit),
                 offset: Some(offset),
                 ..Default::default()
             })
             .await?;
 
-        Ok(task_definitions)
+        let response = ListTaskDefinitionsResponse {
+            task_definitions: task_definitions
+                .into_iter()
+                .map(ListTaskDefinitionsItem::from)
+                .collect(),
+        };
+
+        Ok(response)
     }
 }
