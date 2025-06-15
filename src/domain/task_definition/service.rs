@@ -1,6 +1,12 @@
 use std::sync::Arc;
 
-use crate::errors;
+use crate::{
+    domain::task_definition::{
+        dao::CountTaskDefinitionsParams,
+        dto::{ListTaskDefinitionsItem, ListTaskDefinitionsResponse},
+    },
+    errors,
+};
 
 use super::{
     TaskDefinitionRepository,
@@ -120,7 +126,10 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
     async fn list_task_definitions(
         &self,
         params: ListTaskDefinitionsRequest,
-    ) -> errors::Result<Vec<entities::task_definition::Model>> {
+    ) -> errors::Result<ListTaskDefinitionsResponse> {
+        let limit = params.query.page_size;
+        let offset = (params.query.page_number - 1) * params.query.page_size;
+
         let task_definitions = self
             .task_definition_repository
             .list_task_definitions(ListTaskDefinitionsParams {
@@ -129,11 +138,29 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                     None => vec![],
                 },
                 name: params.query.name.clone(),
-                contains_name: params.query.contains_name,
+                contains_name: params.query.contains_name.clone(),
+                limit: Some(limit),
+                offset: Some(offset),
                 ..Default::default()
             })
             .await?;
 
-        Ok(task_definitions)
+        let total_count = self
+            .task_definition_repository
+            .count_task_definitions(CountTaskDefinitionsParams {
+                name: params.query.name,
+                contains_name: params.query.contains_name,
+            })
+            .await?;
+
+        let response = ListTaskDefinitionsResponse {
+            task_definitions: task_definitions
+                .into_iter()
+                .map(ListTaskDefinitionsItem::from)
+                .collect(),
+            total_count,
+        };
+
+        Ok(response)
     }
 }

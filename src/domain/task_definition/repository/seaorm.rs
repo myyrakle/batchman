@@ -1,15 +1,16 @@
 use sea_orm::{
     ActiveModelTrait,
     ActiveValue::{NotSet, Set},
-    ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder, QuerySelect,
+    ColumnTrait, EntityTrait, IntoActiveModel, PaginatorTrait, QueryFilter, QueryOrder,
+    QuerySelect,
 };
 
 use crate::{
     domain::task_definition::{
         TaskDefinitionRepository,
         dao::{
-            CreateTaskDefinitionParams, DeleteTaskDefinitionParams, ListTaskDefinitionsParams,
-            PatchTaskDefinitionParams,
+            CountTaskDefinitionsParams, CreateTaskDefinitionParams, DeleteTaskDefinitionParams,
+            ListTaskDefinitionsParams, PatchTaskDefinitionParams,
         },
         entities,
     },
@@ -50,9 +51,33 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
             find_query = find_query.limit(limit);
         }
 
+        if let Some(offset) = params.offset {
+            find_query = find_query.offset(offset);
+        }
+
         let task_definitions = find_query.all(&self.connection).await?;
 
         Ok(task_definitions)
+    }
+
+    async fn count_task_definitions(
+        &self,
+        params: CountTaskDefinitionsParams,
+    ) -> errors::Result<u64> {
+        let mut find_query = entities::task_definition::Entity::find();
+
+        if let Some(name) = params.name {
+            find_query = find_query.filter(entities::task_definition::Column::Name.eq(name));
+        }
+
+        if let Some(contains_name) = params.contains_name {
+            find_query =
+                find_query.filter(entities::task_definition::Column::Name.contains(contains_name));
+        }
+
+        let count = find_query.count(&self.connection).await?;
+
+        Ok(count)
     }
 
     async fn create_task_definition(

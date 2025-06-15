@@ -12,7 +12,7 @@ use crate::{
         dto::{
             CreateDefinitionRequest, CreateTaskDefinitionBody, DeleteDefinitionRequest,
             ListTaskDefinitionsItem, ListTaskDefinitionsQuery, ListTaskDefinitionsRequest,
-            ListTaskDefinitionsResponse, PatchDefinitionRequest, PatchTaskDefinitionBody,
+            PatchDefinitionRequest, PatchTaskDefinitionBody,
         },
         entities,
     },
@@ -41,21 +41,13 @@ pub async fn list_task_definitions(
     Query(query): Query<ListTaskDefinitionsQuery>,
     Extension(context): Extension<SharedContext>,
 ) -> response::Response {
-    let task_definitions = context
+    let response = context
         .task_definition_service
         .list_task_definitions(ListTaskDefinitionsRequest { query })
         .await;
 
-    match task_definitions {
-        Ok(task_definitions) => {
-            let response = ListTaskDefinitionsResponse {
-                task_definitions: task_definitions
-                    .into_iter()
-                    .map(ListTaskDefinitionsItem::from)
-                    .collect(),
-            };
-            Json(response).into_response()
-        }
+    match response {
+        Ok(response) => Json(response).into_response(),
         Err(error) => Response::builder()
             .status(500)
             .body(Body::new(error.into_json_response()))

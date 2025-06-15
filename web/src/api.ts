@@ -38,12 +38,13 @@ export interface ListTaskDefinitionsParams {
   contains_name?: string;
   name?: string;
   task_definition_id?: number;
-  page: number;
-  size: number;
+  page_number: number;
+  page_size: number;
 }
 
 export interface ListTaskDefinitionsResponse {
     task_definitions: TaskDefinition[];
+    total_count: number;
 }
 
 export interface CreateTaskDefinitionRequest {
@@ -150,9 +151,17 @@ const handleApiError = (error: AxiosError): ApiResponse<ErrorResponse> => {
 };
 
 // Task Definition API
-export const listTaskDefinitions = async (): Promise<ApiResponse<ListTaskDefinitionsResponse | ErrorResponse>> => {
+export const listTaskDefinitions = async (params: ListTaskDefinitionsParams): Promise<ApiResponse<ListTaskDefinitionsResponse | ErrorResponse>> => {
   try {
-    const response = await api.get('/task-definitions');
+    const response = await api.get('/task-definitions', {
+      params: {
+        page_number: params.page_number,
+        page_size: params.page_size,
+        contains_name: params.contains_name,
+        name: params.name,
+        task_definition_id: params.task_definition_id,
+      }
+    });
     return {
       response: response.data,
       status_code: response.status

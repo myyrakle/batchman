@@ -11,7 +11,7 @@ use dto::{
     PatchDefinitionRequest,
 };
 
-use crate::errors;
+use crate::{domain::task_definition::dto::ListTaskDefinitionsResponse, errors};
 
 #[async_trait::async_trait]
 pub trait TaskDefinitionRepository {
@@ -19,6 +19,11 @@ pub trait TaskDefinitionRepository {
         &self,
         params: ListTaskDefinitionsParams,
     ) -> errors::Result<Vec<entities::task_definition::Model>>;
+
+    async fn count_task_definitions(
+        &self,
+        params: CountTaskDefinitionsParams,
+    ) -> errors::Result<u64>;
 
     async fn create_task_definition(
         &self,
@@ -43,7 +48,7 @@ pub trait TaskDefinitionService {
     async fn list_task_definitions(
         &self,
         params: ListTaskDefinitionsRequest,
-    ) -> errors::Result<Vec<entities::task_definition::Model>>;
+    ) -> errors::Result<ListTaskDefinitionsResponse>;
 
     async fn delete_task_definition(&self, params: DeleteDefinitionRequest) -> errors::Result<()>;
 }
