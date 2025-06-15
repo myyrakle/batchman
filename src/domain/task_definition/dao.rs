@@ -10,6 +10,12 @@ pub struct ListTaskDefinitionsParams {
     pub order_by_desc: Option<entities::task_definition::Column>,
 }
 
+#[derive(Debug, Default)]
+pub struct CountTaskDefinitionsParams {
+    pub name: Option<String>,
+    pub contains_name: Option<String>,
+}
+
 #[derive(Debug)]
 pub struct CreateTaskDefinitionParams {
     pub name: String,        // task name

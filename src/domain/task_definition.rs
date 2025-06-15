@@ -20,6 +20,11 @@ pub trait TaskDefinitionRepository {
         params: ListTaskDefinitionsParams,
     ) -> errors::Result<Vec<entities::task_definition::Model>>;
 
+    async fn count_task_definitions(
+        &self,
+        params: CountTaskDefinitionsParams,
+    ) -> errors::Result<u64>;
+
     async fn create_task_definition(
         &self,
         params: CreateTaskDefinitionParams,
