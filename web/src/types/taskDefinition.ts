@@ -1,8 +1,8 @@
 export interface TaskDefinitionSearchParams {
   keyword?: string;
   status?: 'ACTIVE' | 'INACTIVE';
-  page: number;
-  size: number;
+  page_number: number;
+  page_size: number;
 }
 
 export interface CreateTaskDefinitionFormData {
