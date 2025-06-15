@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use crate::{
-    domain::task_definition::dto::{ListTaskDefinitionsItem, ListTaskDefinitionsResponse},
+    domain::task_definition::{
+        dao::CountTaskDefinitionsParams,
+        dto::{ListTaskDefinitionsItem, ListTaskDefinitionsResponse},
+    },
     errors,
 };
 
@@ -135,10 +138,18 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                     None => vec![],
                 },
                 name: params.query.name.clone(),
-                contains_name: params.query.contains_name,
+                contains_name: params.query.contains_name.clone(),
                 limit: Some(limit),
                 offset: Some(offset),
                 ..Default::default()
+            })
+            .await?;
+
+        let total_count = self
+            .task_definition_repository
+            .count_task_definitions(CountTaskDefinitionsParams {
+                name: params.query.name,
+                contains_name: params.query.contains_name,
             })
             .await?;
 
@@ -147,6 +158,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                 .into_iter()
                 .map(ListTaskDefinitionsItem::from)
                 .collect(),
+            total_count,
         };
 
         Ok(response)
