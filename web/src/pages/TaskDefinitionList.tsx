@@ -75,7 +75,7 @@ const TaskDefinitionList: React.FC = () => {
 
   const handleCreateVersion = (task: TaskDefinition) => {
     setSelectedTask(task);
-    setIsVersionModalOpen(true);
+    setIsCreateModalOpen(true);
   };
 
   const handleCreateTaskSubmit = async (data: CreateTaskDefinitionFormData) => {
@@ -209,8 +209,13 @@ const TaskDefinitionList: React.FC = () => {
 
       <CreateTaskDefinitionModal
         open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setSelectedTask(null);
+        }}
         onSubmit={handleCreateTaskSubmit}
+        baseTaskDefinition={selectedTask || undefined}
+        isVersion={!!selectedTask}
       />
 
       <CreateVersionModal
