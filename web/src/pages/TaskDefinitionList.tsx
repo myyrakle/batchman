@@ -22,6 +22,7 @@ const TaskDefinitionList: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<TaskDefinition | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState(searchParams.get('contains_name') || '');
 
   const currentPage = Number(searchParams.get('page_number')) || 1;
   const currentPageSize = Number(searchParams.get('page_size')) || 10;
@@ -37,8 +38,8 @@ const TaskDefinitionList: React.FC = () => {
         task_definition_id: searchParams.get('task_definition_id') ? Number(searchParams.get('task_definition_id')) : undefined,
       };
       const result = await listTaskDefinitions(params);
-
-      if(result.response instanceof ErrorResponse) {
+      
+      if (result.response instanceof ErrorResponse) {
         setError('작업정의 목록을 불러오는데 실패했습니다.');
         console.error('Failed to fetch task definitions:', result.response.error_code, result.response.message);
       } else {
@@ -55,17 +56,21 @@ const TaskDefinitionList: React.FC = () => {
 
   useEffect(() => {
     fetchTaskDefinitions();
-  }, [searchParams]);
+  }, [currentPage, currentPageSize, searchParams]);
 
   const handleSearch = (params: ListTaskDefinitionsParams) => {
     const newParams = new URLSearchParams(searchParams);
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        newParams.set(key, String(value));
-      } else {
-        newParams.delete(key);
-      }
-    });
+    if (params.contains_name) {
+      newParams.set('contains_name', params.contains_name);
+    } else {
+      newParams.delete('contains_name');
+    }
+    if (params.page_number) {
+      newParams.set('page_number', params.page_number.toString());
+    }
+    if (params.page_size) {
+      newParams.set('page_size', params.page_size.toString());
+    }
     setSearchParams(newParams);
   };
 
@@ -156,16 +161,18 @@ const TaskDefinitionList: React.FC = () => {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4">작업정의 목록</Typography>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" component="h1">
+          작업정의 목록
+        </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleCreateTask}
           disabled={isLoading}
         >
-          새 작업정의
+          새 작업정의 생성
         </Button>
       </Box>
 
@@ -173,11 +180,13 @@ const TaskDefinitionList: React.FC = () => {
         searchParams={{
           page_number: currentPage,
           page_size: currentPageSize,
+          contains_name: searchText,
         }}
-        onSearchParamsChange={handleSearch}
+        onSearchParamsChange={(params) => setSearchText(params.contains_name || '')}
         onSearch={() => handleSearch({
           page_number: 1,
           page_size: currentPageSize,
+          contains_name: searchText,
         })}
       />
 
