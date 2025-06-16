@@ -8,29 +8,44 @@ import {
   TableRow,
   Paper,
   IconButton,
-  CircularProgress,
   Box,
+  Skeleton,
 } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { TaskDefinition } from '../api';
-import { formatDate } from '../utils';
 
 interface TaskDefinitionTableProps {
   taskDefinitions: TaskDefinition[];
-  onVersionCreate: (task: TaskDefinition) => void;
   onRowClick: (task: TaskDefinition) => void;
   onDelete: (task: TaskDefinition) => void;
+  onVersionCreate: (task: TaskDefinition) => void;
   isLoading?: boolean;
 }
 
 const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
   taskDefinitions,
-  onVersionCreate,
   onRowClick,
   onDelete,
+  onVersionCreate,
   isLoading = false,
 }) => {
+  const renderSkeletonRow = () => (
+    <TableRow>
+      <TableCell><Skeleton variant="text" sx={{ bgcolor: 'grey.200' }} /></TableCell>
+      <TableCell><Skeleton variant="text" sx={{ bgcolor: 'grey.200' }} /></TableCell>
+      <TableCell><Skeleton variant="text" sx={{ bgcolor: 'grey.200' }} /></TableCell>
+      <TableCell><Skeleton variant="text" sx={{ bgcolor: 'grey.200' }} /></TableCell>
+      <TableCell><Skeleton variant="text" sx={{ bgcolor: 'grey.200' }} /></TableCell>
+      <TableCell>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Skeleton variant="circular" width={32} height={32} sx={{ bgcolor: 'grey.200' }} />
+          <Skeleton variant="circular" width={32} height={32} sx={{ bgcolor: 'grey.200' }} />
+        </Box>
+      </TableCell>
+    </TableRow>
+  );
+
   return (
     <TableContainer component={Paper}>
       <Table>
@@ -38,60 +53,49 @@ const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
           <TableRow>
             <TableCell>ID</TableCell>
             <TableCell>이름</TableCell>
-            <TableCell>버전</TableCell>
             <TableCell>이미지</TableCell>
+            <TableCell>명령어</TableCell>
             <TableCell>생성일</TableCell>
             <TableCell>작업</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={6}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                  <CircularProgress />
-                </Box>
-              </TableCell>
-            </TableRow>
-          ) : taskDefinitions.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} align="center">
-                작업정의가 없습니다.
-              </TableCell>
-            </TableRow>
+            Array.from({ length: 5 }).map((_, index) => (
+              <React.Fragment key={index}>
+                {renderSkeletonRow()}
+              </React.Fragment>
+            ))
           ) : (
             taskDefinitions.map((task) => (
               <TableRow
                 key={task.id}
-                hover
                 onClick={() => onRowClick(task)}
-                sx={{ cursor: 'pointer' }}
+                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' } }}
               >
                 <TableCell>{task.id}</TableCell>
                 <TableCell>{task.name}</TableCell>
-                <TableCell>{task.version}</TableCell>
                 <TableCell>{task.image}</TableCell>
-                <TableCell>{formatDate(task.created_at)}</TableCell>
+                <TableCell>{task.command}</TableCell>
+                <TableCell>{new Date(task.created_at).toLocaleString()}</TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <IconButton
+                      size="small"
                       onClick={(e) => {
                         e.stopPropagation();
                         onVersionCreate(task);
                       }}
-                      size="small"
-                      title="새 버전 생성"
                     >
-                      <ContentCopyIcon />
+                      <AddIcon />
                     </IconButton>
                     <IconButton
+                      size="small"
                       onClick={(e) => {
                         e.stopPropagation();
                         onDelete(task);
                       }}
-                      size="small"
-                      color="error"
-                      title="삭제"
+                      sx={{ color: 'error.main' }}
                     >
                       <DeleteIcon />
                     </IconButton>
