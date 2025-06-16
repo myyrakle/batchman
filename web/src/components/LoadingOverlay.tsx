@@ -18,13 +18,13 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message = '로딩 중..
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
         backdropFilter: 'blur(4px)',
         zIndex: 9999,
       }}
     >
       <CircularProgress />
-      <Typography variant="h6" sx={{ mt: 2 }}>
+      <Typography variant="h6" sx={{ mt: 2, color: 'white' }}>
         {message}
       </Typography>
     </Box>
