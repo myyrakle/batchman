@@ -189,25 +189,8 @@ const TaskDefinitionList: React.FC = () => {
           onRowClick={handleRowClick}
           onDelete={handleDelete}
           onVersionCreate={handleCreateVersion}
+          isLoading={isLoading}
         />
-        {isLoading && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-              zIndex: 1,
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        )}
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>

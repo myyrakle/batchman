@@ -1,28 +1,14 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Divider from '@mui/material/Divider';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import WorkIcon from '@mui/icons-material/Work';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import AccountCircle from '@mui/icons-material/AccountCircle';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
 import TaskDefinitionList from './pages/TaskDefinitionList';
+import JobList from './pages/JobList';
+import ScheduleList from './pages/ScheduleList';
 
-const drawerWidth = 240;
-
-const darkTheme = createTheme({
+const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
@@ -35,93 +21,40 @@ const darkTheme = createTheme({
   },
 });
 
-function Layout() {
-  return (
-    <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Batch System
-          </Typography>
-          <IconButton
-            size="large"
-            edge="end"
-            color="inherit"
-            aria-label="account"
-          >
-            <AccountCircle />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
-          <List>
-          <Divider />
-            <ListItem component="a" href="/dashboard">
-              <ListItemIcon>
-                <DashboardIcon />
-              </ListItemIcon>
-              <ListItemText primary="Dashboard" />
-            </ListItem>
-            <Divider />
-            <ListItem component="a" href="/task-definition">
-              <ListItemIcon>
-                <AssignmentIcon />
-              </ListItemIcon>
-              <ListItemText primary="Task Definition" />
-            </ListItem>
-            <Divider />
-            <ListItem component="a" href="/job">
-              <ListItemIcon>
-                <WorkIcon />
-              </ListItemIcon>
-              <ListItemText primary="Job" />
-            </ListItem>
-            <Divider />
-            <ListItem component="a" href="/schedule">
-              <ListItemIcon>
-                <ScheduleIcon />
-              </ListItemIcon>
-              <ListItemText primary="Schedule" />
-            </ListItem>
-            <Divider />
-          </List>
-        </Box>
-      </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <Toolbar />
-        <Routes>
-          <Route path="/dashboard" element={<div>Dashboard Page</div>} />
-          <Route path="/task-definition" element={<TaskDefinitionList />} />
-          <Route path="/job" element={<div>Job Page</div>} />
-          <Route path="/schedule" element={<div>Schedule Page</div>} />
-          <Route path="/" element={<div>Dashboard Page</div>} />
-        </Routes>
-      </Box>
-    </Box>
-  );
-}
+const AppContent: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
 
-function App() {
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
   return (
-    <ThemeProvider theme={darkTheme}>
+    <Layout isLoading={isLoading}>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/task-definitions" element={<TaskDefinitionList />} />
+        <Route path="/jobs" element={<JobList />} />
+        <Route path="/schedules" element={<ScheduleList />} />
+      </Routes>
+    </Layout>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Layout />
+        <AppContent />
       </Router>
     </ThemeProvider>
   );
-}
+};
 
 export default App;
