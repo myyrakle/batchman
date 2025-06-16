@@ -12,6 +12,8 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -19,6 +21,7 @@ import {
   Assignment as AssignmentIcon,
   Schedule as ScheduleIcon,
   Work as WorkIcon,
+  AccountCircle as AccountCircleIcon,
 } from '@mui/icons-material';
 import LoadingOverlay from './LoadingOverlay';
 
@@ -31,10 +34,19 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, isLoading = false }) => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const location = useLocation();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleAccountMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleAccountMenuClose = () => {
+    setAnchorEl(null);
   };
 
   const menuItems = [
@@ -94,6 +106,36 @@ const Layout: React.FC<LayoutProps> = ({ children, isLoading = false }) => {
           >
             <MenuIcon />
           </IconButton>
+          <Box sx={{ flexGrow: 1 }} />
+          <IconButton
+            size="large"
+            edge="end"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleAccountMenuOpen}
+            color="inherit"
+          >
+            <AccountCircleIcon />
+          </IconButton>
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(anchorEl)}
+            onClose={handleAccountMenuClose}
+          >
+            <MenuItem onClick={handleAccountMenuClose}>프로필</MenuItem>
+            <MenuItem onClick={handleAccountMenuClose}>로그아웃</MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
       <Box
