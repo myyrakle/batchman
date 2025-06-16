@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Alert, Snackbar, Pagination } from '@mui/material';
+import { Box, Button, Typography, Alert, Snackbar, Pagination, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { CreateTaskDefinitionFormData } from '../types/taskDefinition';
 import TaskDefinitionTable from '../components/TaskDefinitionTable';
@@ -121,13 +121,6 @@ const TaskDefinitionList: React.FC = () => {
     setSearchParams(newParams);
   };
 
-  const handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newParams = new URLSearchParams(searchParams);
-    newParams.set('page_size', event.target.value);
-    newParams.set('page_number', '1'); // 페이지 크기가 변경되면 첫 페이지로 이동
-    setSearchParams(newParams);
-  };
-
   const handleRowClick = (task: TaskDefinition) => {
     setSelectedTask(task);
     setIsDetailModalOpen(true);
@@ -190,24 +183,34 @@ const TaskDefinitionList: React.FC = () => {
         })}
       />
 
-      <TaskDefinitionTable
-        taskDefinitions={taskDefinitions}
-        onVersionCreate={handleCreateVersion}
-        onRowClick={handleRowClick}
-        onDelete={handleDelete}
-        isLoading={isLoading}
-      />
+      <Box sx={{ position: 'relative', minHeight: '400px' }}>
+        <TaskDefinitionTable
+          taskDefinitions={taskDefinitions}
+          onRowClick={handleRowClick}
+          onDelete={handleDelete}
+          onVersionCreate={handleCreateVersion}
+        />
+        {isLoading && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              zIndex: 1,
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
+      </Box>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 3, gap: 2 }}>
-        <select
-          value={currentPageSize}
-          onChange={handlePageSizeChange}
-          style={{ padding: '8px', borderRadius: '4px' }}
-        >
-          <option value="10">10개씩 보기</option>
-          <option value="20">20개씩 보기</option>
-          <option value="50">50개씩 보기</option>
-        </select>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
         <Pagination
           count={Math.ceil(total / currentPageSize)}
           page={currentPage}
