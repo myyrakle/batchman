@@ -17,6 +17,8 @@ import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
   Assignment as AssignmentIcon,
+  Schedule as ScheduleIcon,
+  Work as WorkIcon,
 } from '@mui/icons-material';
 import LoadingOverlay from './LoadingOverlay';
 
@@ -38,6 +40,8 @@ const Layout: React.FC<LayoutProps> = ({ children, isLoading = false }) => {
   const menuItems = [
     { text: '대시보드', icon: <DashboardIcon />, path: '/' },
     { text: '작업 정의', icon: <AssignmentIcon />, path: '/task-definitions' },
+    { text: '작업', icon: <WorkIcon />, path: '/jobs' },
+    { text: '스케줄러', icon: <ScheduleIcon />, path: '/schedules' },
   ];
 
   const drawer = (

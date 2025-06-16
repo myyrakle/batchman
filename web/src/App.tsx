@@ -5,6 +5,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import TaskDefinitionList from './pages/TaskDefinitionList';
+import JobList from './pages/JobList';
+import ScheduleList from './pages/ScheduleList';
 
 const theme = createTheme({
   palette: {
@@ -30,6 +32,8 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/task-definitions" element={<TaskDefinitionList />} />
+        <Route path="/jobs" element={<JobList />} />
+        <Route path="/schedules" element={<ScheduleList />} />
       </Routes>
     </Layout>
   );
