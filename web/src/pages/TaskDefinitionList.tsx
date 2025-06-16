@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Alert, Snackbar, Pagination } from '@mui/material';
+import { Box, Button, Typography, Alert, Snackbar, Pagination, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { CreateTaskDefinitionFormData } from '../types/taskDefinition';
 import TaskDefinitionTable from '../components/TaskDefinitionTable';
@@ -22,6 +22,7 @@ const TaskDefinitionList: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<TaskDefinition | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState(searchParams.get('contains_name') || '');
 
   const currentPage = Number(searchParams.get('page_number')) || 1;
   const currentPageSize = Number(searchParams.get('page_size')) || 10;
@@ -37,8 +38,8 @@ const TaskDefinitionList: React.FC = () => {
         task_definition_id: searchParams.get('task_definition_id') ? Number(searchParams.get('task_definition_id')) : undefined,
       };
       const result = await listTaskDefinitions(params);
-
-      if(result.response instanceof ErrorResponse) {
+      
+      if (result.response instanceof ErrorResponse) {
         setError('작업정의 목록을 불러오는데 실패했습니다.');
         console.error('Failed to fetch task definitions:', result.response.error_code, result.response.message);
       } else {
@@ -55,17 +56,21 @@ const TaskDefinitionList: React.FC = () => {
 
   useEffect(() => {
     fetchTaskDefinitions();
-  }, [searchParams]);
+  }, [currentPage, currentPageSize, searchParams]);
 
   const handleSearch = (params: ListTaskDefinitionsParams) => {
     const newParams = new URLSearchParams(searchParams);
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        newParams.set(key, String(value));
-      } else {
-        newParams.delete(key);
-      }
-    });
+    if (params.contains_name) {
+      newParams.set('contains_name', params.contains_name);
+    } else {
+      newParams.delete('contains_name');
+    }
+    if (params.page_number) {
+      newParams.set('page_number', params.page_number.toString());
+    }
+    if (params.page_size) {
+      newParams.set('page_size', params.page_size.toString());
+    }
     setSearchParams(newParams);
   };
 
@@ -116,13 +121,6 @@ const TaskDefinitionList: React.FC = () => {
     setSearchParams(newParams);
   };
 
-  const handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newParams = new URLSearchParams(searchParams);
-    newParams.set('page_size', event.target.value);
-    newParams.set('page_number', '1'); // 페이지 크기가 변경되면 첫 페이지로 이동
-    setSearchParams(newParams);
-  };
-
   const handleRowClick = (task: TaskDefinition) => {
     setSelectedTask(task);
     setIsDetailModalOpen(true);
@@ -156,16 +154,18 @@ const TaskDefinitionList: React.FC = () => {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4">작업정의 목록</Typography>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" component="h1">
+          작업정의 목록
+        </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleCreateTask}
           disabled={isLoading}
         >
-          새 작업정의
+          새 작업정의 생성
         </Button>
       </Box>
 
@@ -173,32 +173,44 @@ const TaskDefinitionList: React.FC = () => {
         searchParams={{
           page_number: currentPage,
           page_size: currentPageSize,
+          contains_name: searchText,
         }}
-        onSearchParamsChange={handleSearch}
+        onSearchParamsChange={(params) => setSearchText(params.contains_name || '')}
         onSearch={() => handleSearch({
           page_number: 1,
           page_size: currentPageSize,
+          contains_name: searchText,
         })}
       />
 
-      <TaskDefinitionTable
-        taskDefinitions={taskDefinitions}
-        onVersionCreate={handleCreateVersion}
-        onRowClick={handleRowClick}
-        onDelete={handleDelete}
-        isLoading={isLoading}
-      />
+      <Box sx={{ position: 'relative', minHeight: '400px' }}>
+        <TaskDefinitionTable
+          taskDefinitions={taskDefinitions}
+          onRowClick={handleRowClick}
+          onDelete={handleDelete}
+          onVersionCreate={handleCreateVersion}
+        />
+        {isLoading && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              zIndex: 1,
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
+      </Box>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 3, gap: 2 }}>
-        <select
-          value={currentPageSize}
-          onChange={handlePageSizeChange}
-          style={{ padding: '8px', borderRadius: '4px' }}
-        >
-          <option value="10">10개씩 보기</option>
-          <option value="20">20개씩 보기</option>
-          <option value="50">50개씩 보기</option>
-        </select>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
         <Pagination
           count={Math.ceil(total / currentPageSize)}
           page={currentPage}

@@ -4,11 +4,11 @@ import {
   TextField,
   Button,
 } from '@mui/material';
-import { TaskDefinitionSearchParams } from '../types/taskDefinition';
+import { ListTaskDefinitionsParams } from '../api';
 
 interface TaskDefinitionSearchProps {
-  searchParams: TaskDefinitionSearchParams;
-  onSearchParamsChange: (params: TaskDefinitionSearchParams) => void;
+  searchParams: ListTaskDefinitionsParams;
+  onSearchParamsChange: (params: ListTaskDefinitionsParams) => void;
   onSearch: () => void;
 }
 
@@ -17,16 +17,30 @@ const TaskDefinitionSearch: React.FC<TaskDefinitionSearchProps> = ({
   onSearchParamsChange,
   onSearch,
 }) => {
+  const handleSearch = () => {
+    onSearchParamsChange({
+      ...searchParams,
+      page_number: 1, // 검색 시 첫 페이지로 이동
+    });
+    onSearch();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
       <TextField
         label="검색어"
-        value={searchParams.keyword}
-        onChange={(e) => onSearchParamsChange({ ...searchParams, keyword: e.target.value })}
+        value={searchParams.contains_name || ''}
+        onChange={(e) => onSearchParamsChange({ ...searchParams, contains_name: e.target.value })}
+        onKeyPress={handleKeyPress}
         size="small"
       />
-     
-      <Button variant="contained" onClick={onSearch}>
+      <Button variant="contained" onClick={handleSearch}>
         검색
       </Button>
     </Box>
