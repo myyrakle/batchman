@@ -6,6 +6,7 @@ import TaskDefinitionTable from '../components/TaskDefinitionTable';
 import TaskDefinitionSearch from '../components/TaskDefinitionSearch';
 import CreateTaskDefinitionModal from '../components/CreateTaskDefinitionModal';
 import CreateVersionModal from '../components/CreateVersionModal';
+import TaskDefinitionDetailModal from '../components/TaskDefinitionDetailModal';
 import { createTaskDefinition, ErrorResponse, listTaskDefinitions, ListTaskDefinitionsParams, TaskDefinition } from '../api';
 import { useSearchParams } from 'react-router-dom';
 
@@ -18,6 +19,7 @@ const TaskDefinitionList: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<TaskDefinition | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const currentPage = Number(searchParams.get('page_number')) || 1;
   const currentPageSize = Number(searchParams.get('page_size')) || 10;
@@ -119,6 +121,11 @@ const TaskDefinitionList: React.FC = () => {
     setSearchParams(newParams);
   };
 
+  const handleRowClick = (task: TaskDefinition) => {
+    setSelectedTask(task);
+    setIsDetailModalOpen(true);
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
@@ -148,6 +155,7 @@ const TaskDefinitionList: React.FC = () => {
       <TaskDefinitionTable
         taskDefinitions={taskDefinitions}
         onVersionCreate={handleCreateVersion}
+        onRowClick={handleRowClick}
         isLoading={isLoading}
       />
 
@@ -179,6 +187,12 @@ const TaskDefinitionList: React.FC = () => {
         open={isVersionModalOpen}
         onClose={() => setIsVersionModalOpen(false)}
         onSubmit={handleCreateVersionSubmit}
+        taskDefinition={selectedTask}
+      />
+
+      <TaskDefinitionDetailModal
+        open={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
         taskDefinition={selectedTask}
       />
 
