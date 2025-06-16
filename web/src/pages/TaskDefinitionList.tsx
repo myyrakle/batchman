@@ -7,7 +7,8 @@ import TaskDefinitionSearch from '../components/TaskDefinitionSearch';
 import CreateTaskDefinitionModal from '../components/CreateTaskDefinitionModal';
 import CreateVersionModal from '../components/CreateVersionModal';
 import TaskDefinitionDetailModal from '../components/TaskDefinitionDetailModal';
-import { createTaskDefinition, ErrorResponse, listTaskDefinitions, ListTaskDefinitionsParams, TaskDefinition } from '../api';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import { createTaskDefinition, ErrorResponse, listTaskDefinitions, ListTaskDefinitionsParams, TaskDefinition, deleteTaskDefinition } from '../api';
 import { useSearchParams } from 'react-router-dom';
 
 const TaskDefinitionList: React.FC = () => {
@@ -16,10 +17,11 @@ const TaskDefinitionList: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskDefinition | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const currentPage = Number(searchParams.get('page_number')) || 1;
   const currentPageSize = Number(searchParams.get('page_size')) || 10;
@@ -126,6 +128,33 @@ const TaskDefinitionList: React.FC = () => {
     setIsDetailModalOpen(true);
   };
 
+  const handleDelete = (task: TaskDefinition) => {
+    setSelectedTask(task);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedTask) return;
+
+    try {
+      setIsLoading(true);
+      const result = await deleteTaskDefinition(selectedTask.id);
+
+      if(result.response instanceof ErrorResponse) {
+        setError('작업정의 삭제에 실패했습니다.');
+        console.error('Failed to delete task definition:', result.response.error_code, result.response.message);
+      } else {
+        setIsDeleteModalOpen(false);
+        fetchTaskDefinitions(); // 목록 새로고침
+      }
+    } catch (err) {
+      setError('작업정의 삭제에 실패했습니다.');
+      console.error('Failed to delete task definition:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
@@ -156,6 +185,7 @@ const TaskDefinitionList: React.FC = () => {
         taskDefinitions={taskDefinitions}
         onVersionCreate={handleCreateVersion}
         onRowClick={handleRowClick}
+        onDelete={handleDelete}
         isLoading={isLoading}
       />
 
@@ -194,6 +224,14 @@ const TaskDefinitionList: React.FC = () => {
         open={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         taskDefinition={selectedTask}
+      />
+
+      <DeleteConfirmationModal
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="작업정의 삭제"
+        message={`정말로 "${selectedTask?.name}" 작업정의를 삭제하시겠습니까?`}
       />
 
       <Snackbar
