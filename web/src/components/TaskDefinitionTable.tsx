@@ -12,6 +12,7 @@ import {
   Box,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { TaskDefinition } from '../api';
 import { formatDate } from '../utils';
 
@@ -19,6 +20,7 @@ interface TaskDefinitionTableProps {
   taskDefinitions: TaskDefinition[];
   onVersionCreate: (task: TaskDefinition) => void;
   onRowClick: (task: TaskDefinition) => void;
+  onDelete: (task: TaskDefinition) => void;
   isLoading?: boolean;
 }
 
@@ -26,6 +28,7 @@ const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
   taskDefinitions,
   onVersionCreate,
   onRowClick,
+  onDelete,
   isLoading = false,
 }) => {
   return (
@@ -70,15 +73,29 @@ const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
                 <TableCell>{task.image}</TableCell>
                 <TableCell>{formatDate(task.created_at)}</TableCell>
                 <TableCell>
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onVersionCreate(task);
-                    }}
-                    size="small"
-                  >
-                    <ContentCopyIcon />
-                  </IconButton>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onVersionCreate(task);
+                      }}
+                      size="small"
+                      title="새 버전 생성"
+                    >
+                      <ContentCopyIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(task);
+                      }}
+                      size="small"
+                      color="error"
+                      title="삭제"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))
