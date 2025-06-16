@@ -17,17 +17,22 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { CreateTaskDefinitionFormData } from '../types/taskDefinition';
+import { TaskDefinition } from '../api';
 
 interface CreateTaskDefinitionModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: CreateTaskDefinitionFormData) => void;
+  baseTaskDefinition?: TaskDefinition;
+  isVersion?: boolean;
 }
 
 const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
   open,
   onClose,
   onSubmit,
+  baseTaskDefinition,
+  isVersion = false,
 }) => {
   const initialFormData: CreateTaskDefinitionFormData = {
     name: '',
@@ -47,10 +52,26 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
   const [formData, setFormData] = useState<CreateTaskDefinitionFormData>(initialFormData);
 
   useEffect(() => {
-    if (open) {
+    if (open && baseTaskDefinition) {
+      const env = baseTaskDefinition.env ? JSON.parse(baseTaskDefinition.env) : [];
+      setFormData({
+        name:baseTaskDefinition.name,
+        image: baseTaskDefinition.image,
+        command: baseTaskDefinition.command || '',
+        env: env.length > 0 ? env : [{ key: '', value: '' }],
+        resources: {
+          memory: {
+            value: baseTaskDefinition.memory_limit || 1,
+            unit: 'm',
+          },
+          cpu: baseTaskDefinition.cpu_limit || 1,
+        },
+        description: baseTaskDefinition.description,
+      });
+    } else if (open) {
       setFormData(initialFormData);
     }
-  }, [open]);
+  }, [open, baseTaskDefinition, isVersion]);
 
   const handleClose = () => {
     setFormData(initialFormData);
@@ -83,7 +104,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <form onSubmit={handleSubmit}>
-        <DialogTitle>새 작업정의 생성</DialogTitle>
+        <DialogTitle>{isVersion ? '새 버전 생성' : '새 작업정의 생성'}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <TextField
@@ -217,8 +238,10 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>취소</Button>
-          <Button type="submit" variant="contained">생성</Button>
+          <Button onClick={handleClose}>취소</Button>
+          <Button type="submit" variant="contained">
+            {isVersion ? '버전 생성' : '생성'}
+          </Button>
         </DialogActions>
       </form>
     </Dialog>
