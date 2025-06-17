@@ -43,6 +43,11 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
                 find_query.filter(entities::task_definition::Column::Name.contains(contains_name));
         }
 
+        if let Some(is_latest) = params.is_latest {
+            find_query =
+                find_query.filter(entities::task_definition::Column::IsLatest.eq(is_latest));
+        }
+
         if let Some(order_by_desc) = params.order_by_desc {
             find_query = find_query.order_by_desc(order_by_desc);
         }

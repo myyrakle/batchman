@@ -149,6 +149,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                 },
                 name: params.query.name.clone(),
                 contains_name: params.query.contains_name.clone(),
+                is_latest: params.query.is_latest_only,
                 limit: Some(limit),
                 offset: Some(offset),
                 ..Default::default()

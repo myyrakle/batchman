@@ -5,6 +5,7 @@ pub struct ListTaskDefinitionsParams {
     pub task_definition_ids: Vec<i64>,
     pub name: Option<String>,
     pub contains_name: Option<String>,
+    pub is_latest: Option<bool>,
     pub limit: Option<u64>,
     pub offset: Option<u64>,
     pub order_by_desc: Option<entities::task_definition::Column>,
