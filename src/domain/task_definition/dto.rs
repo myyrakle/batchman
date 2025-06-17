@@ -67,6 +67,8 @@ pub struct ListTaskDefinitionsItem {
     pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
 
     pub created_at: chrono::DateTime<Utc>,
+    pub enabled: bool,
+    pub is_latest: bool,
 }
 
 #[derive(Serialize)]
