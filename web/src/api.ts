@@ -92,6 +92,10 @@ export interface StopJobRequest {
     job_id: number;
 }
 
+export interface SubmitJobResponse {
+  job_id: number;
+}
+
 // Schedule 관련 타입
 export interface Schedule {
     id: number;
@@ -208,7 +212,7 @@ export const deleteTaskDefinition = async (id: number): Promise<ApiResponse<void
 };
 
 // Job API
-export const submitJob = async (request: SubmitJobRequest): Promise<ApiResponse<number | ErrorResponse>> => {
+export const submitJob = async (request: SubmitJobRequest): Promise<ApiResponse<SubmitJobResponse | ErrorResponse>> => {
   try {
     const response = await api.post('/jobs/submit', request);
     return {
