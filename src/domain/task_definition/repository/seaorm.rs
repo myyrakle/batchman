@@ -43,6 +43,11 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
                 find_query.filter(entities::task_definition::Column::Name.contains(contains_name));
         }
 
+        if let Some(is_latest) = params.is_latest {
+            find_query =
+                find_query.filter(entities::task_definition::Column::IsLatest.eq(is_latest));
+        }
+
         if let Some(order_by_desc) = params.order_by_desc {
             find_query = find_query.order_by_desc(order_by_desc);
         }
@@ -96,6 +101,8 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
             cpu_limit: Set(params.cpu_limit),
             description: Set(params.description),
             created_at: Set(chrono::Utc::now()),
+            enabled: Set(true),
+            is_latest: Set(true),
         };
 
         let saved = new_definition.insert(&self.connection).await?;

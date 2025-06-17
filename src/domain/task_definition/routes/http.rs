@@ -33,6 +33,8 @@ impl From<entities::task_definition::Model> for ListTaskDefinitionsItem {
             memory_limit: model.memory_limit,
             cpu_limit: model.cpu_limit,
             created_at: model.created_at,
+            enabled: model.enabled,
+            is_latest: model.is_latest,
         }
     }
 }

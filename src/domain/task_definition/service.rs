@@ -58,6 +58,15 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
 
             if !task_definitions.is_empty() {
                 version = task_definitions[0].version + 1;
+
+                // 기존 작업정의의 is_latest 를 false 로 변경 (TODO: Transaction 처리 필요)
+                self.task_definition_repository
+                    .patch_task_definition(PatchTaskDefinitionParams {
+                        task_definition_id: task_definitions[0].id,
+                        is_latest: Some(false),
+                        ..Default::default()
+                    })
+                    .await?;
             }
         }
 
@@ -106,6 +115,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                 env: request.request.env,
                 memory_limit: request.request.memory_limit,
                 cpu_limit: request.request.cpu_limit,
+                enabled: request.request.enabled,
                 ..Default::default()
             })
             .await;
@@ -139,6 +149,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                 },
                 name: params.query.name.clone(),
                 contains_name: params.query.contains_name.clone(),
+                is_latest: params.query.is_latest_only,
                 limit: Some(limit),
                 offset: Some(offset),
                 ..Default::default()

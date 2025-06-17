@@ -27,6 +27,7 @@ pub struct PatchTaskDefinitionBody {
     pub env: Option<String>,         // environment variables
     pub memory_limit: Option<u32>,   // memory limit in MB
     pub cpu_limit: Option<u32>,      // cpu limit (default 1024)
+    pub enabled: Option<bool>,
 }
 
 #[derive(Debug, Clone)]
@@ -40,6 +41,7 @@ pub struct ListTaskDefinitionsQuery {
     pub task_definition_id: Option<i64>,
     pub contains_name: Option<String>,
     pub name: Option<String>,
+    pub is_latest_only: Option<bool>,
     pub page_number: u64,
     pub page_size: u64,
 }
@@ -65,6 +67,8 @@ pub struct ListTaskDefinitionsItem {
     pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
 
     pub created_at: chrono::DateTime<Utc>,
+    pub enabled: bool,
+    pub is_latest: bool,
 }
 
 #[derive(Serialize)]
