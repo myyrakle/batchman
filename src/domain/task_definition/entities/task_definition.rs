@@ -20,6 +20,9 @@ pub struct Model {
     pub cpu_limit: Option<u32>,    // cpu limit (default 1024)
 
     pub created_at: chrono::DateTime<Utc>,
+
+    pub enabled: bool,   // task definition is enabled
+    pub is_latest: bool, // task definition is latest
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
