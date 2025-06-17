@@ -158,6 +158,14 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
             model.cpu_limit = Set(Some(cpu_limit));
         }
 
+        if let Some(enabled) = params.enabled {
+            model.enabled = Set(enabled);
+        }
+
+        if let Some(is_latest) = params.is_latest {
+            model.is_latest = Set(is_latest);
+        }
+
         let _ = model.update(&self.connection).await?;
 
         Ok(())

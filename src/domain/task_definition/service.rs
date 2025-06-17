@@ -149,7 +149,11 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                 },
                 name: params.query.name.clone(),
                 contains_name: params.query.contains_name.clone(),
-                is_latest: params.query.is_latest_only,
+                is_latest: if let Some(true) = params.query.is_latest_only {
+                    Some(true)
+                } else {
+                    None
+                },
                 limit: Some(limit),
                 offset: Some(offset),
                 ..Default::default()

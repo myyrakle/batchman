@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Alert, Snackbar, Pagination, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, Alert, Snackbar, Pagination, CircularProgress, TextField, FormControlLabel, Switch } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { CreateTaskDefinitionFormData } from '../types/taskDefinition';
 import TaskDefinitionTable from '../components/TaskDefinitionTable';
@@ -10,6 +10,9 @@ import TaskDefinitionDetailModal from '../components/TaskDefinitionDetailModal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import { createTaskDefinition, ErrorResponse, listTaskDefinitions, ListTaskDefinitionsParams, TaskDefinition, deleteTaskDefinition } from '../api';
 import { useSearchParams } from 'react-router-dom';
+import {
+  Add as SearchIcon,
+} from '@mui/icons-material';
 
 const TaskDefinitionList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -23,6 +26,7 @@ const TaskDefinitionList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState(searchParams.get('contains_name') || '');
+  const [showLatestOnly, setShowLatestOnly] = useState(false);
 
   const currentPage = Number(searchParams.get('page_number')) || 1;
   const currentPageSize = Number(searchParams.get('page_size')) || 10;
@@ -33,10 +37,12 @@ const TaskDefinitionList: React.FC = () => {
       const params: ListTaskDefinitionsParams = {
         page_number: currentPage,
         page_size: currentPageSize,
-        contains_name: searchParams.get('contains_name') || undefined,
         name: searchParams.get('name') || undefined,
         task_definition_id: searchParams.get('task_definition_id') ? Number(searchParams.get('task_definition_id')) : undefined,
+        contains_name: searchParams.get('contains_name') || undefined,
+        is_latest_only: searchParams.get('is_latest_only') === 'true',
       };
+      console.log('API params:', params); // 디버깅용
       const result = await listTaskDefinitions(params);
       
       if (result.response instanceof ErrorResponse) {
@@ -55,21 +61,23 @@ const TaskDefinitionList: React.FC = () => {
   };
 
   useEffect(() => {
+    const isLatestOnly = searchParams.get('is_latest_only') === 'true';
+    setShowLatestOnly(isLatestOnly);
     fetchTaskDefinitions();
   }, [currentPage, currentPageSize, searchParams]);
 
   const handleSearch = (params: ListTaskDefinitionsParams) => {
     const newParams = new URLSearchParams(searchParams);
+    newParams.set('page_number', '1');
     if (params.contains_name) {
       newParams.set('contains_name', params.contains_name);
     } else {
       newParams.delete('contains_name');
     }
-    if (params.page_number) {
-      newParams.set('page_number', params.page_number.toString());
-    }
-    if (params.page_size) {
-      newParams.set('page_size', params.page_size.toString());
+    if (params.is_latest_only) {
+      newParams.set('is_latest_only', 'true');
+    } else {
+      newParams.delete('is_latest_only');
     }
     setSearchParams(newParams);
   };
@@ -169,19 +177,44 @@ const TaskDefinitionList: React.FC = () => {
         </Button>
       </Box>
 
-      <TaskDefinitionSearch
-        searchParams={{
-          page_number: currentPage,
-          page_size: currentPageSize,
-          contains_name: searchText,
-        }}
-        onSearchParamsChange={(params) => setSearchText(params.contains_name || '')}
-        onSearch={() => handleSearch({
-          page_number: 1,
-          page_size: currentPageSize,
-          contains_name: searchText,
-        })}
-      />
+      <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center' }}>
+        <TextField
+          label="검색"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          sx={{ width: '300px' }}
+        />
+        <Button
+          variant="contained"
+          startIcon={<SearchIcon />}
+          onClick={() => handleSearch({
+            page_number: 1,
+            page_size: currentPageSize,
+            contains_name: searchText,
+            is_latest_only: showLatestOnly,
+          })}
+        >
+          검색
+        </Button>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showLatestOnly}
+              onChange={(e) => {
+                const newValue = e.target.checked;
+                setShowLatestOnly(newValue);
+                handleSearch({
+                  page_number: 1,
+                  page_size: currentPageSize,
+                  contains_name: searchText,
+                  is_latest_only: newValue,
+                });
+              }}
+            />
+          }
+          label="최신 버전만 보기"
+        />
+      </Box>
 
       <Box sx={{ position: 'relative', minHeight: '400px' }}>
         <TaskDefinitionTable
