@@ -27,6 +27,7 @@ pub struct PatchTaskDefinitionBody {
     pub env: Option<String>,         // environment variables
     pub memory_limit: Option<u32>,   // memory limit in MB
     pub cpu_limit: Option<u32>,      // cpu limit (default 1024)
+    pub enabled: Option<bool>,
 }
 
 #[derive(Debug, Clone)]

@@ -115,6 +115,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
                 env: request.request.env,
                 memory_limit: request.request.memory_limit,
                 cpu_limit: request.request.cpu_limit,
+                enabled: request.request.enabled,
                 ..Default::default()
             })
             .await;
