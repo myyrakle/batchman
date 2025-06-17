@@ -43,6 +43,8 @@ pub struct PatchTaskDefinitionParams {
     pub env: Option<String>,
     pub memory_limit: Option<u32>,
     pub cpu_limit: Option<u32>,
+    pub enabled: Option<bool>,
+    pub is_latest: Option<bool>,
 }
 
 #[derive(Debug)]
