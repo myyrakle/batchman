@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -13,7 +13,9 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import { TaskDefinition } from '../api';
+import { PlayArrow as PlayArrowIcon } from '@mui/icons-material';
+import { TaskDefinition, ErrorResponse, submitJob } from '../api';
+import { useNavigate } from 'react-router-dom';
 
 interface TaskDefinitionDetailModalProps {
   open: boolean;
@@ -26,114 +28,178 @@ const TaskDefinitionDetailModal: React.FC<TaskDefinitionDetailModalProps> = ({
   onClose,
   taskDefinition,
 }) => {
+  const navigate = useNavigate();
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [jobName, setJobName] = useState('');
+
   if (!taskDefinition) return null;
 
   const env = taskDefinition.env ? JSON.parse(taskDefinition.env) : [];
 
+  const handleSubmitClick = () => {
+    setIsSubmitModalOpen(true);
+  };
+
+  const handleSubmitClose = () => {
+    setIsSubmitModalOpen(false);
+    setJobName('');
+  };
+
+  const handleSubmitConfirm = async () => {
+    try {
+      const result = await submitJob({
+        task_definition_id: taskDefinition.id,
+        job_name: jobName,
+      });
+
+      if ('error_code' in result.response) {
+        console.error('Failed to submit job:', result.response.error_code, result.response.message);
+      } else {
+        handleSubmitClose();
+        navigate('/jobs');
+      }
+    } catch (error) {
+      console.error('Failed to submit job:', error);
+    }
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>작업정의 상세 정보</DialogTitle>
-      <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-          <TextField
-            label="이름"
-            value={taskDefinition.name}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <DialogTitle>작업정의 상세 정보</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            <TextField
+              label="이름"
+              value={taskDefinition.name}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
 
-          <TextField
-            label="설명"
-            value={taskDefinition.description}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
+            <TextField
+              label="설명"
+              value={taskDefinition.description}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
 
-          <TextField
-            label="이미지"
-            value={taskDefinition.image}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
+            <TextField
+              label="이미지"
+              value={taskDefinition.image}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
 
-          <TextField
-            label="명령어"
-            value={taskDefinition.command || ''}
-            fullWidth
-            InputProps={{ readOnly: true }}
-          />
+            <TextField
+              label="명령어"
+              value={taskDefinition.command ? taskDefinition.command.replace(/\\"/g, '"') : ''}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
 
-          <Box>
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>환경 변수</Typography>
-            {env.length > 0 ? (
-              env.map((item: { key: string; value: string }, index: number) => (
-                <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+            <Box>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>환경 변수</Typography>
+              {env.length > 0 ? (
+                env.map((item: { key: string; value: string }, index: number) => (
+                  <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                    <TextField
+                      label="키"
+                      value={item.key}
+                      size="small"
+                      sx={{ flex: 1 }}
+                      InputProps={{ readOnly: true }}
+                    />
+                    <TextField
+                      label="값"
+                      value={item.value}
+                      size="small"
+                      sx={{ flex: 1 }}
+                      InputProps={{ readOnly: true }}
+                    />
+                  </Box>
+                ))
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  환경 변수가 없습니다.
+                </Typography>
+              )}
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ flex: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1 }}>
                   <TextField
-                    label="키"
-                    value={item.key}
-                    size="small"
+                    label="메모리 제한"
+                    value={taskDefinition.memory_limit || ''}
                     sx={{ flex: 1 }}
                     InputProps={{ readOnly: true }}
                   />
-                  <TextField
-                    label="값"
-                    value={item.value}
-                    size="small"
-                    sx={{ flex: 1 }}
-                    InputProps={{ readOnly: true }}
-                  />
+                  <FormControl sx={{ minWidth: 100 }}>
+                    <InputLabel>단위</InputLabel>
+                    <Select
+                      value="m"
+                      label="단위"
+                      disabled
+                    >
+                      <MenuItem value="m">MB</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Box>
-              ))
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                환경 변수가 없습니다.
-              </Typography>
-            )}
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              </Box>
+              <Box sx={{ flex: 1 }}>
                 <TextField
-                  label="메모리 제한"
-                  value={taskDefinition.memory_limit || ''}
-                  sx={{ flex: 1 }}
+                  label="CPU 제한"
+                  value={taskDefinition.cpu_limit || ''}
+                  fullWidth
                   InputProps={{ readOnly: true }}
                 />
-                <FormControl sx={{ minWidth: 100 }}>
-                  <InputLabel>단위</InputLabel>
-                  <Select
-                    value="m"
-                    label="단위"
-                    disabled
-                  >
-                    <MenuItem value="m">MB</MenuItem>
-                  </Select>
-                </FormControl>
               </Box>
             </Box>
-            <Box sx={{ flex: 1 }}>
-              <TextField
-                label="CPU 제한"
-                value={taskDefinition.cpu_limit || ''}
-                fullWidth
-                InputProps={{ readOnly: true }}
-              />
-            </Box>
-          </Box>
 
+            <TextField
+              label="생성일"
+              value={new Date(taskDefinition.created_at).toLocaleString()}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSubmitClick} startIcon={<PlayArrowIcon />}>
+            작업 제출
+          </Button>
+          <Button onClick={onClose}>닫기</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={isSubmitModalOpen}
+        onClose={handleSubmitClose}
+      >
+        <DialogTitle>작업 제출</DialogTitle>
+        <DialogContent>
           <TextField
-            label="생성일"
-            value={new Date(taskDefinition.created_at).toLocaleString()}
+            autoFocus
+            margin="dense"
+            label="작업 이름"
             fullWidth
-            InputProps={{ readOnly: true }}
+            value={jobName}
+            onChange={(e) => setJobName(e.target.value)}
+            required
           />
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>닫기</Button>
-      </DialogActions>
-    </Dialog>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSubmitClose}>취소</Button>
+          <Button
+            onClick={handleSubmitConfirm}
+            variant="contained"
+            disabled={!jobName}
+          >
+            제출
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

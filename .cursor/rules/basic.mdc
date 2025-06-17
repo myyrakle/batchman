@@ -23,5 +23,5 @@ Web Structure
 1. Separate page units using react router. (routes are in `/web/src/App.tsx`)
 2. Each page is in `/web/src/pages/*.tsx`
 3. The individual component units used on each page are in `/web/src/pages/*.tsx`
-4. All API call functions are in `/web/src/api.ts`.
+4. All API call functions are in `/web/src/api.ts`. DO NOT add new file for using server api. 
 - If necessary, add or modify the API call function by referring to the server code. (`/src/api.rs`, `/src/domain/*/routes/http`, `/src/domain/*/dto.rs`),
