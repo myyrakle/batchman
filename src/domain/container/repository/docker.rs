@@ -11,6 +11,8 @@ use crate::{
     errors,
 };
 
+const DOCKER_PATH: &str = "docker";
+
 #[derive(Debug, Clone)]
 pub struct ContainerDockerRepository {}
 
@@ -26,7 +28,7 @@ impl ContainerRepository for ContainerDockerRepository {
         &self,
         params: InspectContainerParams,
     ) -> errors::Result<InspectContainerResult> {
-        let mut command = Command::new("docker");
+        let mut command = Command::new(DOCKER_PATH);
 
         command.arg("inspect");
         command.arg(params.container_id);
@@ -64,7 +66,7 @@ impl ContainerRepository for ContainerDockerRepository {
         // Docker 컨테이너 실행
         let image_name = &task_definition.image;
 
-        let mut command = Command::new("docker");
+        let mut command = Command::new(DOCKER_PATH);
 
         command.arg("run");
         command.arg("-d");
@@ -93,7 +95,11 @@ impl ContainerRepository for ContainerDockerRepository {
 
         // CMD 설정
         if let Some(cmd) = &task_definition.command {
-            let command_list = serde_json::from_str::<Vec<String>>(cmd)?;
+            // split 로직 고도화 필요
+            let command_list = cmd
+                .split(' ')
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>();
 
             for cmd in command_list {
                 command.arg(cmd);
@@ -132,7 +138,7 @@ impl ContainerRepository for ContainerDockerRepository {
     /// * `Err` with an error message if the operation failed
     ///
     async fn kill_container(&self, params: KillContainerParams) -> errors::Result<()> {
-        let mut command = Command::new("docker");
+        let mut command = Command::new(DOCKER_PATH);
 
         command.arg("kill");
         command.arg(&params.container_id);
@@ -170,7 +176,7 @@ impl ContainerRepository for ContainerDockerRepository {
     ///
     async fn stop_container(&self, params: StopContainerParams) -> errors::Result<()> {
         // First try to stop gracefully with timeout
-        let mut command = Command::new("docker");
+        let mut command = Command::new(DOCKER_PATH);
 
         command.arg("stop");
         command.arg("--time");

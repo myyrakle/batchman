@@ -89,9 +89,7 @@ impl TaskDefinitionRepository for TaskDefinitionSeaOrmRepository {
             name: Set(params.name),
             version: Set(params.version),
             image: Set(params.image),
-            command: Set(params
-                .command
-                .map(|command| serde_json::to_string(&command).unwrap_or_default())),
+            command: Set(params.command),
             args: Set(params.args),
             env: Set(params.env),
             memory_limit: Set(params.memory_limit),

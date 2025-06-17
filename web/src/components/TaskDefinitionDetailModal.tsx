@@ -92,7 +92,7 @@ const TaskDefinitionDetailModal: React.FC<TaskDefinitionDetailModalProps> = ({
 
             <TextField
               label="명령어"
-              value={taskDefinition.command || ''}
+              value={taskDefinition.command ? taskDefinition.command.replace(/\\"/g, '"') : ''}
               fullWidth
               InputProps={{ readOnly: true }}
             />
