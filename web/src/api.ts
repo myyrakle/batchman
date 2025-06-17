@@ -35,11 +35,12 @@ export interface TaskDefinition {
 }
 
 export interface ListTaskDefinitionsParams {
-  contains_name?: string;
-  name?: string;
-  task_definition_id?: number;
   page_number: number;
   page_size: number;
+  name?: string;
+  task_definition_id?: number;
+  contains_name?: string;
+  is_latest_only?: boolean;
 }
 
 export interface ListTaskDefinitionsResponse {
@@ -157,15 +158,8 @@ const handleApiError = (error: AxiosError): ApiResponse<ErrorResponse> => {
 // Task Definition API
 export const listTaskDefinitions = async (params: ListTaskDefinitionsParams): Promise<ApiResponse<ListTaskDefinitionsResponse | ErrorResponse>> => {
   try {
-    const response = await api.get('/task-definitions', {
-      params: {
-        page_number: params.page_number,
-        page_size: params.page_size,
-        contains_name: params.contains_name,
-        name: params.name,
-        task_definition_id: params.task_definition_id,
-      }
-    });
+    const response = await api.get('/task-definitions', { params });
+    console.log('API request params:', params); // 디버깅용
     return {
       response: response.data,
       status_code: response.status
