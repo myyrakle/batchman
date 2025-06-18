@@ -39,7 +39,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
     name: '',
     image: '',
     command: '',
-    env: [{ key: '', value: '' }],
+    env: [],
     resources: {
       memory: {
         value: 1,
@@ -82,12 +82,19 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (formData.resources.memory.value < 10) {
+    if (formData.resources.memory.unit === 'm' && formData.resources.memory.value < 10) {
       setError("메모리 제한은 10MB 이상이어야 합니다.");
       return;
     }
     if (formData.resources.cpu < 10) {
       setError("CPU 제한은 10 이상이어야 합니다.");
+      return;
+    }
+
+    // 환경변수 검증
+    const invalidEnv = formData.env.find(env => (env.key.trim() === '' || env.value.trim() === ''));
+    if (invalidEnv) {
+      setError("환경변수 값을 입력해주세요.");
       return;
     }
 
@@ -108,6 +115,38 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
     setFormData({ ...formData, env: newEnv });
   };
 
+  // 환경변수 실시간 검증
+  useEffect(() => {
+    const invalidEnv = formData.env.find(env => 
+      (env.key.trim() === '' || env.value.trim()=== '') 
+    );
+    if (invalidEnv) {
+      setError("환경변수의 키와 값을 모두 입력해주세요.");
+    } else {
+      setError(null);
+    }
+  }, [formData.env]);
+
+  // 제출 가능 여부 확인
+  const isSubmitDisabled = () => {
+    // 메모리 제한 검증
+    if (formData.resources.memory.unit === 'm' && formData.resources.memory.value < 10) {
+      return true;
+    }
+    // CPU 제한 검증
+    if (formData.resources.cpu < 10) {
+      return true;
+    }
+    // 환경변수 검증
+    const invalidEnv = formData.env.find(env => 
+      (env.key.trim() === '' || env.value.trim() === '') 
+    );
+    if (invalidEnv) {
+      return true;
+    }
+    return false;
+  };
+
   const addEnvField = () => {
     setFormData({
       ...formData,
@@ -125,11 +164,6 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
       <form onSubmit={handleSubmit}>
         <DialogTitle>{isVersion ? '새 버전 생성' : '새 작업정의 생성'}</DialogTitle>
         <DialogContent>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             <TextField
               label="이름"
@@ -179,6 +213,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
                     onChange={(e) => handleEnvChange(index, 'key', e.target.value)}
                     size="small"
                     sx={{ flex: 1 }}
+                    error={(env.key.trim() === '')}
                   />
                   <TextField
                     label="값"
@@ -186,11 +221,11 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
                     onChange={(e) => handleEnvChange(index, 'value', e.target.value)}
                     size="small"
                     sx={{ flex: 1 }}
+                    error={env.value.trim() === ''}
                   />
                   <IconButton
                     onClick={() => removeEnvField(index)}
                     size="small"
-                    disabled={formData?.env?.length === 1}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -218,7 +253,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
                     required
                     sx={{ flex: 1 }}
                     error={ formData.resources.memory.unit === 'm' &&  formData.resources.memory.value < 10}
-                    helperText={formData.resources.memory.value < 10 ? "메모리 제한은 10MB 이상이어야 합니다." : ""}
+                    helperText= { formData.resources.memory.unit === 'm' && formData.resources.memory.value < 10 ? "메모리 제한은 10MB 이상이어야 합니다." : ""}
                   />
                   <FormControl sx={{ minWidth: 100 }}>
                     <InputLabel>단위</InputLabel>
@@ -267,7 +302,11 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>취소</Button>
-          <Button type="submit" variant="contained" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            variant="contained" 
+            disabled={isSubmitting || isSubmitDisabled()}
+          >
             {isVersion ? '버전 생성' : '생성'}
           </Button>
         </DialogActions>
