@@ -39,7 +39,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
     name: '',
     image: '',
     command: '',
-    env: [{ key: '', value: '' }],
+    env: [],
     resources: {
       memory: {
         value: 1,
