@@ -62,7 +62,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
         resources: {
           memory: {
             value: baseTaskDefinition.memory_limit || 1,
-            unit: 'm',
+            unit: 'g',
           },
           cpu: baseTaskDefinition.cpu_limit || 1,
         },
