@@ -127,6 +127,26 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
     }
   }, [formData.env]);
 
+  // 제출 가능 여부 확인
+  const isSubmitDisabled = () => {
+    // 메모리 제한 검증
+    if (formData.resources.memory.unit === 'm' && formData.resources.memory.value < 10) {
+      return true;
+    }
+    // CPU 제한 검증
+    if (formData.resources.cpu < 10) {
+      return true;
+    }
+    // 환경변수 검증
+    const invalidEnv = formData.env.find(env => 
+      (env.key.trim() === '' || env.value.trim() === '') 
+    );
+    if (invalidEnv) {
+      return true;
+    }
+    return false;
+  };
+
   const addEnvField = () => {
     setFormData({
       ...formData,
@@ -282,7 +302,11 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>취소</Button>
-          <Button type="submit" variant="contained" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            variant="contained" 
+            disabled={isSubmitting || isSubmitDisabled()}
+          >
             {isVersion ? '버전 생성' : '생성'}
           </Button>
         </DialogActions>
