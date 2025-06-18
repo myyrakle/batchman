@@ -44,7 +44,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
         value: 1,
         unit: 'g',
       },
-      cpu: 1,
+      cpu: 1024,
     },
     description: '',
   };
@@ -64,7 +64,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
             value: baseTaskDefinition.memory_limit || 1,
             unit: 'g',
           },
-          cpu: baseTaskDefinition.cpu_limit || 1,
+          cpu: baseTaskDefinition.cpu_limit || 1024,
         },
         description: baseTaskDefinition.description,
       });
@@ -230,7 +230,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
                   })}
                   required
                   fullWidth
-                  inputProps={{ step: 0.1 }}
+                  inputProps={{ step: 1 }}
                   placeholder="예: 0.5, 1, 2"
                 />
               </Box>
