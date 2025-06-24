@@ -83,6 +83,7 @@ const TaskDefinitionList: React.FC = () => {
   };
 
   const handleCreateTask = () => {
+    setSelectedTask(null);
     setIsCreateModalOpen(true);
   };
 
@@ -257,6 +258,7 @@ const TaskDefinitionList: React.FC = () => {
         open={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         taskDefinition={selectedTask}
+        onCreateVersion={handleCreateVersion}
       />
 
       <DeleteConfirmationModal

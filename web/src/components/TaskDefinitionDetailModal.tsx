@@ -13,7 +13,7 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import { PlayArrow as PlayArrowIcon } from '@mui/icons-material';
+import { PlayArrow as PlayArrowIcon, Add as AddIcon } from '@mui/icons-material';
 import { TaskDefinition, ErrorResponse, submitJob } from '../api';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,12 +21,14 @@ interface TaskDefinitionDetailModalProps {
   open: boolean;
   onClose: () => void;
   taskDefinition: TaskDefinition | null;
+  onCreateVersion?: (task: TaskDefinition) => void;
 }
 
 const TaskDefinitionDetailModal: React.FC<TaskDefinitionDetailModalProps> = ({
   open,
   onClose,
   taskDefinition,
+  onCreateVersion,
 }) => {
   const navigate = useNavigate();
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -43,6 +45,13 @@ const TaskDefinitionDetailModal: React.FC<TaskDefinitionDetailModalProps> = ({
   const handleSubmitClose = () => {
     setIsSubmitModalOpen(false);
     setJobName('');
+  };
+
+  const handleCreateVersion = () => {
+    if (taskDefinition && onCreateVersion) {
+      onCreateVersion(taskDefinition);
+      onClose();
+    }
   };
 
   const handleSubmitConfirm = async () => {
@@ -168,6 +177,11 @@ const TaskDefinitionDetailModal: React.FC<TaskDefinitionDetailModalProps> = ({
           <Button onClick={handleSubmitClick} startIcon={<PlayArrowIcon />}>
             작업 제출
           </Button>
+          {onCreateVersion && (
+            <Button onClick={handleCreateVersion} startIcon={<AddIcon />}>
+              새 버전 생성
+            </Button>
+          )}
           <Button onClick={onClose}>닫기</Button>
         </DialogActions>
       </Dialog>
