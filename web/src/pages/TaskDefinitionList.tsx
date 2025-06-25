@@ -3,16 +3,13 @@ import { Box, Button, Typography, Alert, Snackbar, Pagination, CircularProgress,
 import AddIcon from '@mui/icons-material/Add';
 import { CreateTaskDefinitionFormData } from '../types/taskDefinition';
 import TaskDefinitionTable from '../components/TaskDefinitionTable';
-import TaskDefinitionSearch from '../components/TaskDefinitionSearch';
 import CreateTaskDefinitionModal from '../components/CreateTaskDefinitionModal';
 import CreateVersionModal from '../components/CreateVersionModal';
 import TaskDefinitionDetailModal from '../components/TaskDefinitionDetailModal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import { createTaskDefinition, ErrorResponse, listTaskDefinitions, ListTaskDefinitionsParams, TaskDefinition, deleteTaskDefinition } from '../api';
 import { useSearchParams } from 'react-router-dom';
-import {
-  Add as SearchIcon,
-} from '@mui/icons-material';
+import SearchIcon from '@mui/icons-material/Search';
 
 const TaskDefinitionList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
