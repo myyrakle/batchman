@@ -40,6 +40,7 @@ pub fn app(context: SharedContext) -> Router {
         )
         .route("/jobs/submit", post(domain::job::routes::http::submit_job))
         .route("/jobs/stop", post(domain::job::routes::http::stop_job))
+        .route("/jobs", get(domain::job::routes::http::list_jobs))
         .route(
             "/schedules",
             get(domain::schedule::routes::http::list_schedules),

@@ -1,7 +1,7 @@
 use sea_orm::{
     ActiveModelTrait,
     ActiveValue::{NotSet, Set},
-    ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QuerySelect,
+    ColumnTrait, EntityTrait, IntoActiveModel, PaginatorTrait, QueryFilter, QuerySelect,
 };
 
 use crate::{
@@ -37,8 +37,17 @@ impl JobRepository for JobSeaOrmRepository {
                 find_job_query.filter(entities::job::Column::Status.is_in(params.statuses));
         }
 
+        if let Some(contains_name) = &params.contains_name {
+            find_job_query =
+                find_job_query.filter(entities::job::Column::Name.contains(contains_name));
+        }
+
         if let Some(limit) = params.limit {
             find_job_query = find_job_query.limit(limit);
+        }
+
+        if let Some(offset) = params.offset {
+            find_job_query = find_job_query.offset(offset);
         }
 
         let jobs = find_job_query.all(&self.connection).await?;
@@ -113,5 +122,28 @@ impl JobRepository for JobSeaOrmRepository {
         model.update(&self.connection).await?;
 
         Ok(())
+    }
+
+    async fn count_jobs(&self, params: ListJobsParams) -> errors::Result<u64> {
+        let mut count_job_query = entities::job::Entity::find();
+
+        if !params.job_ids.is_empty() {
+            count_job_query =
+                count_job_query.filter(entities::job::Column::Id.is_in(params.job_ids));
+        }
+
+        if !params.statuses.is_empty() {
+            count_job_query =
+                count_job_query.filter(entities::job::Column::Status.is_in(params.statuses));
+        }
+
+        if let Some(contains_name) = &params.contains_name {
+            count_job_query =
+                count_job_query.filter(entities::job::Column::Name.contains(contains_name));
+        }
+
+        let count = count_job_query.count(&self.connection).await?;
+
+        Ok(count)
     }
 }
