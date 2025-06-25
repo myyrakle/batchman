@@ -34,4 +34,6 @@ pub struct ListJobsParams {
     pub job_ids: Vec<i64>,
     pub statuses: Vec<JobStatus>,
     pub limit: Option<u64>,
+    pub offset: Option<u64>,
+    pub contains_name: Option<String>,
 }

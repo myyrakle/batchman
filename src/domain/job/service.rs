@@ -14,7 +14,7 @@ use crate::{
 use super::{
     JobRepository, JobService,
     dao::{CreateJobParams, ListJobsParams, PatchJobParams},
-    dto::{StopJobRequest, SubmitJobRequest},
+    dto::{JobDto, ListJobsRequest, ListJobsResponse, StopJobRequest, SubmitJobRequest},
     entities::{self, job::JobStatus},
 };
 
@@ -197,5 +197,61 @@ impl JobService for JobServiceImpl {
         }
 
         Ok(())
+    }
+
+    async fn list_jobs(&self, params: ListJobsRequest) -> errors::Result<ListJobsResponse> {
+        let query = &params.request_query;
+
+        // 페이지네이션 계산
+        let page_number = query.page_number.unwrap_or(1);
+        let page_size = query.page_size.unwrap_or(10);
+        let offset = (page_number - 1) * page_size;
+
+        // 상태 필터링
+        let mut statuses = Vec::new();
+        if let Some(status_str) = &query.status {
+            match status_str.as_str() {
+                "Pending" => statuses.push(JobStatus::Pending),
+                "Starting" => statuses.push(JobStatus::Starting),
+                "Running" => statuses.push(JobStatus::Running),
+                "Finished" => statuses.push(JobStatus::Finished),
+                "Failed" => statuses.push(JobStatus::Failed),
+                _ => {}
+            }
+        }
+
+        // job_id 필터링
+        let mut job_ids = Vec::new();
+        if let Some(job_id) = query.job_id {
+            job_ids.push(job_id);
+        }
+
+        let list_params = ListJobsParams {
+            job_ids: job_ids.clone(),
+            statuses: statuses.clone(),
+            limit: Some(page_size),
+            offset: Some(offset),
+            contains_name: query.contains_name.clone(),
+        };
+
+        let count_params = ListJobsParams {
+            job_ids,
+            statuses,
+            limit: None,
+            offset: None,
+            contains_name: query.contains_name.clone(),
+        };
+
+        // 목록과 전체 카운트를 각각 조회
+        let jobs = self.job_repository.list_jobs(list_params).await?;
+        let total_count = self.job_repository.count_jobs(count_params).await?;
+
+        // Model을 JobDto로 변환
+        let job_dtos: Vec<JobDto> = jobs.into_iter().map(|job| job.into()).collect();
+
+        Ok(ListJobsResponse {
+            jobs: job_dtos,
+            total_count,
+        })
     }
 }

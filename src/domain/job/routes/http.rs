@@ -1,13 +1,17 @@
 use axum::{
     Extension, Json,
     body::Body,
+    extract::Query,
     http::Response,
     response::{self, IntoResponse},
 };
 
 use crate::{
     context::SharedContext,
-    domain::job::dto::{StopJobBody, StopJobRequest, SubmitJobBody, SubmitJobRequest},
+    domain::job::dto::{
+        ListJobsQuery, ListJobsRequest, StopJobBody, StopJobRequest, SubmitJobBody,
+        SubmitJobRequest,
+    },
 };
 
 pub async fn submit_job(
@@ -39,6 +43,26 @@ pub async fn stop_job(
 
     match result {
         Ok(_) => Json(()).into_response(),
+        Err(error) => Response::builder()
+            .status(500)
+            .body(Body::new(error.into_json_response()))
+            .unwrap(),
+    }
+}
+
+pub async fn list_jobs(
+    Extension(context): Extension<SharedContext>,
+    Query(query): Query<ListJobsQuery>,
+) -> response::Response {
+    let result = context
+        .job_service
+        .list_jobs(ListJobsRequest {
+            request_query: query,
+        })
+        .await;
+
+    match result {
+        Ok(response) => Json(response).into_response(),
         Err(error) => Response::builder()
             .status(500)
             .body(Body::new(error.into_json_response()))

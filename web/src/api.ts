@@ -97,6 +97,19 @@ export interface SubmitJobResponse {
   job_id: number;
 }
 
+export interface ListJobsRequest {
+  page_number: number;
+  page_size: number;
+  job_id?: number;
+  status?: JobStatus;
+  contains_name?: string;
+}
+
+export interface ListJobsResponse {
+    jobs: Job[];
+    total_count: number;
+}
+
 // Schedule 관련 타입
 export interface Schedule {
     id: number;
@@ -221,6 +234,32 @@ export const submitJob = async (request: SubmitJobRequest): Promise<ApiResponse<
 export const stopJob = async (request: StopJobRequest): Promise<ApiResponse<void | ErrorResponse>> => {
   try {
     const response = await api.post('/jobs/stop', request);
+    return {
+      response: response.data,
+      status_code: response.status
+    };
+  } catch (error) {
+    return handleApiError(error as AxiosError);
+  }
+};
+
+export const listJobs = async (request: ListJobsRequest): Promise<ApiResponse<ListJobsResponse | ErrorResponse>> => {
+  try {
+    const queryParams = new URLSearchParams();
+    queryParams.append('page_number', String(request.page_number));
+    queryParams.append('page_size', String(request.page_size));
+    
+    if (request.job_id) {
+      queryParams.append('job_id', String(request.job_id));
+    }
+    if (request.status) {
+      queryParams.append('status', request.status);
+    }
+    if (request.contains_name) {
+      queryParams.append('contains_name', request.contains_name);
+    }
+
+    const response = await api.get(`/jobs?${queryParams.toString()}`);
     return {
       response: response.data,
       status_code: response.status
