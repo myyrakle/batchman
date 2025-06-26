@@ -243,11 +243,37 @@ impl JobService for JobServiceImpl {
         };
 
         // 목록과 전체 카운트를 각각 조회
-        let jobs = self.job_repository.list_jobs(list_params).await?;
         let total_count = self.job_repository.count_jobs(count_params).await?;
+        if total_count == 0 {
+            return Ok(ListJobsResponse {
+                jobs: Vec::new(),
+                total_count,
+            });
+        }
+
+        let jobs = self.job_repository.list_jobs(list_params).await?;
+
+        let task_definition_ids: Vec<i64> = jobs.iter().map(|job| job.task_definition_id).collect();
+
+        let task_definitions = self
+            .task_definition_repository
+            .list_task_definitions(ListTaskDefinitionsParams {
+                task_definition_ids,
+                ..Default::default()
+            })
+            .await?;
 
         // Model을 JobDto로 변환
-        let job_dtos: Vec<JobDto> = jobs.into_iter().map(|job| job.into()).collect();
+        let mut job_dtos: Vec<JobDto> = jobs.into_iter().map(|job| job.into()).collect();
+
+        for job_dto in &mut job_dtos {
+            if let Some(task_definition) = task_definitions
+                .iter()
+                .find(|td| td.id == job_dto.task_definition_id)
+            {
+                job_dto.task_definition_name = Some(task_definition.name.clone());
+            }
+        }
 
         Ok(ListJobsResponse {
             jobs: job_dtos,
