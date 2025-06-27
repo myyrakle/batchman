@@ -75,6 +75,7 @@ export interface Job {
     id: number;
     name: string;
     task_definition_id: number;
+    task_definition_name?: string;
     status: JobStatus;
     submited_at: string | null;
     started_at: string | null;

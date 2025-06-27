@@ -51,6 +51,7 @@ const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell>ID</TableCell>
             <TableCell>이름</TableCell>
             <TableCell>Version</TableCell>
             <TableCell>이미지</TableCell>
@@ -73,6 +74,7 @@ const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
                 onClick={() => onRowClick(task)}
                 sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' } }}
               >
+                <TableCell>{task.id}</TableCell>
                 <TableCell>{task.name}</TableCell>
                 <TableCell>{task.version}</TableCell>
                 <TableCell>{task.image}</TableCell>

@@ -84,11 +84,10 @@ const JobTable: React.FC<JobTableProps> = ({
             <TableCell>ID</TableCell>
             <TableCell>이름</TableCell>
             <TableCell>상태</TableCell>
-            <TableCell>작업정의 ID</TableCell>
+            <TableCell>작업정의</TableCell>
             <TableCell>제출시간</TableCell>
             <TableCell>시작시간</TableCell>
             <TableCell>완료시간</TableCell>
-            <TableCell>종료코드</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -121,7 +120,7 @@ const JobTable: React.FC<JobTableProps> = ({
                     size="small"
                   />
                 </TableCell>
-                <TableCell>{job.task_definition_id}</TableCell>
+                <TableCell>{job.task_definition_name??''}</TableCell>
                 <TableCell sx={{ fontSize: '0.875rem' }}>
                   {formatDate(job.submited_at)}
                 </TableCell>
@@ -131,7 +130,6 @@ const JobTable: React.FC<JobTableProps> = ({
                 <TableCell sx={{ fontSize: '0.875rem' }}>
                   {formatDate(job.finished_at)}
                 </TableCell>
-                <TableCell>{job.exit_code ?? '-'}</TableCell>
               </TableRow>
             ))
           )}

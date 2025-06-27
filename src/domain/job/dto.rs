@@ -1,8 +1,9 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, Default)]
 pub enum JobStatusDto {
+    #[default]
     Pending,
     Starting,
     Running,
@@ -22,11 +23,12 @@ impl From<super::entities::job::JobStatus> for JobStatusDto {
     }
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, Default)]
 pub struct JobDto {
     pub id: i64,
     pub name: String,
     pub task_definition_id: i64,
+    pub task_definition_name: Option<String>,
     pub status: JobStatusDto,
     pub submited_at: Option<chrono::DateTime<Utc>>,
     pub started_at: Option<chrono::DateTime<Utc>>,
@@ -51,6 +53,7 @@ impl From<super::entities::job::Model> for JobDto {
             exit_code: model.exit_code,
             error_message: model.error_message,
             created_at: model.created_at,
+            ..Default::default()
         }
     }
 }

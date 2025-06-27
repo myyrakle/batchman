@@ -14,8 +14,8 @@
 2. all domains are in `/src/domain`
 
 - all API routes are in `/src/domain/*/routes/http`
-- all service(business logic) are in `/src/domain/*/service.rs`. dtos are in `/src/domain/*/dto.rs`
-- all repositories are in `/src/domain/*/repository/*.rs`. daos are in `/src/domain/*/dao.rs`
+- all service(business logic) are in `/src/domain/*/service.rs`. dtos are in `/src/domain/*/dto.rs`, dtos's argument/return type name is `*Request` & `*Response`.
+- all repositories are in `/src/domain/*/repository/*.rs`. daos are in `/src/domain/*/dao.rs`, dao's argument type name is `*Params`.
 - all entities(DB Table) are in `/src/domain/*/entities.rs`
 
 3. All repositories and services must define an interface through a trait and then implement it.
