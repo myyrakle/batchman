@@ -11,7 +11,6 @@ import {
   IconButton,
   Alert,
   CircularProgress,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -19,7 +18,6 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import { 
   Job, 
@@ -265,18 +263,24 @@ const JobDetail: React.FC = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                      작업 정의 ID
+                      종료 코드
                     </TableCell>
-                    <TableCell>{job.task_definition_id}</TableCell>
+                    <TableCell>{job.exit_code !== null ? job.exit_code : '-'}</TableCell>
                   </TableRow>
-                  {job.task_definition_name && (
+                  {job.error_message && (
                     <TableRow>
                       <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        작업 정의 이름
+                        오류 메시지
                       </TableCell>
-                      <TableCell>{job.task_definition_name}</TableCell>
+                      <TableCell sx={{ color: 'error.main' }}>{job.error_message}</TableCell>
                     </TableRow>
                   )}
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      작업 정의
+                    </TableCell>
+                    <TableCell>{job.task_definition_name ?? 'DELETED'}:{taskDefinition?.version ?? ''}</TableCell>
+                  </TableRow>
                   <TableRow>
                     <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                       제출 시간
@@ -297,112 +301,18 @@ const JobDetail: React.FC = () => {
                   </TableRow>
                   <TableRow>
                     <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      컨테이너 타입
+                    </TableCell>
+                    <TableCell>{job.container_type}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                       컨테이너 ID
                     </TableCell>
                     <TableCell>{job.container_id || '-'}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                      종료 코드
-                    </TableCell>
-                    <TableCell>{job.exit_code !== null ? job.exit_code : '-'}</TableCell>
-                  </TableRow>
-                  {job.error_message && (
-                    <TableRow>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        오류 메시지
-                      </TableCell>
-                      <TableCell sx={{ color: 'error.main' }}>{job.error_message}</TableCell>
-                    </TableRow>
-                  )}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </Box>
-
-        {/* 작업 정의 정보 */}
-        <Box>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                작업 정의 정보
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              {taskDefinition ? (
-                <Table size="small">
-                  <TableBody>
-                    <TableRow>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold', width: '40%' }}>
-                        이름
-                      </TableCell>
-                      <TableCell>{taskDefinition.name}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        버전
-                      </TableCell>
-                      <TableCell>{taskDefinition.version}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        이미지
-                      </TableCell>
-                      <TableCell sx={{ wordBreak: 'break-all' }}>{taskDefinition.image}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        명령어
-                      </TableCell>
-                      <TableCell sx={{ wordBreak: 'break-all' }}>
-                        {taskDefinition.command || '-'}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        인자
-                      </TableCell>
-                      <TableCell sx={{ wordBreak: 'break-all' }}>
-                        {taskDefinition.args || '-'}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        환경 변수
-                      </TableCell>
-                      <TableCell sx={{ wordBreak: 'break-all' }}>
-                        {taskDefinition.env || '-'}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        메모리 제한
-                      </TableCell>
-                      <TableCell>
-                        {taskDefinition.memory_limit ? `${taskDefinition.memory_limit} MB` : '-'}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        CPU 제한
-                      </TableCell>
-                      <TableCell>
-                        {taskDefinition.cpu_limit ? `${taskDefinition.cpu_limit}` : '-'}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                        설명
-                      </TableCell>
-                      <TableCell>{taskDefinition.description || '-'}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              ) : (
-                <Typography color="text.secondary">
-                  작업 정의 정보를 불러올 수 없습니다.
-                </Typography>
-              )}
             </CardContent>
           </Card>
         </Box>

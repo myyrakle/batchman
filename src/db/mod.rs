@@ -70,6 +70,25 @@ pub async fn setup_schema(db: &DatabaseConnection) {
         db.execute(database_backend.build(&create_table_statement))
             .await
             .expect("Failed to create table");
+
+        // add columes
+        {
+            // use sea_orm::sea_query::ColumnDef;
+            // use sea_orm::sea_query::TableAlterStatement;
+
+            // let alter_table_statement = TableAlterStatement::new()
+            //     .table(entities::job::Entity)
+            //     .add_column_if_not_exists(
+            //         ColumnDef::new(entities::job::Column::ContainerType)
+            //             .default("Docker")
+            //             .not_null(),
+            //     )
+            //     .to_owned();
+
+            // db.execute(database_backend.build(&alter_table_statement))
+            //     .await
+            //     .expect("Failed to alter table");
+        }
     }
 
     // schedule table generate

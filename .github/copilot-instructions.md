@@ -30,3 +30,7 @@
 4. All API call functions are in `/web/src/api.ts`. DO NOT add new file for using server api.
 
 - If necessary, add or modify the API call function by referring to the server code. (`/src/api.rs`, `/src/domain/*/routes/http`, `/src/domain/*/dto.rs`),
+
+# Answer language
+
+- If possible, please answer in Korean.

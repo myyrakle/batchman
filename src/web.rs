@@ -13,11 +13,11 @@ pub async fn index_html() -> Response {
   <head>
     <meta charset="UTF-8" />
     <title>React App</title>
-    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="/index.css" />
   </head>
   <body>
     <div id="root"></div>
-    <script src="bundle.js"></script>
+    <script src="/bundle.js"></script>
   </body>
 </html>
 "#;
