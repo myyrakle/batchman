@@ -131,7 +131,7 @@ const TaskDefinitionDetail: React.FC = () => {
           <ArrowBackIcon />
         </IconButton>
         <Typography variant="h5" component="h1" sx={{ flexGrow: 1 }}>
-          작업정의 상세 - {taskDefinition.name}
+          작업 정의 상세 - {taskDefinition.name}
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
@@ -167,7 +167,13 @@ const TaskDefinitionDetail: React.FC = () => {
                       <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                         버전
                       </TableCell>
-                      <TableCell>{taskDefinition.version}</TableCell>
+                      <TableCell>{taskDefinition.version} {taskDefinition.is_latest ? '[latest]' : ''}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        활성화
+                      </TableCell>
+                      <TableCell>{taskDefinition.enabled ? '예': '아니오' }</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
