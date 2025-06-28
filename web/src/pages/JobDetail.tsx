@@ -28,6 +28,7 @@ import {
   stopJob,
   ErrorResponse 
 } from '../api';
+import { formatDate } from '../utils';
 
 const JobDetail: React.FC = () => {
   const { jobId } = useParams<{ jobId: string }>();
@@ -142,11 +143,6 @@ const JobDetail: React.FC = () => {
       default:
         return status;
     }
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('ko-KR');
   };
 
   const canStopJob = job && (job.status === 'Pending' || job.status === 'Starting' || job.status === 'Running');
