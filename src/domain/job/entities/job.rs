@@ -1,6 +1,8 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
+use crate::domain::container::ContainerType;
+
 #[derive(EnumIter, DeriveActiveEnum, Clone, Debug, PartialEq, Eq, Default)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::N(1))")]
 pub enum JobStatus {
@@ -32,6 +34,7 @@ pub struct Model {
     pub started_at: Option<chrono::DateTime<Utc>>,  // job started time
     pub finished_at: Option<chrono::DateTime<Utc>>, // job finished time
 
+    pub container_type: ContainerType,
     pub container_id: Option<String>, // batch container id (docker container id)
     pub exit_code: Option<i32>,       // batch exit code
     pub error_message: Option<String>, // batch error message
