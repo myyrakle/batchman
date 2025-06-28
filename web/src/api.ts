@@ -32,6 +32,8 @@ export interface TaskDefinition {
     memory_limit: number | null;
     cpu_limit: number | null;
     created_at: string;
+    enabled: boolean;
+    is_latest: boolean;
 }
 
 export interface ListTaskDefinitionsParams {

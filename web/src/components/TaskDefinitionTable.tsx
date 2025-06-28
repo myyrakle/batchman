@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -10,6 +11,7 @@ import {
   IconButton,
   Box,
   Skeleton,
+  Link,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -30,6 +32,8 @@ const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
   onVersionCreate,
   isLoading = false,
 }) => {
+  const navigate = useNavigate();
+
   const renderSkeletonRow = () => (
     <TableRow>
       <TableCell><Skeleton variant="text" sx={{ bgcolor: 'grey.200' }} /></TableCell>
@@ -75,7 +79,26 @@ const TaskDefinitionTable: React.FC<TaskDefinitionTableProps> = ({
                 sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' } }}
               >
                 <TableCell>{task.id}</TableCell>
-                <TableCell>{task.name}</TableCell>
+                <TableCell>
+                   <Link
+                    component="button"
+                    variant="body2"
+                    onClick={(e) => {
+                      e.stopPropagation(); // 상위 TableRow의 onClick 이벤트 전파 방지
+                      navigate(`/task-definitions/${task.id}`); // 작업 정의 상세 페이지로 이동
+                    }}
+                    sx={{ 
+                      fontWeight: 'medium',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                      }
+                    }}
+                  >
+                    {task.name}
+                  </Link>  
+                </TableCell>
                 <TableCell>{task.version}</TableCell>
                 <TableCell>{task.image}</TableCell>
                 <TableCell>{task.command}</TableCell>

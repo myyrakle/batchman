@@ -15,6 +15,7 @@ import {
   TableBody,
   TableCell,
   TableRow,
+  Link,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -28,6 +29,7 @@ import {
   stopJob,
   ErrorResponse 
 } from '../api';
+import { formatDate } from '../utils';
 
 const JobDetail: React.FC = () => {
   const { jobId } = useParams<{ jobId: string }>();
@@ -142,11 +144,6 @@ const JobDetail: React.FC = () => {
       default:
         return status;
     }
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('ko-KR');
   };
 
   const canStopJob = job && (job.status === 'Pending' || job.status === 'Starting' || job.status === 'Running');
@@ -279,7 +276,26 @@ const JobDetail: React.FC = () => {
                     <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                       작업 정의
                     </TableCell>
-                    <TableCell>{job.task_definition_name ?? 'DELETED'}:{taskDefinition?.version ?? ''}</TableCell>
+                    <TableCell>
+                      <Link
+                        component="button"
+                        variant="body2"
+                        onClick={(e) => {
+                          e.stopPropagation(); // 상위 TableRow의 onClick 이벤트 전파 방지
+                          navigate(`/task-definitions/${job.task_definition_id}`); // 작업 정의 상세 페이지로 이동
+                        }}
+                        sx={{ 
+                          fontWeight: 'medium',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          '&:hover': {
+                            textDecoration: 'underline',
+                          }
+                        }}
+                      >
+                        {job.task_definition_name ?? 'DELETED'}:{taskDefinition?.version ?? ''}
+                      </Link>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
