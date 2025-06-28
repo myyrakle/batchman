@@ -133,6 +133,7 @@ const JobTable: React.FC<JobTableProps> = ({
                     label={getStatusLabel(job.status)}
                     color={getStatusColor(job.status)}
                     size="small"
+                    onClick={() => {}}
                   />
                 </TableCell>
                 <TableCell>{job.task_definition_name??''}</TableCell>
