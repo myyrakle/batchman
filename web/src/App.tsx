@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import TaskDefinitionList from './pages/TaskDefinitionList';
 import JobList from './pages/JobList';
+import JobDetail from './pages/JobDetail';
 import ScheduleList from './pages/ScheduleList';
 
 const theme = createTheme({
@@ -40,6 +41,7 @@ const AppContent: React.FC = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/task-definitions" element={<TaskDefinitionList />} />
         <Route path="/jobs" element={<JobList />} />
+        <Route path="/jobs/:jobId" element={<JobDetail />} />
         <Route path="/schedules" element={<ScheduleList />} />
       </Routes>
     </Layout>

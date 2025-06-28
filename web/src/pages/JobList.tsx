@@ -4,10 +4,11 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
 import JobTable from '../components/JobTable';
 import { ErrorResponse, listJobs, ListJobsRequest, Job, JobStatus } from '../api';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const JobList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -80,8 +81,7 @@ const JobList: React.FC = () => {
   };
 
   const handleJobClick = (job: Job) => {
-    // TODO: 작업 상세 모달 구현
-    console.log('Job clicked:', job);
+    navigate(`/jobs/${job.id}`);
   };
 
   return (

@@ -10,6 +10,7 @@ import {
   Box,
   Skeleton,
   Chip,
+  Link,
 } from '@mui/material';
 import { Job, JobStatus } from '../api';
 
@@ -108,11 +109,25 @@ const JobTable: React.FC<JobTableProps> = ({
               <TableRow
                 key={job.id}
                 hover
-                onClick={() => onRowClick?.(job)}
-                sx={{ cursor: onRowClick ? 'pointer' : 'default' }}
               >
                 <TableCell>{job.id}</TableCell>
-                <TableCell sx={{ fontWeight: 'medium' }}>{job.name}</TableCell>
+                <TableCell>
+                  <Link
+                    component="button"
+                    variant="body2"
+                    onClick={() => onRowClick?.(job)}
+                    sx={{ 
+                      fontWeight: 'medium',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                      }
+                    }}
+                  >
+                    {job.name}
+                  </Link>
+                </TableCell>
                 <TableCell>
                   <Chip
                     label={getStatusLabel(job.status)}
