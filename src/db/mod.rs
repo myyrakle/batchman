@@ -73,21 +73,21 @@ pub async fn setup_schema(db: &DatabaseConnection) {
 
         // add columes
         {
-            use sea_orm::sea_query::ColumnDef;
-            use sea_orm::sea_query::TableAlterStatement;
+            // use sea_orm::sea_query::ColumnDef;
+            // use sea_orm::sea_query::TableAlterStatement;
 
-            let alter_table_statement = TableAlterStatement::new()
-                .table(entities::job::Entity)
-                .add_column_if_not_exists(
-                    ColumnDef::new(entities::job::Column::ContainerType)
-                        .default("Docker")
-                        .not_null(),
-                )
-                .to_owned();
+            // let alter_table_statement = TableAlterStatement::new()
+            //     .table(entities::job::Entity)
+            //     .add_column_if_not_exists(
+            //         ColumnDef::new(entities::job::Column::ContainerType)
+            //             .default("Docker")
+            //             .not_null(),
+            //     )
+            //     .to_owned();
 
-            db.execute(database_backend.build(&alter_table_statement))
-                .await
-                .expect("Failed to alter table");
+            // db.execute(database_backend.build(&alter_table_statement))
+            //     .await
+            //     .expect("Failed to alter table");
         }
     }
 

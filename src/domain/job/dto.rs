@@ -1,6 +1,8 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
+use crate::domain::container::ContainerType;
+
 #[derive(Serialize, Debug, Clone, Default)]
 pub enum JobStatusDto {
     #[default]
@@ -33,6 +35,7 @@ pub struct JobDto {
     pub submited_at: Option<chrono::DateTime<Utc>>,
     pub started_at: Option<chrono::DateTime<Utc>>,
     pub finished_at: Option<chrono::DateTime<Utc>>,
+    pub container_type: ContainerType,
     pub container_id: Option<String>,
     pub exit_code: Option<i32>,
     pub error_message: Option<String>,
@@ -53,6 +56,7 @@ impl From<super::entities::job::Model> for JobDto {
             exit_code: model.exit_code,
             error_message: model.error_message,
             created_at: model.created_at,
+            container_type: model.container_type,
             ..Default::default()
         }
     }
