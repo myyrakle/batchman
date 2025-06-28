@@ -71,6 +71,8 @@ export interface PatchTaskDefinitionRequest {
 // Job 관련 타입
 export type JobStatus = 'Pending' | 'Starting' | 'Running' | 'Finished' | 'Failed';
 
+export type ContainerType = 'Docker'
+
 export interface Job {
     id: number;
     name: string;
@@ -80,6 +82,7 @@ export interface Job {
     submited_at: string | null;
     started_at: string | null;
     finished_at: string | null;
+    container_type: ContainerType;
     container_id: string | null;
     exit_code: number | null;
     error_message: string | null;

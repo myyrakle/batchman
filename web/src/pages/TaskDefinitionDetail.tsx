@@ -2,264 +2,413 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
-  Typography,
-  Paper,
-  Grid,
   Button,
+  Card,
+  CardContent,
+  Typography,
   Chip,
   Divider,
   IconButton,
-  Menu,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Alert,
+  CircularProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
 } from '@mui/material';
-import {
-  ArrowBack as ArrowBackIcon,
-  MoreVert as MoreVertIcon,
-} from '@mui/icons-material';
-import Layout from '../components/Layout';
-import { deleteTaskDefinition, ErrorResponse, listTaskDefinitions, TaskDefinition } from '../api';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import StopIcon from '@mui/icons-material/Stop';
+import { 
+  Job, 
+  JobStatus, 
+  TaskDefinition,
+  listJobs, 
+  listTaskDefinitions,
+  stopJob,
+  ErrorResponse 
+} from '../api';
 
-const TaskDefinitionDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+const JobDetail: React.FC = () => {
+  const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
+  const [job, setJob] = useState<Job | null>(null);
   const [taskDefinition, setTaskDefinition] = useState<TaskDefinition | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isStoppingJob, setIsStoppingJob] = useState(false);
 
-  useEffect(() => {
-    const fetchTaskDefinition = async () => {
-      if (!id) return;
-      try {
-        setIsLoading(true);
-        const result = await listTaskDefinitions({
-            task_definition_id: parseInt(id),
-            page_number: 1,
-            page_size: 1,
-        });
-        if (result.response instanceof ErrorResponse) {
-            console.error('Failed to fetch task definition:', result.response.error_code, result.response.message);
-        } else {
-            let response = result.response;
-
-            if(response.task_definitions.length > 0) {
-               let taskDefinition = response.task_definitions[0];
-               setTaskDefinition(taskDefinition);
-            }
-        }
-      } catch (error) {
-        console.error('Failed to fetch task definition:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTaskDefinition();
-  }, [id]);
-
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleDeleteClick = () => {
-    handleMenuClose();
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!taskDefinition) return;
+  const fetchJobDetail = async () => {
+    if (!jobId) return;
 
     try {
       setIsLoading(true);
-      await deleteTaskDefinition(taskDefinition.id);
-      navigate('/task-definitions');
-    } catch (error) {
-      console.error('Failed to delete task definition:', error);
+      setError(null);
+
+      // 특정 작업 조회
+      const jobResult = await listJobs({
+        page_number: 1,
+        page_size: 1,
+        job_id: parseInt(jobId),
+      });
+
+      if (jobResult.response instanceof ErrorResponse) {
+        setError('작업 정보를 불러오는데 실패했습니다.');
+        return;
+      }
+
+      if (jobResult.response.jobs.length === 0) {
+        setError('작업을 찾을 수 없습니다.');
+        return;
+      }
+
+      const jobData = jobResult.response.jobs[0];
+      setJob(jobData);
+
+      // 작업 정의 정보 조회
+      const taskDefResult = await listTaskDefinitions({
+        page_number: 1,
+        page_size: 1,
+        task_definition_id: jobData.task_definition_id,
+      });
+
+      if (taskDefResult.response instanceof ErrorResponse) {
+        console.error('Failed to fetch task definition:', taskDefResult.response);
+      } else if (taskDefResult.response.task_definitions.length > 0) {
+        setTaskDefinition(taskDefResult.response.task_definitions[0]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch job detail:', err);
+      setError('작업 정보를 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCreateVersion = () => {
-    navigate(`/task-definitions/new?base=${taskDefinition?.id}`);
+  const handleStopJob = async () => {
+    if (!job) return;
+
+    try {
+      setIsStoppingJob(true);
+      const result = await stopJob({ job_id: job.id });
+      
+      if (result.response instanceof ErrorResponse) {
+        setError('작업 중지에 실패했습니다.');
+      } else {
+        // 작업 정보 다시 조회
+        fetchJobDetail();
+      }
+    } catch (err) {
+      console.error('Failed to stop job:', err);
+      setError('작업 중지에 실패했습니다.');
+    } finally {
+      setIsStoppingJob(false);
+    }
   };
 
-  if (!taskDefinition) {
+  useEffect(() => {
+    fetchJobDetail();
+  }, [jobId]);
+
+  const getStatusColor = (status: JobStatus) => {
+    switch (status) {
+      case 'Pending':
+        return 'warning';
+      case 'Starting':
+        return 'info';
+      case 'Running':
+        return 'primary';
+      case 'Finished':
+        return 'success';
+      case 'Failed':
+        return 'error';
+      default:
+        return 'default';
+    }
+  };
+
+  const getStatusLabel = (status: JobStatus) => {
+    switch (status) {
+      case 'Pending':
+        return '대기중';
+      case 'Starting':
+        return '시작중';
+      case 'Running':
+        return '실행중';
+      case 'Finished':
+        return '완료';
+      case 'Failed':
+        return '실패';
+      default:
+        return status;
+    }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('ko-KR');
+  };
+
+  const canStopJob = job && (job.status === 'Pending' || job.status === 'Starting' || job.status === 'Running');
+
+  if (isLoading) {
     return (
-      <Layout isLoading={isLoading}>
-        <Box sx={{ p: 3 }}>
-          <Typography>작업 정의를 찾을 수 없습니다.</Typography>
-        </Box>
-      </Layout>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/jobs')}
+        >
+          작업 목록으로 돌아가기
+        </Button>
+      </Box>
+    );
+  }
+
+  if (!job) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          작업을 찾을 수 없습니다.
+        </Alert>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/jobs')}
+        >
+          작업 목록으로 돌아가기
+        </Button>
+      </Box>
     );
   }
 
   return (
-    <Layout isLoading={isLoading}>
-      <Box sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <IconButton
-            onClick={() => {
-              if (navigate) {
-                navigate('/task-definitions');
-              }
-            }}
-            sx={{ mr: 2 }}
+    <Box sx={{ p: 3 }}>
+      {/* 헤더 */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <IconButton onClick={() => navigate('/jobs')} sx={{ mr: 1 }}>
+          <ArrowBackIcon />
+        </IconButton>
+        <Typography variant="h5" component="h1" sx={{ flexGrow: 1 }}>
+          작업 상세 - {job.name}
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={fetchJobDetail}
+            disabled={isLoading}
           >
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h4" sx={{ flexGrow: 1 }}>
-            {taskDefinition.name}
-          </Typography>
-          <IconButton onClick={handleMenuClick}>
-            <MoreVertIcon />
-          </IconButton>
+            새로고침
+          </Button>
+          {canStopJob && (
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<StopIcon />}
+              onClick={handleStopJob}
+              disabled={isStoppingJob}
+            >
+              {isStoppingJob ? '중지 중...' : '작업 중지'}
+            </Button>
+          )}
+        </Box>
+      </Box>
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+        {/* 작업 정보 */}
+        <Box>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                작업 정보
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Table size="small">
+                <TableBody>
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold', width: '40%' }}>
+                      작업 ID
+                    </TableCell>
+                    <TableCell>{job.id}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      작업 이름
+                    </TableCell>
+                    <TableCell>{job.name}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      상태
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={getStatusLabel(job.status)}
+                        color={getStatusColor(job.status)}
+                        size="small"
+                      />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      작업 정의 ID
+                    </TableCell>
+                    <TableCell>{job.task_definition_id}</TableCell>
+                  </TableRow>
+                  {job.task_definition_name && (
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        작업 정의 이름
+                      </TableCell>
+                      <TableCell>{job.task_definition_name}</TableCell>
+                    </TableRow>
+                  )}
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      제출 시간
+                    </TableCell>
+                    <TableCell>{formatDate(job.submited_at)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      시작 시간
+                    </TableCell>
+                    <TableCell>{formatDate(job.started_at)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      완료 시간
+                    </TableCell>
+                    <TableCell>{formatDate(job.finished_at)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      컨테이너 ID
+                    </TableCell>
+                    <TableCell>{job.container_id || '-'}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                      종료 코드
+                    </TableCell>
+                    <TableCell>{job.exit_code !== null ? job.exit_code : '-'}</TableCell>
+                  </TableRow>
+                  {job.error_message && (
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        오류 메시지
+                      </TableCell>
+                      <TableCell sx={{ color: 'error.main' }}>{job.error_message}</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </Box>
 
-        <Paper sx={{ p: 3, mb: 3 }}>
-          <Box sx={{ display: 'grid', gap: 3 }}>
-            <Box>
+        {/* 작업 정의 정보 */}
+        <Box>
+          <Card>
+            <CardContent>
               <Typography variant="h6" gutterBottom>
-                기본 정보
+                작업 정의 정보
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    버전
-                  </Typography>
-                  <Typography variant="body1">
-                    {taskDefinition.version}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    설명
-                  </Typography>
-                  <Typography variant="body1">
-                    {taskDefinition.description || '-'}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                실행 정보
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    이미지
-                  </Typography>
-                  <Typography variant="body1">
-                    {taskDefinition.image}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    명령어
-                  </Typography>
-                  <Typography variant="body1">
-                    {taskDefinition.command}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-
-            
-
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                환경 변수
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box>
-                {taskDefinition.env && (JSON.parse(taskDefinition.env) as Array<{key:string;value:string}> ).map(e => (
-                  <Chip
-                    key={e.key}
-                    label={`${e.key}=${e.value}`}
-                    sx={{ mr: 1, mb: 1 }}
-                    onClick={() => {}}
-                  />
-                ))}
-                {(!taskDefinition.env || Object.keys(taskDefinition.env).length === 0) && (
-                  <Typography variant="body2" color="text.secondary">
-                    환경 변수가 없습니다.
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                리소스
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    메모리 제한
-                  </Typography>
-                  <Typography variant="body1">
-                    {taskDefinition.memory_limit || '-'}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    CPU 제한
-                  </Typography>
-                  <Typography variant="body1">
-                    {taskDefinition.cpu_limit || '-'}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        </Paper>
-
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-        >
-          <MenuItem onClick={handleCreateVersion}>
-            새 버전 만들기
-          </MenuItem>
-          <MenuItem onClick={handleDeleteClick}>
-            삭제
-          </MenuItem>
-        </Menu>
-
-        <Dialog
-          open={isDeleteDialogOpen}
-          onClose={() => setIsDeleteDialogOpen(false)}
-        >
-          <DialogTitle>작업 정의 삭제</DialogTitle>
-          <DialogContent>
-            <Typography>
-              정말로 이 작업 정의를 삭제하시겠습니까?
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setIsDeleteDialogOpen(false)}>취소</Button>
-            <Button onClick={handleDeleteConfirm} color="error">
-              삭제
-            </Button>
-          </DialogActions>
-        </Dialog>
+              {taskDefinition ? (
+                <Table size="small">
+                  <TableBody>
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold', width: '40%' }}>
+                        이름
+                      </TableCell>
+                      <TableCell>{taskDefinition.name}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        버전
+                      </TableCell>
+                      <TableCell>{taskDefinition.version}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        이미지
+                      </TableCell>
+                      <TableCell sx={{ wordBreak: 'break-all' }}>{taskDefinition.image}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        명령어
+                      </TableCell>
+                      <TableCell sx={{ wordBreak: 'break-all' }}>
+                        {taskDefinition.command || '-'}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        인자
+                      </TableCell>
+                      <TableCell sx={{ wordBreak: 'break-all' }}>
+                        {taskDefinition.args || '-'}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        환경 변수
+                      </TableCell>
+                      <TableCell sx={{ wordBreak: 'break-all' }}>
+                        {taskDefinition.env || '-'}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        메모리 제한
+                      </TableCell>
+                      <TableCell>
+                        {taskDefinition.memory_limit ? `${taskDefinition.memory_limit} MB` : '-'}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        CPU 제한
+                      </TableCell>
+                      <TableCell>
+                        {taskDefinition.cpu_limit ? `${taskDefinition.cpu_limit}` : '-'}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                        설명
+                      </TableCell>
+                      <TableCell>{taskDefinition.description || '-'}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              ) : (
+                <Typography color="text.secondary">
+                  작업 정의 정보를 불러올 수 없습니다.
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Box>
       </Box>
-    </Layout>
+    </Box>
   );
 };
 
-export default TaskDefinitionDetail; 
+export default JobDetail;
