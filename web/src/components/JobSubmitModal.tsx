@@ -54,14 +54,23 @@ const JobSubmitModal: React.FC<JobSubmitModalProps> = ({
       if (result.response instanceof ErrorResponse) {
         setErrorMessage(`작업 제출에 실패했습니다: ${result.response.message || '알 수 없는 오류'}`);
         console.error('Failed to submit job:', result.response.error_code, result.response.message);
-      } else {
-        setSuccessMessage(`작업 "${jobName}"이 성공적으로 제출되었습니다.`);
-        handleClose();
-        // 2초 후 작업 목록 페이지로 이동
-        setTimeout(() => {
-          navigate('/jobs');
-        }, 2000);
+        return
       }
+
+      const jobID = result.response.job_id;
+
+      setSuccessMessage(`작업 "${jobName}"이 성공적으로 제출되었습니다.`);
+      handleClose();
+        // 2초 후 작업 목록 페이지로 이동
+      setTimeout(() => {
+        console.log('Navigating to job detail page with ID:', jobID);
+        if(jobID) {
+          navigate(`/jobs/${jobID}`);
+        }
+        else {
+            navigate('/jobs');
+        }
+      }, 2000);
     } catch (error) {
       setErrorMessage('작업 제출 중 오류가 발생했습니다.');
       console.error('Failed to submit job:', error);
