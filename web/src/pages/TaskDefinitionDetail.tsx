@@ -200,7 +200,7 @@ const TaskDefinitionDetail: React.FC = () => {
         <Button
           variant="outlined"
           startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/jobs')}
+          onClick={() => navigate('/task-definitions')}
         >
           작업 목록으로 돌아가기
         </Button>
@@ -229,7 +229,7 @@ const TaskDefinitionDetail: React.FC = () => {
     <Box sx={{ p: 3 }}>
       {/* 헤더 */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <IconButton onClick={() => navigate('/jobs')} sx={{ mr: 1 }}>
+        <IconButton onClick={() => navigate('/task-definitions')} sx={{ mr: 1 }}>
           <ArrowBackIcon />
         </IconButton>
         <Typography variant="h5" component="h1" sx={{ flexGrow: 1 }}>
