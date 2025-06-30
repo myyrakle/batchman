@@ -89,21 +89,45 @@ const TaskDefinitionList: React.FC = () => {
     setIsCreateModalOpen(true);
   };
 
-  const handleCreateTaskSubmit = async (data: CreateTaskDefinitionFormData) => {
+  const handleCreateTaskSubmit = async (data: CreateTaskDefinitionFormData): Promise<number | void> => {
     try {
       setIsLoading(true);
-      await createTaskDefinition({
+      
+      // 메모리 단위 변환: GB를 MB로 변환
+      const memoryLimitInMB = data.resources.memory.unit === 'g' 
+        ? data.resources.memory.value * 1024 
+        : data.resources.memory.value;
+      
+      console.log('Memory conversion:', {
+        originalValue: data.resources.memory.value,
+        unit: data.resources.memory.unit,
+        convertedToMB: memoryLimitInMB
+      });
+      
+      const result = await createTaskDefinition({
         name: data.name,
         description: data.description,
         image: data.image,
         command: data.command,
         env: JSON.stringify(data.env),
-        memory_limit: data.resources.memory.value,
+        memory_limit: memoryLimitInMB,
         cpu_limit: data.resources.cpu,
         args: undefined,
       });
+
+
+      if (result.response instanceof ErrorResponse) {
+        setError('작업정의 생성에 실패했습니다.');
+        console.error('Failed to create task definition:', result.response.error_code, result.response.message);
+        return;
+      }
+
+      const task_definition_id = result.response?.task_definition_id
+
       setIsCreateModalOpen(false);
       fetchTaskDefinitions(); // 목록 새로고침
+
+      return task_definition_id; // 생성된 작업정의 ID 반환
     } catch (err) {
       setError('작업정의 생성에 실패했습니다.');
       console.error('Failed to create task definition:', err);

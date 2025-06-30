@@ -61,6 +61,10 @@ export interface CreateTaskDefinitionRequest {
     cpu_limit?: number;
 }
 
+export interface CreateTaskDefinitionResponse {
+    task_definition_id: number;
+}
+
 export interface PatchTaskDefinitionRequest {
     image?: string;
     command?: string;
@@ -188,9 +192,10 @@ export const listTaskDefinitions = async (params: ListTaskDefinitionsParams): Pr
   }
 };
 
-export const createTaskDefinition = async (taskDefinition: CreateTaskDefinitionRequest): Promise<ApiResponse<number | ErrorResponse>> => {
+export const createTaskDefinition = async (taskDefinition: CreateTaskDefinitionRequest): Promise<ApiResponse<CreateTaskDefinitionResponse | ErrorResponse>> => {
   try {
     const response = await api.post('/task-definitions', taskDefinition);
+    console.log('API response:', response); // 디버깅용
     return {
       response: response.data,
       status_code: response.status

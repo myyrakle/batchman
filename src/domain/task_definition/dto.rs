@@ -18,6 +18,11 @@ pub struct CreateDefinitionRequest {
     pub request_body: CreateTaskDefinitionBody,
 }
 
+#[derive(Serialize)]
+pub struct CreateDefinitionResponse {
+    pub task_definition_id: i64, // primary key of the task definition
+}
+
 #[derive(Deserialize, Debug, Clone)]
 pub struct PatchTaskDefinitionBody {
     pub description: Option<String>, // task description

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     domain::task_definition::{
         dao::CountTaskDefinitionsParams,
-        dto::{ListTaskDefinitionsItem, ListTaskDefinitionsResponse},
+        dto::{CreateDefinitionResponse, ListTaskDefinitionsItem, ListTaskDefinitionsResponse},
     },
     errors,
 };
@@ -40,7 +40,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
     async fn create_task_definition(
         &self,
         request: CreateDefinitionRequest,
-    ) -> errors::Result<i64> {
+    ) -> errors::Result<CreateDefinitionResponse> {
         // version이 없다면 동일한 이름의 task definition이 있는지 확인
 
         let mut version = 1;
@@ -85,7 +85,7 @@ impl super::TaskDefinitionService for TaskDefinitionServiceImpl {
             })
             .await?;
 
-        Ok(task_definition_id)
+        Ok(CreateDefinitionResponse { task_definition_id })
     }
 
     async fn patch_task_definition(&self, request: PatchDefinitionRequest) -> errors::Result<()> {

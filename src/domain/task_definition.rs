@@ -11,7 +11,10 @@ use dto::{
     PatchDefinitionRequest,
 };
 
-use crate::{domain::task_definition::dto::ListTaskDefinitionsResponse, errors};
+use crate::{
+    domain::task_definition::dto::{CreateDefinitionResponse, ListTaskDefinitionsResponse},
+    errors,
+};
 
 #[async_trait::async_trait]
 pub trait TaskDefinitionRepository {
@@ -40,8 +43,10 @@ pub trait TaskDefinitionRepository {
 
 #[async_trait::async_trait]
 pub trait TaskDefinitionService {
-    async fn create_task_definition(&self, request: CreateDefinitionRequest)
-    -> errors::Result<i64>;
+    async fn create_task_definition(
+        &self,
+        request: CreateDefinitionRequest,
+    ) -> errors::Result<CreateDefinitionResponse>;
 
     async fn patch_task_definition(&self, request: PatchDefinitionRequest) -> errors::Result<()>;
 
