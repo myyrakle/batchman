@@ -6,6 +6,7 @@ use crate::{
             ContainerRepository,
             dao::{InspectContainerParams, RunContainerParams, StopContainerParams},
         },
+        job::dto::SubmitJobResponse,
         task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
     },
     errors,
@@ -40,7 +41,7 @@ impl JobServiceImpl {
 
 #[async_trait::async_trait]
 impl JobService for JobServiceImpl {
-    async fn submit_job(&self, params: SubmitJobRequest) -> errors::Result<i64> {
+    async fn submit_job(&self, params: SubmitJobRequest) -> errors::Result<SubmitJobResponse> {
         let task_definitions = self
             .task_definition_repository
             .list_task_definitions(ListTaskDefinitionsParams {
@@ -64,7 +65,7 @@ impl JobService for JobServiceImpl {
             })
             .await?;
 
-        Ok(new_job_id)
+        Ok(SubmitJobResponse { job_id: new_job_id })
     }
 
     async fn stop_job(&self, params: StopJobRequest) -> errors::Result<()> {

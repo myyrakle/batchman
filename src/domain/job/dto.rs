@@ -73,6 +73,11 @@ pub struct SubmitJobRequest {
     pub request_body: SubmitJobBody,
 }
 
+#[derive(Serialize, Debug, Clone)]
+pub struct SubmitJobResponse {
+    pub job_id: i64, // primary key of the job
+}
+
 #[derive(Deserialize, Debug, Clone)]
 pub struct StopJobBody {
     pub job_id: i64,
