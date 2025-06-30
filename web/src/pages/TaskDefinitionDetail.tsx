@@ -101,7 +101,7 @@ const TaskDefinitionDetail: React.FC = () => {
     setIsVersionModalOpen(false);
   };
 
-  const handleCreateVersionSubmit = async (data: CreateTaskDefinitionFormData): Promise<void> => {
+  const handleCreateVersionSubmit = async (data: CreateTaskDefinitionFormData): Promise<number | void> => {
     if (!taskDefinitionId) return;
 
     try {
@@ -125,10 +125,11 @@ const TaskDefinitionDetail: React.FC = () => {
       if (result.response instanceof ErrorResponse) {
         setError('새 버전 생성에 실패했습니다.');
         console.error('Failed to create new version:', result.response.error_code, result.response.message);
-      } else {
-        setIsVersionModalOpen(false);
-        fetchJobDetail(); // 새 버전 생성 후 데이터 새로고침
+        return;
       }
+
+      setIsVersionModalOpen(false);
+      return result.response?.task_definition_id
     } catch (error) {
       console.error('Failed to create new version:', error);
       setError('새 버전 생성 중 오류가 발생했습니다.');
