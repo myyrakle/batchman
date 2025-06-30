@@ -35,6 +35,7 @@ import {
 } from '../api';
 import { formatDate } from '../utils';
 import CreateTaskDefinitionModal from '../components/CreateTaskDefinitionModal';
+import JobSubmitModal from '../components/JobSubmitModal';
 import { CreateTaskDefinitionFormData } from '../types/taskDefinition';
 
 const TaskDefinitionDetail: React.FC = () => {
@@ -46,6 +47,7 @@ const TaskDefinitionDetail: React.FC = () => {
   const [isStoppingJob, setIsStoppingJob] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
+  const [isJobSubmitModalOpen, setIsJobSubmitModalOpen] = useState(false);
 
   const fetchJobDetail = async () => {
     if (!taskDefinitionId) return;
@@ -99,6 +101,14 @@ const TaskDefinitionDetail: React.FC = () => {
 
   const handleVersionModalClose = () => {
     setIsVersionModalOpen(false);
+  };
+
+  const handleJobSubmit = () => {
+    setIsJobSubmitModalOpen(true);
+  };
+
+  const handleJobSubmitModalClose = () => {
+    setIsJobSubmitModalOpen(false);
   };
 
   const handleCreateVersionSubmit = async (data: CreateTaskDefinitionFormData): Promise<number | void> => {
@@ -226,6 +236,14 @@ const TaskDefinitionDetail: React.FC = () => {
           작업 정의 상세 - {taskDefinition.name}
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="contained"
+            startIcon={<PlayArrowIcon />}
+            onClick={handleJobSubmit}
+            disabled={isLoading || !taskDefinition.enabled}
+          >
+            작업 제출
+          </Button>
           <Button
             variant="outlined"
             startIcon={<AddIcon />}
@@ -361,6 +379,13 @@ const TaskDefinitionDetail: React.FC = () => {
         onSubmit={handleCreateVersionSubmit}
         baseTaskDefinition={taskDefinition}
         isVersion={true}
+      />
+
+      {/* 작업 제출 모달 */}
+      <JobSubmitModal
+        open={isJobSubmitModalOpen}
+        onClose={handleJobSubmitModalClose}
+        taskDefinition={taskDefinition}
       />
     </Box>
   );
