@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+target/
+dist/
+build/
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Package manager files
+package-lock.json
+yarn.lock
+
+# Generated files
+*.d.ts
