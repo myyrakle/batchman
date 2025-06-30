@@ -18,7 +18,8 @@ import {
   TableRow,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import { 
@@ -28,9 +29,13 @@ import {
   listJobs, 
   listTaskDefinitions,
   stopJob,
+  patchTaskDefinition,
+  createTaskDefinition,
   ErrorResponse 
 } from '../api';
 import { formatDate } from '../utils';
+import CreateTaskDefinitionModal from '../components/CreateTaskDefinitionModal';
+import { CreateTaskDefinitionFormData } from '../types/taskDefinition';
 
 const TaskDefinitionDetail: React.FC = () => {
   const { taskDefinitionId } = useParams<{ taskDefinitionId: string }>();
@@ -39,6 +44,8 @@ const TaskDefinitionDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isStoppingJob, setIsStoppingJob] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
 
   const fetchJobDetail = async () => {
     if (!taskDefinitionId) return;
@@ -77,6 +84,90 @@ const TaskDefinitionDetail: React.FC = () => {
   useEffect(() => {
     fetchJobDetail();
   }, [taskDefinitionId]);
+
+  const handleEditTask = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+  };
+
+  const handleCreateVersion = () => {
+    setIsVersionModalOpen(true);
+  };
+
+  const handleVersionModalClose = () => {
+    setIsVersionModalOpen(false);
+  };
+
+  const handleCreateVersionSubmit = async (data: CreateTaskDefinitionFormData) => {
+    if (!taskDefinitionId) return;
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // 새 버전 생성은 동일한 createTaskDefinition API를 사용하되 같은 이름으로 생성
+      const result = await createTaskDefinition({
+        name: data.name, // 동일한 이름으로 새 버전 생성
+        description: data.description,
+        image: data.image,
+        command: data.command,
+        env: JSON.stringify(data.env),
+        memory_limit: data.resources.memory.unit === 'g' 
+          ? data.resources.memory.value * 1024 
+          : data.resources.memory.value,
+        cpu_limit: data.resources.cpu,
+        args: undefined,
+      });
+
+      if (result.response instanceof ErrorResponse) {
+        setError('새 버전 생성에 실패했습니다.');
+        console.error('Failed to create new version:', result.response.error_code, result.response.message);
+      } else {
+        setIsVersionModalOpen(false);
+        fetchJobDetail(); // 새 버전 생성 후 데이터 새로고침
+      }
+    } catch (error) {
+      console.error('Failed to create new version:', error);
+      setError('새 버전 생성 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditSubmit = async (data: CreateTaskDefinitionFormData) => {
+    if (!taskDefinitionId) return;
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const result = await patchTaskDefinition(parseInt(taskDefinitionId), {
+        image: data.image,
+        command: data.command,
+        env: JSON.stringify(data.env),
+        memory_limit: data.resources.memory.unit === 'g' 
+          ? data.resources.memory.value * 1024 
+          : data.resources.memory.value,
+        cpu_limit: data.resources.cpu,
+      });
+
+      if (result.response instanceof ErrorResponse) {
+        setError('작업정의 수정에 실패했습니다.');
+        console.error('Failed to update task definition:', result.response.error_code, result.response.message);
+      } else {
+        setIsEditModalOpen(false);
+        fetchJobDetail(); // 수정 후 데이터 새로고침
+      }
+    } catch (error) {
+      console.error('Failed to edit task definition:', error);
+      setError('작업정의 수정 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
 
@@ -136,11 +227,19 @@ const TaskDefinitionDetail: React.FC = () => {
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
             variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={fetchJobDetail}
+            startIcon={<AddIcon />}
+            onClick={handleCreateVersion}
             disabled={isLoading}
           >
-            새로고침
+            새 버전 생성
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<EditIcon />}
+            onClick={handleEditTask}
+            disabled={isLoading}
+          >
+            수정
           </Button>
         </Box>
       </Box>
@@ -244,6 +343,24 @@ const TaskDefinitionDetail: React.FC = () => {
           </Card>
         </Box>
       </Box>
+
+      {/* 수정 모달 */}
+      <CreateTaskDefinitionModal
+        open={isEditModalOpen}
+        onClose={handleEditModalClose}
+        onSubmit={handleEditSubmit}
+        baseTaskDefinition={taskDefinition}
+        isVersion={false}
+      />
+
+      {/* 새 버전 생성 모달 */}
+      <CreateTaskDefinitionModal
+        open={isVersionModalOpen}
+        onClose={handleVersionModalClose}
+        onSubmit={handleCreateVersionSubmit}
+        baseTaskDefinition={taskDefinition}
+        isVersion={true}
+      />
     </Box>
   );
 };

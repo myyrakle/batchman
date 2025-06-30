@@ -57,6 +57,17 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
   useEffect(() => {
     if (open && baseTaskDefinition) {
       const env = baseTaskDefinition.env ? JSON.parse(baseTaskDefinition.env) : [];
+      
+      // 메모리 단위 변환 로직
+      let memoryValue = baseTaskDefinition.memory_limit || 1024;
+      let memoryUnit: 'm' | 'g' = 'm'; // 기본값은 MB
+      
+      // 만약 1024MB 이상이고 1024로 나누어떨어지면 GB로 변환
+      if (memoryValue >= 1024 && memoryValue % 1024 === 0) {
+        memoryValue = memoryValue / 1024;
+        memoryUnit = 'g';
+      }
+      
       setFormData({
         name:baseTaskDefinition.name,
         image: baseTaskDefinition.image,
@@ -64,8 +75,8 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
         env: env.length > 0 ? env : [{ key: '', value: '' }],
         resources: {
           memory: {
-            value: baseTaskDefinition.memory_limit || 1,
-            unit: 'g',
+            value: memoryValue,
+            unit: memoryUnit,
           },
           cpu: baseTaskDefinition.cpu_limit || 1024,
         },
