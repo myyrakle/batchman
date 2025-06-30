@@ -204,7 +204,6 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
               label="명령어"
               value={formData.command}
               onChange={(e) => setFormData({ ...formData, command: e.target.value })}
-              required
               fullWidth
               placeholder="예: nginx -g 'daemon off;'"
             />
