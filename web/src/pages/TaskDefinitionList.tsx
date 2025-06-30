@@ -92,13 +92,25 @@ const TaskDefinitionList: React.FC = () => {
   const handleCreateTaskSubmit = async (data: CreateTaskDefinitionFormData): Promise<number | void> => {
     try {
       setIsLoading(true);
+      
+      // 메모리 단위 변환: GB를 MB로 변환
+      const memoryLimitInMB = data.resources.memory.unit === 'g' 
+        ? data.resources.memory.value * 1024 
+        : data.resources.memory.value;
+      
+      console.log('Memory conversion:', {
+        originalValue: data.resources.memory.value,
+        unit: data.resources.memory.unit,
+        convertedToMB: memoryLimitInMB
+      });
+      
       const result = await createTaskDefinition({
         name: data.name,
         description: data.description,
         image: data.image,
         command: data.command,
         env: JSON.stringify(data.env),
-        memory_limit: data.resources.memory.value,
+        memory_limit: memoryLimitInMB,
         cpu_limit: data.resources.cpu,
         args: undefined,
       });
