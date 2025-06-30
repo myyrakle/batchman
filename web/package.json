@@ -6,7 +6,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "NODE_ENV=development webpack serve",
     "build": "NODE_ENV=production webpack --mode=production",
-    "build:dev": "NODE_ENV=development webpack --mode=development"
+    "build:dev": "NODE_ENV=development webpack --mode=development",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "author": "",
   "license": "ISC",
@@ -32,6 +34,7 @@
   "devDependencies": {
     "css-loader": "^7.1.2",
     "mini-css-extract-plugin": "^2.9.2",
+    "prettier": "^3.4.2",
     "style-loader": "^4.0.0",
     "webpack-dev-server": "^5.2.1"
   }
