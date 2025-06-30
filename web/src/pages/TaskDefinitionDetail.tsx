@@ -101,7 +101,7 @@ const TaskDefinitionDetail: React.FC = () => {
     setIsVersionModalOpen(false);
   };
 
-  const handleCreateVersionSubmit = async (data: CreateTaskDefinitionFormData) => {
+  const handleCreateVersionSubmit = async (data: CreateTaskDefinitionFormData): Promise<void> => {
     if (!taskDefinitionId) return;
 
     try {
@@ -137,7 +137,7 @@ const TaskDefinitionDetail: React.FC = () => {
     }
   };
 
-  const handleEditSubmit = async (data: CreateTaskDefinitionFormData) => {
+  const handleEditSubmit = async (data: CreateTaskDefinitionFormData): Promise<void> => {
     if (!taskDefinitionId) return;
 
     try {

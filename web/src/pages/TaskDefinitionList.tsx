@@ -89,10 +89,10 @@ const TaskDefinitionList: React.FC = () => {
     setIsCreateModalOpen(true);
   };
 
-  const handleCreateTaskSubmit = async (data: CreateTaskDefinitionFormData) => {
+  const handleCreateTaskSubmit = async (data: CreateTaskDefinitionFormData): Promise<number | void> => {
     try {
       setIsLoading(true);
-      await createTaskDefinition({
+      const result = await createTaskDefinition({
         name: data.name,
         description: data.description,
         image: data.image,
@@ -102,8 +102,20 @@ const TaskDefinitionList: React.FC = () => {
         cpu_limit: data.resources.cpu,
         args: undefined,
       });
+
+
+      if (result.response instanceof ErrorResponse) {
+        setError('작업정의 생성에 실패했습니다.');
+        console.error('Failed to create task definition:', result.response.error_code, result.response.message);
+        return;
+      }
+
+      const task_definition_id = result.response?.task_definition_id
+
       setIsCreateModalOpen(false);
       fetchTaskDefinitions(); // 목록 새로고침
+
+      return task_definition_id; // 생성된 작업정의 ID 반환
     } catch (err) {
       setError('작업정의 생성에 실패했습니다.');
       console.error('Failed to create task definition:', err);

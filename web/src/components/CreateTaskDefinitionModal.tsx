@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogTitle,
@@ -23,7 +24,7 @@ import { TaskDefinition, ErrorResponse } from '../api';
 interface CreateTaskDefinitionModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateTaskDefinitionFormData) => Promise<void>;
+  onSubmit: (data: CreateTaskDefinitionFormData) => Promise<number | void>;
   baseTaskDefinition?: TaskDefinition;
   isVersion?: boolean;
 }
@@ -35,6 +36,8 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
   baseTaskDefinition,
   isVersion = false,
 }) => {
+  const navigate = useNavigate();
+
   const initialFormData: CreateTaskDefinitionFormData = {
     name: '',
     image: '',
@@ -111,9 +114,26 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
 
     try {
       setIsSubmitting(true);
-      await onSubmit(formData);
-      onClose();
+      const taskDefinitionId = await onSubmit(formData);
+      
+      // 새로운 작업정의가 생성되었고 ID가 반환된 경우 상세 페이지로 이동
+      if (taskDefinitionId) {
+        const targetPath = `/task-definitions/${taskDefinitionId}`;
+        
+        try {
+          navigate(targetPath);
+        } catch (navError) {
+          console.error('Navigate failed:', navError);
+          onClose();
+        }
+        
+        console.log('Navigate sequence completed');
+      } else {
+        console.log('No taskDefinitionId returned, closing modal');
+        onClose();
+      }
     } catch (error) {
+      console.error('Error in handleSubmit:', error);
       setError('Failed to create task definition');
     } finally {
       setIsSubmitting(false);
@@ -172,7 +192,7 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <form onSubmit={handleSubmit}>
+      <form>
         <DialogTitle>{isVersion ? '새 버전 생성' : '새 작업정의 생성'}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
@@ -313,8 +333,13 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
         <DialogActions>
           <Button onClick={handleClose}>취소</Button>
           <Button 
-            type="submit" 
+            type="button" 
             variant="contained" 
+            onClick={(e)=>{
+              e.stopPropagation();
+
+              handleSubmit();
+            }}
             disabled={isSubmitting || isSubmitDisabled()}
           >
             {isVersion ? '버전 생성' : '생성'}
