@@ -11,11 +11,9 @@ export class ErrorResponse {
     }
 }
 
-
-
 // API 응답 타입 정의
-export interface ApiResponse<T>  {
-    response: T | ErrorResponse
+export interface ApiResponse<T> {
+    response: T | ErrorResponse;
     status_code: number;
 }
 
@@ -37,12 +35,12 @@ export interface TaskDefinition {
 }
 
 export interface ListTaskDefinitionsParams {
-  page_number: number;
-  page_size: number;
-  name?: string;
-  task_definition_id?: number;
-  contains_name?: string;
-  is_latest_only?: boolean;
+    page_number: number;
+    page_size: number;
+    name?: string;
+    task_definition_id?: number;
+    contains_name?: string;
+    is_latest_only?: boolean;
 }
 
 export interface ListTaskDefinitionsResponse {
@@ -75,9 +73,14 @@ export interface PatchTaskDefinitionRequest {
 }
 
 // Job 관련 타입
-export type JobStatus = 'Pending' | 'Starting' | 'Running' | 'Finished' | 'Failed';
+export type JobStatus =
+    | 'Pending'
+    | 'Starting'
+    | 'Running'
+    | 'Finished'
+    | 'Failed';
 
-export type ContainerType = 'Docker'
+export type ContainerType = 'Docker';
 
 export interface Job {
     id: number;
@@ -104,15 +107,15 @@ export interface StopJobRequest {
 }
 
 export interface SubmitJobResponse {
-  job_id: number;
+    job_id: number;
 }
 
 export interface ListJobsRequest {
-  page_number: number;
-  page_size: number;
-  job_id?: number;
-  status?: JobStatus;
-  contains_name?: string;
+    page_number: number;
+    page_size: number;
+    job_id?: number;
+    status?: JobStatus;
+    contains_name?: string;
 }
 
 export interface ListJobsResponse {
@@ -155,177 +158,208 @@ export interface PatchScheduleRequest {
     enabled?: boolean;
 }
 
-
 // API 클라이언트 생성
 const api = axios.create({
-  baseURL: config.apiBaseUrl,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+    baseURL: config.apiBaseUrl,
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
 // 에러 처리 헬퍼 함수
 const handleApiError = (error: AxiosError): ApiResponse<ErrorResponse> => {
-  if (error.response) {
+    if (error.response) {
+        return {
+            response: new ErrorResponse(
+                (error.response.data as any)?.error_code,
+                (error.response.data as any)?.message
+            ),
+            status_code: error.response.status,
+        };
+    }
     return {
-      response: new ErrorResponse((error.response.data as any)?.error_code, (error.response.data as any)?.message),
-      status_code: error.response.status
+        response: new ErrorResponse(
+            '',
+            error.message || 'Unknown error occurred'
+        ),
+        status_code: 500,
     };
-  }
-  return {
-    response: new ErrorResponse("", error.message || 'Unknown error occurred'),
-    status_code: 500
-  };
 };
 
 // Task Definition API
-export const listTaskDefinitions = async (params: ListTaskDefinitionsParams): Promise<ApiResponse<ListTaskDefinitionsResponse | ErrorResponse>> => {
-  try {
-    const response = await api.get('/task-definitions', { params });
-    console.log('API request params:', params); // 디버깅용
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+export const listTaskDefinitions = async (
+    params: ListTaskDefinitionsParams
+): Promise<ApiResponse<ListTaskDefinitionsResponse | ErrorResponse>> => {
+    try {
+        const response = await api.get('/task-definitions', { params });
+        console.log('API request params:', params); // 디버깅용
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
 
-export const createTaskDefinition = async (taskDefinition: CreateTaskDefinitionRequest): Promise<ApiResponse<CreateTaskDefinitionResponse | ErrorResponse>> => {
-  try {
-    const response = await api.post('/task-definitions', taskDefinition);
-    console.log('API response:', response); // 디버깅용
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+export const createTaskDefinition = async (
+    taskDefinition: CreateTaskDefinitionRequest
+): Promise<ApiResponse<CreateTaskDefinitionResponse | ErrorResponse>> => {
+    try {
+        const response = await api.post('/task-definitions', taskDefinition);
+        console.log('API response:', response); // 디버깅용
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
 
-export const patchTaskDefinition = async (id: number, taskDefinition: PatchTaskDefinitionRequest): Promise<ApiResponse<void | ErrorResponse>> => {
-  try {
-    const response = await api.patch(`/task-definitions/${id}`, taskDefinition);
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+export const patchTaskDefinition = async (
+    id: number,
+    taskDefinition: PatchTaskDefinitionRequest
+): Promise<ApiResponse<void | ErrorResponse>> => {
+    try {
+        const response = await api.patch(
+            `/task-definitions/${id}`,
+            taskDefinition
+        );
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
 
-export const deleteTaskDefinition = async (id: number): Promise<ApiResponse<void | ErrorResponse>> => {
-  try {
-    const response = await api.delete(`/task-definitions/${id}`);
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+export const deleteTaskDefinition = async (
+    id: number
+): Promise<ApiResponse<void | ErrorResponse>> => {
+    try {
+        const response = await api.delete(`/task-definitions/${id}`);
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
 
 // Job API
-export const submitJob = async (request: SubmitJobRequest): Promise<ApiResponse<SubmitJobResponse | ErrorResponse>> => {
-  try {
-    const response = await api.post('/jobs/submit', request);
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+export const submitJob = async (
+    request: SubmitJobRequest
+): Promise<ApiResponse<SubmitJobResponse | ErrorResponse>> => {
+    try {
+        const response = await api.post('/jobs/submit', request);
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
 
-export const stopJob = async (request: StopJobRequest): Promise<ApiResponse<void | ErrorResponse>> => {
-  try {
-    const response = await api.post('/jobs/stop', request);
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+export const stopJob = async (
+    request: StopJobRequest
+): Promise<ApiResponse<void | ErrorResponse>> => {
+    try {
+        const response = await api.post('/jobs/stop', request);
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
 
-export const listJobs = async (request: ListJobsRequest): Promise<ApiResponse<ListJobsResponse | ErrorResponse>> => {
-  try {
-    const queryParams = new URLSearchParams();
-    queryParams.append('page_number', String(request.page_number));
-    queryParams.append('page_size', String(request.page_size));
-    
-    if (request.job_id) {
-      queryParams.append('job_id', String(request.job_id));
-    }
-    if (request.status) {
-      queryParams.append('status', request.status);
-    }
-    if (request.contains_name) {
-      queryParams.append('contains_name', request.contains_name);
-    }
+export const listJobs = async (
+    request: ListJobsRequest
+): Promise<ApiResponse<ListJobsResponse | ErrorResponse>> => {
+    try {
+        const queryParams = new URLSearchParams();
+        queryParams.append('page_number', String(request.page_number));
+        queryParams.append('page_size', String(request.page_size));
 
-    const response = await api.get(`/jobs?${queryParams.toString()}`);
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+        if (request.job_id) {
+            queryParams.append('job_id', String(request.job_id));
+        }
+        if (request.status) {
+            queryParams.append('status', request.status);
+        }
+        if (request.contains_name) {
+            queryParams.append('contains_name', request.contains_name);
+        }
+
+        const response = await api.get(`/jobs?${queryParams.toString()}`);
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
 
 // Schedule API
-export const listSchedules = async (): Promise<ApiResponse<Schedule[] | ErrorResponse>> => {
-  try {
-    const response = await api.get('/schedules');
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+export const listSchedules = async (): Promise<
+    ApiResponse<Schedule[] | ErrorResponse>
+> => {
+    try {
+        const response = await api.get('/schedules');
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
 
-export const createSchedule = async (schedule: CreateScheduleRequest): Promise<ApiResponse<number | ErrorResponse>> => {
-  try {
-    const response = await api.post('/schedules', schedule);
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+export const createSchedule = async (
+    schedule: CreateScheduleRequest
+): Promise<ApiResponse<number | ErrorResponse>> => {
+    try {
+        const response = await api.post('/schedules', schedule);
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
 
-export const patchSchedule = async (id: number, schedule: PatchScheduleRequest): Promise<ApiResponse<void | ErrorResponse>> => {
-  try {
-    const response = await api.patch(`/schedules/${id}`, schedule);
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+export const patchSchedule = async (
+    id: number,
+    schedule: PatchScheduleRequest
+): Promise<ApiResponse<void | ErrorResponse>> => {
+    try {
+        const response = await api.patch(`/schedules/${id}`, schedule);
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
 
-export const deleteSchedule = async (id: number): Promise<ApiResponse<void | ErrorResponse>> => {
-  try {
-    const response = await api.delete(`/schedules/${id}`);
-    return {
-      response: response.data,
-      status_code: response.status
-    };
-  } catch (error) {
-    return handleApiError(error as AxiosError);
-  }
+export const deleteSchedule = async (
+    id: number
+): Promise<ApiResponse<void | ErrorResponse>> => {
+    try {
+        const response = await api.delete(`/schedules/${id}`);
+        return {
+            response: response.data,
+            status_code: response.status,
+        };
+    } catch (error) {
+        return handleApiError(error as AxiosError);
+    }
 };
-
