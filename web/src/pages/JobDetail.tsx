@@ -255,6 +255,7 @@ const JobDetail: React.FC = () => {
                         label={getStatusLabel(job.status)}
                         color={getStatusColor(job.status)}
                         size="small"
+                        onClick={()=>{}}
                       />
                     </TableCell>
                   </TableRow>
