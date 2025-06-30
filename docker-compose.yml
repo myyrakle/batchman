@@ -1,0 +1,9 @@
+services: 
+  forever:
+    build:
+      dockerfile: ./dockerfiles/Dockerfile.forever
+    container_name: forever
+  fail:
+    build:
+      dockerfile: ./dockerfiles/Dockerfile.fail
+    container_name: fail
