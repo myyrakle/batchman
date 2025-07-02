@@ -85,9 +85,15 @@ impl ContainerRepository for ContainerDockerRepository {
 
         // 환경 변수 설정
         if let Some(env_vars) = &task_definition.env {
-            for env_var in env_vars.split(',') {
-                command.arg("-e");
-                command.arg(env_var);
+            let env_vars = env_vars.trim();
+            if !env_vars.is_empty() {
+                for env_var in env_vars.split(',') {
+                    let env_var = env_var.trim();
+                    if !env_var.is_empty() {
+                        command.arg("-e");
+                        command.arg(env_var);
+                    }
+                }
             }
         }
 
@@ -95,21 +101,31 @@ impl ContainerRepository for ContainerDockerRepository {
 
         // CMD 설정
         if let Some(cmd) = &task_definition.command {
-            // split 로직 고도화 필요
-            let command_list = cmd
-                .split(' ')
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>();
+            let cmd = cmd.trim();
+            if !cmd.is_empty() {
+                // split 로직 고도화 필요
+                let command_list = cmd
+                    .split(' ')
+                    .filter(|s| !s.trim().is_empty())
+                    .map(|s| s.to_string())
+                    .collect::<Vec<String>>();
 
-            for cmd in command_list {
-                command.arg(cmd);
+                for cmd in command_list {
+                    command.arg(cmd);
+                }
             }
         }
 
         // Arguments 전달
         if let Some(args) = &task_definition.args {
-            for arg in args.split(',') {
-                command.arg(arg);
+            let args = args.trim();
+            if !args.is_empty() {
+                for arg in args.split(',') {
+                    let arg = arg.trim();
+                    if !arg.is_empty() {
+                        command.arg(arg);
+                    }
+                }
             }
         }
 

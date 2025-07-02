@@ -99,6 +99,17 @@ const CreateTaskDefinitionModal: React.FC<CreateTaskDefinitionModalProps> = ({
     };
 
     const handleSubmit = async () => {
+        // 필수 필드 검증
+        if (!formData.name.trim()) {
+            setError('작업 이름을 입력해주세요.');
+            return;
+        }
+        if (!formData.image.trim()) {
+            setError('이미지를 입력해주세요.');
+            return;
+        }
+
+        // 리소스 검증
         if (
             formData.resources.memory.unit === 'm' &&
             formData.resources.memory.value < 10
