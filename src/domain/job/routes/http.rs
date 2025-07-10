@@ -9,8 +9,8 @@ use axum::{
 use crate::{
     context::SharedContext,
     domain::job::dto::{
-        ListJobLogsQuery, ListJobLogsRequest, ListJobsQuery, ListJobsRequest, StopJobBody,
-        StopJobRequest, SubmitJobBody, SubmitJobRequest,
+        CountJobLogsRequest, ListJobLogsQuery, ListJobLogsRequest, ListJobsQuery, ListJobsRequest,
+        StopJobBody, StopJobRequest, SubmitJobBody, SubmitJobRequest,
     },
 };
 
@@ -70,7 +70,6 @@ pub async fn list_jobs(
     }
 }
 
-#[axum::debug_handler]
 pub async fn list_job_logs(
     Path(job_id): Path<i64>,
     Extension(context): Extension<SharedContext>,
@@ -79,6 +78,24 @@ pub async fn list_job_logs(
     let result = context
         .job_service
         .list_job_logs(ListJobLogsRequest { job_id, query })
+        .await;
+
+    match result {
+        Ok(response) => Json(response).into_response(),
+        Err(error) => Response::builder()
+            .status(500)
+            .body(Body::new(error.into_json_response()))
+            .unwrap(),
+    }
+}
+
+pub async fn count_job_logs(
+    Path(job_id): Path<i64>,
+    Extension(context): Extension<SharedContext>,
+) -> response::Response {
+    let result = context
+        .job_service
+        .count_job_logs(CountJobLogsRequest { job_id })
         .await;
 
     match result {

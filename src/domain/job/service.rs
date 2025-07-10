@@ -6,7 +6,10 @@ use crate::{
             ContainerRepository,
             dao::{InspectContainerParams, RunContainerParams, StopContainerParams},
         },
-        job::dto::{JobLogDto, ListJobLogsRequest, ListJobLogsResponse, SubmitJobResponse},
+        job::dto::{
+            CountJobLogsRequest, CountJobLogsResponse, JobLogDto, ListJobLogsRequest,
+            ListJobLogsResponse, SubmitJobResponse,
+        },
         task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
     },
     errors,
@@ -339,5 +342,37 @@ impl JobService for JobServiceImpl {
         }
 
         Ok(ListJobLogsResponse { logs })
+    }
+
+    async fn count_job_logs(
+        &self,
+        job_id: CountJobLogsRequest,
+    ) -> errors::Result<CountJobLogsResponse> {
+        let mut jobs = self
+            .job_repository
+            .list_jobs(ListJobsParams {
+                job_ids: vec![job_id.job_id],
+                ..Default::default()
+            })
+            .await?;
+
+        let Some(job) = jobs.pop() else {
+            return Err(errors::Error::JobNotFound);
+        };
+
+        let Some(container_id) = &job.container_id else {
+            return Err(errors::Error::ContainerIDNotFound);
+        };
+
+        let container_info = self
+            .container_repository
+            .inspect_container(InspectContainerParams {
+                container_id: container_id.clone(),
+            })
+            .await?;
+
+        let log_count = crate::utils::count_lines(&container_info.log_path)?;
+
+        Ok(CountJobLogsResponse { count: log_count })
     }
 }

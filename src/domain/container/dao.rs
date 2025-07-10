@@ -234,13 +234,13 @@ pub enum LogType {
 #[derive(Debug, Clone, Deserialize)]
 pub struct LogConfig {
     #[serde(rename = "Type")]
-    pub log_type: LogType,
+    pub _log_type: LogType,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct HostConfig {
     #[serde(rename = "LogConfig")]
-    pub log_config: LogConfig,
+    pub _log_config: LogConfig,
 }
 
 #[allow(dead_code)]

@@ -47,6 +47,10 @@ pub fn app(context: SharedContext) -> Router {
             get(domain::job::routes::http::list_job_logs),
         )
         .route(
+            "/jobs/{job_id}/logs/count",
+            get(domain::job::routes::http::count_job_logs),
+        )
+        .route(
             "/schedules",
             get(domain::schedule::routes::http::list_schedules),
         )

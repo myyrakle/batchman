@@ -5,11 +5,15 @@ pub mod repository;
 pub mod routes;
 pub mod service;
 
-use axum::http::request;
 use dao::*;
 use dto::{ListJobsRequest, StopJobRequest, SubmitJobRequest};
 
-use crate::{domain::job::dto::SubmitJobResponse, errors};
+use crate::{
+    domain::job::dto::{
+        CountJobLogsRequest, CountJobLogsResponse, ListJobLogsRequest, SubmitJobResponse,
+    },
+    errors,
+};
 
 #[async_trait::async_trait]
 pub trait JobRepository {
@@ -28,6 +32,10 @@ pub trait JobService {
     async fn track_running_job(&self, job: &entities::job::Model) -> errors::Result<()>;
     async fn list_job_logs(
         &self,
-        request: dto::ListJobLogsRequest,
+        request: ListJobLogsRequest,
     ) -> errors::Result<dto::ListJobLogsResponse>;
+    async fn count_job_logs(
+        &self,
+        job_id: CountJobLogsRequest,
+    ) -> errors::Result<CountJobLogsResponse>;
 }

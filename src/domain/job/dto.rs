@@ -131,3 +131,13 @@ pub struct JobLogDto {
 pub struct ListJobLogsResponse {
     pub logs: Vec<JobLogDto>,
 }
+
+#[derive(Debug, Clone)]
+pub struct CountJobLogsRequest {
+    pub job_id: i64,
+}
+
+#[derive(Serialize, Debug, Clone)]
+pub struct CountJobLogsResponse {
+    pub count: usize,
+}
