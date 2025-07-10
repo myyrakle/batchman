@@ -4,6 +4,7 @@ pub(crate) mod db;
 pub(crate) mod domain;
 pub(crate) mod errors;
 pub(crate) mod types;
+pub(crate) mod utils;
 pub(crate) mod web;
 
 use std::sync::Arc;
