@@ -71,6 +71,11 @@ impl ContainerRepository for ContainerDockerRepository {
         command.arg("run");
         command.arg("-d");
 
+        // log 드라이버 설정
+        // 참조: https://docs.docker.com/engine/logging/configure/
+        command.arg("--log-driver");
+        command.arg("json-file");
+
         // 메모리 제한 설정
         if let Some(memory_limit) = task_definition.memory_limit {
             command.arg("--memory");

@@ -4,6 +4,7 @@ pub(crate) mod db;
 pub(crate) mod domain;
 pub(crate) mod errors;
 pub(crate) mod types;
+pub(crate) mod utils;
 pub(crate) mod web;
 
 use std::sync::Arc;
@@ -41,6 +42,14 @@ pub fn app(context: SharedContext) -> Router {
         .route("/jobs/submit", post(domain::job::routes::http::submit_job))
         .route("/jobs/stop", post(domain::job::routes::http::stop_job))
         .route("/jobs", get(domain::job::routes::http::list_jobs))
+        .route(
+            "/jobs/{job_id}/logs",
+            get(domain::job::routes::http::list_job_logs),
+        )
+        .route(
+            "/jobs/{job_id}/logs/count",
+            get(domain::job::routes::http::count_job_logs),
+        )
         .route(
             "/schedules",
             get(domain::schedule::routes::http::list_schedules),
