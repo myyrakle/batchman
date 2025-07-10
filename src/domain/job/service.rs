@@ -168,18 +168,8 @@ impl JobService for JobServiceImpl {
             })
             .await?;
 
-        // 1. 컨테이너가 종료되었을 경우 종료 처리
-        if let Some(finished_at) = inspect_result.state.finished_at {
-            self.job_repository
-                .patch_job(PatchJobParams {
-                    job_id: job.id,
-                    status: Some(entities::job::JobStatus::Finished),
-                    finished_at: Some(finished_at),
-                    exit_code: inspect_result.state.exit_code,
-                    ..Default::default()
-                })
-                .await?;
-
+        // 1. 컨테이너가 여전히 실행 중인 경우, 아무 작업도 하지 않음
+        if inspect_result.state.running {
             return Ok(());
         }
 
@@ -193,6 +183,21 @@ impl JobService for JobServiceImpl {
                         "Container is dead: {}",
                         inspect_result.state.error.unwrap_or_default()
                     )),
+                    ..Default::default()
+                })
+                .await?;
+
+            return Ok(());
+        }
+
+        // 3. 컨테이너가 종료되었을 경우 종료 처리
+        if let Some(finished_at) = inspect_result.state.finished_at {
+            self.job_repository
+                .patch_job(PatchJobParams {
+                    job_id: job.id,
+                    status: Some(entities::job::JobStatus::Finished),
+                    finished_at: Some(finished_at),
+                    exit_code: inspect_result.state.exit_code,
                     ..Default::default()
                 })
                 .await?;
