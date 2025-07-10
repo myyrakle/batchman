@@ -6,7 +6,7 @@ use crate::{
             ContainerRepository,
             dao::{InspectContainerParams, RunContainerParams, StopContainerParams},
         },
-        job::dto::SubmitJobResponse,
+        job::dto::{JobLogDto, ListJobLogsRequest, ListJobLogsResponse, SubmitJobResponse},
         task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
     },
     errors,
@@ -280,5 +280,64 @@ impl JobService for JobServiceImpl {
             jobs: job_dtos,
             total_count,
         })
+    }
+
+    async fn list_job_logs(
+        &self,
+        request: ListJobLogsRequest,
+    ) -> errors::Result<ListJobLogsResponse> {
+        let job_id = request.job_id;
+
+        // job_id로 job 조회
+        let mut jobs = self
+            .job_repository
+            .list_jobs(ListJobsParams {
+                job_ids: vec![job_id],
+                ..Default::default()
+            })
+            .await?;
+
+        let Some(job) = jobs.pop() else {
+            return Err(errors::Error::JobNotFound);
+        };
+
+        // 컨테이너 ID가 없으면 에러
+        let Some(container_id) = &job.container_id else {
+            return Err(errors::Error::ContainerIDNotFound);
+        };
+
+        // 컨테이너 정보 조회
+        // TODO: inspect 시점을 컨테이너 생성 후로 조정할 필요 있음
+        let container_info = self
+            .container_repository
+            .inspect_container(InspectContainerParams {
+                container_id: container_id.clone(),
+            })
+            .await?;
+
+        let lines = crate::utils::read_lines_range(
+            &container_info.log_path,
+            request.query.offset,
+            request.query.limit,
+        )?;
+
+        let mut logs = vec![];
+
+        for (i, line) in lines.into_iter().enumerate() {
+            #[derive(serde::Deserialize)]
+            struct LogLine {
+                log: String,
+                time: chrono::DateTime<chrono::Utc>,
+            }
+
+            let line = serde_json::from_str::<LogLine>(&line)?;
+            logs.push(JobLogDto {
+                index: request.query.offset + i,
+                time: line.time,
+                message: line.log,
+            });
+        }
+
+        Ok(ListJobLogsResponse { logs })
     }
 }

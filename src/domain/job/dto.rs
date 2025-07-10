@@ -107,3 +107,27 @@ pub struct ListJobsResponse {
     pub jobs: Vec<JobDto>,
     pub total_count: u64,
 }
+
+#[derive(Debug, Clone)]
+pub struct ListJobLogsRequest {
+    pub job_id: i64,
+    pub query: ListJobLogsQuery,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct ListJobLogsQuery {
+    pub offset: usize,
+    pub limit: usize,
+}
+
+#[derive(Serialize, Debug, Clone)]
+pub struct JobLogDto {
+    pub index: usize,
+    pub time: chrono::DateTime<Utc>,
+    pub message: String,
+}
+
+#[derive(Serialize, Debug, Clone)]
+pub struct ListJobLogsResponse {
+    pub logs: Vec<JobLogDto>,
+}

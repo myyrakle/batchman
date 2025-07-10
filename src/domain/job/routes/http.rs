@@ -1,7 +1,7 @@
 use axum::{
     Extension, Json,
     body::Body,
-    extract::Query,
+    extract::{Path, Query},
     http::Response,
     response::{self, IntoResponse},
 };
@@ -9,8 +9,8 @@ use axum::{
 use crate::{
     context::SharedContext,
     domain::job::dto::{
-        ListJobsQuery, ListJobsRequest, StopJobBody, StopJobRequest, SubmitJobBody,
-        SubmitJobRequest,
+        ListJobLogsQuery, ListJobLogsRequest, ListJobsQuery, ListJobsRequest, StopJobBody,
+        StopJobRequest, SubmitJobBody, SubmitJobRequest,
     },
 };
 
@@ -59,6 +59,26 @@ pub async fn list_jobs(
         .list_jobs(ListJobsRequest {
             request_query: query,
         })
+        .await;
+
+    match result {
+        Ok(response) => Json(response).into_response(),
+        Err(error) => Response::builder()
+            .status(500)
+            .body(Body::new(error.into_json_response()))
+            .unwrap(),
+    }
+}
+
+#[axum::debug_handler]
+pub async fn list_job_logs(
+    Path(job_id): Path<i64>,
+    Extension(context): Extension<SharedContext>,
+    Query(query): Query<ListJobLogsQuery>,
+) -> response::Response {
+    let result = context
+        .job_service
+        .list_job_logs(ListJobLogsRequest { job_id, query })
         .await;
 
     match result {
