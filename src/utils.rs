@@ -21,3 +21,15 @@ pub(crate) fn read_lines_range(
 
     Ok(lines)
 }
+
+/*
+파일의 총 줄 수를 계산합니다.
+*/
+pub(crate) fn count_lines(file_path: &str) -> Result<usize, std::io::Error> {
+    let file = File::open(file_path)?;
+    let reader = BufReader::new(file);
+
+    let count = reader.lines().count();
+
+    Ok(count)
+}
