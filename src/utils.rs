@@ -1,8 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader, SeekFrom};
 
-use tokio::io::AsyncSeekExt;
-
 /*
 사용 예: 100번째 줄부터 500줄 가져오기
 let lines = read_lines_range("large_file.txt", 100, 500)?;
@@ -39,11 +37,13 @@ pub(crate) fn count_lines(file_path: &str) -> Result<usize, std::io::Error> {
 /*
 Log Tailing을 위한 유틸리티 객체
 */
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Tailer {
     reader: tokio::io::BufReader<tokio::fs::File>,
 }
 
+#[allow(dead_code)]
 impl Tailer {
     pub async fn new(file_path: &str) -> std::io::Result<Self> {
         use tokio::io::AsyncSeekExt;
@@ -68,9 +68,6 @@ impl Tailer {
             lines.push(line.trim().to_string());
             line.clear();
         }
-
-        // Seek 위치 업데이트
-        // self.reader.seek(SeekFrom::Current(0)).await?;
 
         Ok(lines)
     }
