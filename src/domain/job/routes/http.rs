@@ -1,9 +1,14 @@
+use std::convert::Infallible;
+
 use axum::{
     Extension, Json,
     body::Body,
     extract::{Path, Query},
     http::Response,
-    response::{self, IntoResponse},
+    response::{
+        self, IntoResponse, Sse,
+        sse::{Event, KeepAlive},
+    },
 };
 
 use crate::{
@@ -105,4 +110,33 @@ pub async fn count_job_logs(
             .body(Body::new(error.into_json_response()))
             .unwrap(),
     }
+}
+
+// UNCOMPLETE:
+pub async fn tail_job_logs(
+    Path(_job_id): Path<i64>,
+    Extension(_context): Extension<SharedContext>,
+) -> Sse<impl futures_util::Stream<Item = Result<Event, Infallible>>> {
+    use futures_util::stream::{self};
+    use std::time::Duration;
+    use tokio_stream::StreamExt as _;
+
+    // let result = context
+    //     .job_service
+    //     .list_job_logs(ListJobLogsRequest { job_id })
+    //     .await;
+
+    let stream = stream::repeat_with(|| Event::default().data("hi!"))
+        .map(Ok)
+        .throttle(Duration::from_secs(1));
+
+    Sse::new(stream).keep_alive(KeepAlive::default())
+
+    // match result {
+    //     Ok(response) => unimplemented!(),
+    //     Err(error) => Response::builder()
+    //         .status(500)
+    //         .body(Body::new(error.into_json_response()))
+    //         .unwrap(),
+    // }
 }
