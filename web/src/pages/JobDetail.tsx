@@ -16,6 +16,7 @@ import {
   TableCell,
   TableRow,
   Link,
+  Paper,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -24,9 +25,11 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Job,
   JobStatus,
+  JobLog,
   TaskDefinition,
   listJobs,
   listTaskDefinitions,
+  listJobLogs,
   stopJob,
   ErrorResponse,
 } from "../api";
@@ -39,6 +42,7 @@ const JobDetail: React.FC = () => {
   const [taskDefinition, setTaskDefinition] = useState<TaskDefinition | null>(
     null,
   );
+  const [logs, setLogs] = useState<JobLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isStoppingJob, setIsStoppingJob] = useState(false);
@@ -114,8 +118,29 @@ const JobDetail: React.FC = () => {
     }
   };
 
+  const fetchJobLogs = async () => {
+    if (!jobId) return;
+
+    try {
+      const logsResult = await listJobLogs({
+        job_id: parseInt(jobId),
+        offset: 0,
+        limit: 100,
+      });
+
+      if (logsResult.response instanceof ErrorResponse) {
+        console.error("Failed to fetch job logs:", logsResult.response);
+      } else {
+        setLogs(logsResult.response.logs);
+      }
+    } catch (err) {
+      console.error("Failed to fetch job logs:", err);
+    }
+  };
+
   useEffect(() => {
     fetchJobDetail();
+    fetchJobLogs();
   }, [jobId]);
 
   const getStatusColor = (status: JobStatus) => {
@@ -228,7 +253,10 @@ const JobDetail: React.FC = () => {
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
-            onClick={fetchJobDetail}
+            onClick={() => {
+              fetchJobDetail();
+              fetchJobLogs();
+            }}
             disabled={isLoading}
           >
             새로고침
@@ -252,11 +280,12 @@ const JobDetail: React.FC = () => {
           display: "grid",
           gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
           gap: 3,
+          alignItems: "start",
         }}
       >
         {/* 작업 정보 */}
         <Box>
-          <Card>
+          <Card sx={{ height: "fit-content", minHeight: "500px" }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 작업 정보
@@ -414,6 +443,93 @@ const JobDetail: React.FC = () => {
                   </TableRow>
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </Box>
+
+        {/* 로그 섹션 */}
+        <Box>
+          <Card sx={{ height: "fit-content", minHeight: "500px" }}>
+            <CardContent>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                  로그
+                </Typography>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => navigate(`/jobs/${job.id}/logs`)}
+                  sx={{ minWidth: "auto" }}
+                >
+                  전체 보기
+                </Button>
+              </Box>
+              <Divider sx={{ mb: 2 }} />
+              <Box
+                sx={{
+                  height: "400px",
+                  overflow: "auto",
+                  backgroundColor: "#0d1117",
+                  fontFamily: "monospace",
+                  fontSize: "12px",
+                  lineHeight: 1.4,
+                  p: 1,
+                  border: "1px solid #21262d",
+                  borderRadius: 1,
+                }}
+              >
+                {logs.length === 0 ? (
+                  <Box
+                    sx={{
+                      textAlign: "center",
+                      py: 4,
+                      color: "#7d8590",
+                    }}
+                  >
+                    로그가 없습니다.
+                  </Box>
+                ) : (
+                  logs.map((log) => (
+                    <Box
+                      key={log.index}
+                      sx={{
+                        display: "flex",
+                        borderBottom: "1px solid #21262d",
+                        py: 0.5,
+                        "&:hover": {
+                          backgroundColor: "#161b22",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: "100px",
+                          flexShrink: 0,
+                          color: "#7d8590",
+                          fontSize: "10px",
+                          mr: 1,
+                        }}
+                      >
+                        {new Date(log.time).toLocaleTimeString("ko-KR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        })}
+                      </Box>
+                      <Box
+                        sx={{
+                          flex: 1,
+                          color: "#f0f6fc",
+                          whiteSpace: "pre-wrap",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {log.message}
+                      </Box>
+                    </Box>
+                  ))
+                )}
+              </Box>
             </CardContent>
           </Card>
         </Box>
