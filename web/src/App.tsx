@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import TaskDefinitionList from './pages/TaskDefinitionList';
 import JobList from './pages/JobList';
 import JobDetail from './pages/JobDetail';
+import JobLogs from './pages/JobLogs';
 import ScheduleList from './pages/ScheduleList';
 import TaskDefinitionDetail from './pages/TaskDefinitionDetail';
 
@@ -55,6 +56,7 @@ const AppContent: React.FC = () => {
                 />
                 <Route path="/jobs" element={<JobList />} />
                 <Route path="/jobs/:jobId" element={<JobDetail />} />
+                <Route path="/jobs/:jobId/logs" element={<JobLogs />} />
                 <Route path="/schedules" element={<ScheduleList />} />
             </Routes>
         </Layout>

@@ -20,6 +20,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import StopIcon from '@mui/icons-material/Stop';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
     Job,
     JobStatus,
@@ -217,6 +218,13 @@ const JobDetail: React.FC = () => {
                     작업 상세 - {job.name}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                        variant="outlined"
+                        startIcon={<VisibilityIcon />}
+                        onClick={() => navigate(`/jobs/${job.id}/logs`)}
+                    >
+                        로그 보기
+                    </Button>
                     <Button
                         variant="outlined"
                         startIcon={<RefreshIcon />}
