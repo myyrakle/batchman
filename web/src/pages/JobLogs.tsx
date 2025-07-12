@@ -19,9 +19,8 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
 import PauseIcon from '@mui/icons-material/Pause';
-import ClearIcon from '@mui/icons-material/Clear';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     Job,
@@ -219,11 +218,6 @@ const JobLogs: React.FC = () => {
         shouldAutoScrollRef.current = true;
     };
 
-    const clearLogs = () => {
-        setLogs([]);
-        fetchInitialLogs();
-    };
-
     useEffect(() => {
         fetchInitialLogs();
     }, [jobId]);
@@ -342,12 +336,7 @@ const JobLogs: React.FC = () => {
                             </Tooltip>
                             <Tooltip title="맨 아래로 스크롤">
                                 <IconButton onClick={scrollToBottom} size="small">
-                                    <PlayArrowIcon />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="로그 지우기">
-                                <IconButton onClick={clearLogs} size="small">
-                                    <ClearIcon />
+                                    <VerticalAlignBottomIcon />
                                 </IconButton>
                             </Tooltip>
                         </Stack>
