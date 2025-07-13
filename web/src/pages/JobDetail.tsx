@@ -17,11 +17,15 @@ import {
   TableRow,
   Link,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import StopIcon from "@mui/icons-material/Stop";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import {
   Job,
   JobStatus,
@@ -31,6 +35,7 @@ import {
   listTaskDefinitions,
   listJobLogs,
   stopJob,
+  submitJob,
   ErrorResponse,
 } from "../api";
 import { formatDate } from "../utils";
@@ -46,6 +51,8 @@ const JobDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isStoppingJob, setIsStoppingJob] = useState(false);
+  const [isRetryingJob, setIsRetryingJob] = useState(false);
+  const [isRetryDialogOpen, setIsRetryDialogOpen] = useState(false);
 
   const fetchJobDetail = async () => {
     if (!jobId) return;
@@ -118,6 +125,54 @@ const JobDetail: React.FC = () => {
     }
   };
 
+  const handleRetryJob = async () => {
+    if (!job || !taskDefinition) return;
+
+    try {
+      setIsRetryingJob(true);
+      setError(null);
+
+      const result = await submitJob({
+        task_definition_id: taskDefinition.id,
+        job_name: `${job.name} (재시도)`,
+      });
+
+      if (result.response instanceof ErrorResponse) {
+        setError(
+          `작업 재시도에 실패했습니다: ${
+            result.response.message || "알 수 없는 오류"
+          }`
+        );
+        return;
+      }
+
+      const newJobId = result.response.job_id;
+      
+      // 새로 생성된 작업 상세 페이지로 이동
+      if (newJobId) {
+        navigate(`/jobs/${newJobId}`);
+      }
+    } catch (err) {
+      console.error("Failed to retry job:", err);
+      setError("작업 재시도 중 오류가 발생했습니다.");
+    } finally {
+      setIsRetryingJob(false);
+      setIsRetryDialogOpen(false);
+    }
+  };
+
+  const handleRetryButtonClick = () => {
+    setIsRetryDialogOpen(true);
+  };
+
+  const handleRetryDialogClose = () => {
+    setIsRetryDialogOpen(false);
+  };
+
+  const handleRetryConfirm = () => {
+    handleRetryJob();
+  };
+
   const fetchJobLogs = async () => {
     if (!jobId) return;
 
@@ -182,6 +237,9 @@ const JobDetail: React.FC = () => {
     (job.status === "Pending" ||
       job.status === "Starting" ||
       job.status === "Running");
+
+  const canRetryJob =
+    job && taskDefinition && (job.status === "Finished" || job.status === "Failed");
 
   if (isLoading) {
     return (
@@ -261,6 +319,17 @@ const JobDetail: React.FC = () => {
           >
             새로고침
           </Button>
+          {canRetryJob && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<RestartAltIcon />}
+              onClick={handleRetryButtonClick}
+              disabled={isRetryingJob}
+            >
+              {isRetryingJob ? "재시도 중..." : "재시도"}
+            </Button>
+          )}
           {canStopJob && (
             <Button
               variant="contained"
@@ -534,6 +603,29 @@ const JobDetail: React.FC = () => {
           </Card>
         </Box>
       </Box>
+
+      {/* 재시도 확인 모달 */}
+      <Dialog
+        open={isRetryDialogOpen}
+        onClose={handleRetryDialogClose}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>작업 재시도</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleRetryDialogClose} disabled={isRetryingJob}>
+            취소
+          </Button>
+          <Button
+            onClick={handleRetryConfirm}
+            variant="contained"
+            color="primary"
+            disabled={isRetryingJob}
+          >
+            {isRetryingJob ? "재시도 중..." : "확인"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
