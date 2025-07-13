@@ -17,6 +17,9 @@ import {
   TableRow,
   Link,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -49,6 +52,7 @@ const JobDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isStoppingJob, setIsStoppingJob] = useState(false);
   const [isRetryingJob, setIsRetryingJob] = useState(false);
+  const [isRetryDialogOpen, setIsRetryDialogOpen] = useState(false);
 
   const fetchJobDetail = async () => {
     if (!jobId) return;
@@ -153,7 +157,20 @@ const JobDetail: React.FC = () => {
       setError("작업 재시도 중 오류가 발생했습니다.");
     } finally {
       setIsRetryingJob(false);
+      setIsRetryDialogOpen(false);
     }
+  };
+
+  const handleRetryButtonClick = () => {
+    setIsRetryDialogOpen(true);
+  };
+
+  const handleRetryDialogClose = () => {
+    setIsRetryDialogOpen(false);
+  };
+
+  const handleRetryConfirm = () => {
+    handleRetryJob();
   };
 
   const fetchJobLogs = async () => {
@@ -307,7 +324,7 @@ const JobDetail: React.FC = () => {
               variant="contained"
               color="primary"
               startIcon={<RestartAltIcon />}
-              onClick={handleRetryJob}
+              onClick={handleRetryButtonClick}
               disabled={isRetryingJob}
             >
               {isRetryingJob ? "재시도 중..." : "재시도"}
@@ -586,6 +603,29 @@ const JobDetail: React.FC = () => {
           </Card>
         </Box>
       </Box>
+
+      {/* 재시도 확인 모달 */}
+      <Dialog
+        open={isRetryDialogOpen}
+        onClose={handleRetryDialogClose}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>작업 재시도</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleRetryDialogClose} disabled={isRetryingJob}>
+            취소
+          </Button>
+          <Button
+            onClick={handleRetryConfirm}
+            variant="contained"
+            color="primary"
+            disabled={isRetryingJob}
+          >
+            {isRetryingJob ? "재시도 중..." : "확인"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
