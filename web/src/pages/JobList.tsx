@@ -14,7 +14,9 @@ import {
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
 import JobTable from '../components/JobTable';
+import JobCreateModal from '../components/JobCreateModal';
 import {
     ErrorResponse,
     listJobs,
@@ -31,6 +33,7 @@ const JobList: React.FC = () => {
     const [total, setTotal] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isJobCreateModalOpen, setIsJobCreateModalOpen] = useState(false);
     const [searchText, setSearchText] = useState(
         searchParams.get('contains_name') || ''
     );
@@ -115,6 +118,19 @@ const JobList: React.FC = () => {
         navigate(`/jobs/${job.id}`);
     };
 
+    const handleOpenJobCreateModal = () => {
+        setIsJobCreateModalOpen(true);
+    };
+
+    const handleCloseJobCreateModal = () => {
+        setIsJobCreateModalOpen(false);
+    };
+
+    const handleJobCreated = () => {
+        // 새 작업이 생성되면 목록을 새로고침
+        fetchJobs();
+    };
+
     return (
         <Box sx={{ p: 3 }}>
             <Box
@@ -128,14 +144,24 @@ const JobList: React.FC = () => {
                 <Typography variant="h5" component="h1">
                     작업 목록
                 </Typography>
-                <Button
-                    variant="outlined"
-                    startIcon={<RefreshIcon />}
-                    onClick={fetchJobs}
-                    disabled={isLoading}
-                >
-                    새로고침
-                </Button>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={handleOpenJobCreateModal}
+                        color="primary"
+                    >
+                        새 작업 생성
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        startIcon={<RefreshIcon />}
+                        onClick={fetchJobs}
+                        disabled={isLoading}
+                    >
+                        새로고침
+                    </Button>
+                </Box>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center' }}>
@@ -203,6 +229,12 @@ const JobList: React.FC = () => {
                     {error}
                 </Alert>
             </Snackbar>
+
+            <JobCreateModal
+                open={isJobCreateModalOpen}
+                onClose={handleCloseJobCreateModal}
+                onJobCreated={handleJobCreated}
+            />
         </Box>
     );
 };
