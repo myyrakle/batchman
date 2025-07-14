@@ -141,13 +141,13 @@ const JobDetail: React.FC = () => {
         setError(
           `작업 재시도에 실패했습니다: ${
             result.response.message || "알 수 없는 오류"
-          }`
+          }`,
         );
         return;
       }
 
       const newJobId = result.response.job_id;
-      
+
       // 새로 생성된 작업 상세 페이지로 이동
       if (newJobId) {
         navigate(`/jobs/${newJobId}`);
@@ -239,7 +239,9 @@ const JobDetail: React.FC = () => {
       job.status === "Running");
 
   const canRetryJob =
-    job && taskDefinition && (job.status === "Finished" || job.status === "Failed");
+    job &&
+    taskDefinition &&
+    (job.status === "Finished" || job.status === "Failed");
 
   if (isLoading) {
     return (
