@@ -78,11 +78,22 @@ pub async fn setup_schema(db: &DatabaseConnection) {
 
             // let alter_table_statement = TableAlterStatement::new()
             //     .table(entities::job::Entity)
+            //     // .add_column_if_not_exists(
+            //     //     ColumnDef::new(entities::job::Column::ContainerType)
+            //     //         .default("Docker")
+            //     //         .not_null(),
+            //     // )
             //     .add_column_if_not_exists(
-            //         ColumnDef::new(entities::job::Column::ContainerType)
-            //             .default("Docker")
-            //             .not_null(),
+            //         ColumnDef::new(entities::job::Column::LogExpireAfter)
+            //             .date_time()
+            //             .null(),
             //     )
+            //     // .add_column_if_not_exists(
+            //     //     ColumnDef::new(entities::job::Column::LogExpired)
+            //     //         .boolean()
+            //     //         .default(false)
+            //     //         .not_null(),
+            //     // )
             //     .to_owned();
 
             // db.execute(database_backend.build(&alter_table_statement))
