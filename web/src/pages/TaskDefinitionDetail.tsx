@@ -35,7 +35,7 @@ import {
 } from "../api";
 import { formatDate } from "../utils";
 import CreateTaskDefinitionModal from "../components/CreateTaskDefinitionModal";
-import JobSubmitModal from "../components/JobSubmitModal";
+import JobCreateModal from "../components/JobCreateModal";
 import { CreateTaskDefinitionFormData } from "../types/taskDefinition";
 
 const TaskDefinitionDetail: React.FC = () => {
@@ -599,10 +599,13 @@ const TaskDefinitionDetail: React.FC = () => {
       />
 
       {/* 작업 제출 모달 */}
-      <JobSubmitModal
+      <JobCreateModal
         open={isJobSubmitModalOpen}
         onClose={handleJobSubmitModalClose}
-        taskDefinition={taskDefinition}
+        preselectedTaskDefinition={taskDefinition || undefined}
+        onJobCreated={() => {
+          // 작업 생성 후 페이지 새로고침이나 다른 동작이 필요하다면 여기에 추가
+        }}
       />
     </Box>
   );

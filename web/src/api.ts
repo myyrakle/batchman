@@ -100,6 +100,7 @@ export interface Job {
 export interface SubmitJobRequest {
   task_definition_id: number;
   job_name: string;
+  log_expire_after?: string;
 }
 
 export interface StopJobRequest {

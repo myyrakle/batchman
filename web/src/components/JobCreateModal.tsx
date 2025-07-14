@@ -18,6 +18,10 @@ import {
   Autocomplete,
   Chip,
   Paper,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormLabel,
 } from "@mui/material";
 import { PlayArrow as PlayArrowIcon } from "@mui/icons-material";
 import {
@@ -33,12 +37,14 @@ interface JobCreateModalProps {
   open: boolean;
   onClose: () => void;
   onJobCreated?: () => void;
+  preselectedTaskDefinition?: TaskDefinition;
 }
 
 const JobCreateModal: React.FC<JobCreateModalProps> = ({
   open,
   onClose,
   onJobCreated,
+  preselectedTaskDefinition,
 }) => {
   const navigate = useNavigate();
   const [taskDefinitions, setTaskDefinitions] = useState<TaskDefinition[]>([]);
@@ -57,6 +63,14 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // 로그 만료일 관련 상태
+  const [logExpirationMode, setLogExpirationMode] = useState<
+    "none" | "days" | "date"
+  >("none");
+  const [logExpirationDays, setLogExpirationDays] = useState<number>(30);
+  const [logExpirationDate, setLogExpirationDate] = useState<string>("");
+  const [logExpirationTime, setLogExpirationTime] = useState<string>("23:59");
+
   const selectedTaskDefinition = taskDefinitions.find(
     (td) => td.id === selectedTaskDefinitionId,
   );
@@ -72,6 +86,14 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
     }
   }, [open]);
 
+  // preselectedTaskDefinition이 있을 때 초기화
+  useEffect(() => {
+    if (preselectedTaskDefinition && taskDefinitions.length > 0) {
+      setSelectedTaskDefinitionName(preselectedTaskDefinition.name);
+      setSelectedTaskDefinitionId(preselectedTaskDefinition.id);
+    }
+  }, [preselectedTaskDefinition, taskDefinitions]);
+
   // 선택된 작업정의 이름에 따라 버전 목록 업데이트
   useEffect(() => {
     if (selectedTaskDefinitionName) {
@@ -80,18 +102,22 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
         .sort((a, b) => b.version - a.version); // 버전 내림차순 정렬
       setAvailableVersions(versions);
 
-      // 최신 버전을 기본으로 선택
-      const latestVersion = versions.find((v) => v.is_latest);
-      if (latestVersion) {
-        setSelectedTaskDefinitionId(latestVersion.id);
-      } else if (versions.length > 0) {
-        setSelectedTaskDefinitionId(versions[0].id);
+      // preselectedTaskDefinition이 있으면 해당 버전을 선택, 없으면 최신 버전 선택
+      if (preselectedTaskDefinition && versions.find(v => v.id === preselectedTaskDefinition.id)) {
+        setSelectedTaskDefinitionId(preselectedTaskDefinition.id);
+      } else {
+        const latestVersion = versions.find((v) => v.is_latest);
+        if (latestVersion) {
+          setSelectedTaskDefinitionId(latestVersion.id);
+        } else if (versions.length > 0) {
+          setSelectedTaskDefinitionId(versions[0].id);
+        }
       }
     } else {
       setAvailableVersions([]);
       setSelectedTaskDefinitionId("");
     }
-  }, [selectedTaskDefinitionName, taskDefinitions]);
+  }, [selectedTaskDefinitionName, taskDefinitions, preselectedTaskDefinition]);
 
   const fetchTaskDefinitions = async () => {
     try {
@@ -127,10 +153,22 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
 
   const handleClose = () => {
     setJobName("");
-    setSelectedTaskDefinitionName("");
-    setSelectedTaskDefinitionId("");
-    setAvailableVersions([]);
+    
+    // preselectedTaskDefinition이 없을 때만 작업 정의 선택 상태 초기화
+    if (!preselectedTaskDefinition) {
+      setSelectedTaskDefinitionName("");
+      setSelectedTaskDefinitionId("");
+      setAvailableVersions([]);
+    }
+    
     setErrorMessage(null);
+
+    // 로그 만료일 상태 초기화
+    setLogExpirationMode("none");
+    setLogExpirationDays(30);
+    setLogExpirationDate("");
+    setLogExpirationTime("23:59");
+
     onClose();
   };
 
@@ -140,14 +178,44 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
       return;
     }
 
+    // 로그 만료일 계산
+    let logExpireAfter: string | undefined;
+
+    if (logExpirationMode === "days") {
+      const expireDate = new Date();
+      expireDate.setDate(expireDate.getDate() + logExpirationDays);
+      logExpireAfter = expireDate.toISOString();
+    } else if (logExpirationMode === "date") {
+      if (!logExpirationDate) {
+        setErrorMessage("로그 만료일을 선택해주세요.");
+        return;
+      }
+      const expirationDateTime = new Date(
+        `${logExpirationDate}T${logExpirationTime}`,
+      );
+
+      if (expirationDateTime.getTime() <= Date.now()) {
+        setErrorMessage("로그 만료일은 현재 시간 이후로 설정해주세요.");
+        return;
+      }
+
+      logExpireAfter = expirationDateTime.toISOString();
+    }
+
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
 
-      const result = await submitJob({
+      const submitData: any = {
         task_definition_id: selectedTaskDefinitionId as number,
         job_name: jobName.trim(),
-      });
+      };
+
+      if (logExpireAfter) {
+        submitData.log_expire_after = logExpireAfter;
+      }
+
+      const result = await submitJob(submitData);
 
       if (result.response instanceof ErrorResponse) {
         setErrorMessage(
@@ -227,7 +295,7 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
                   }}
                 />
               )}
-              disabled={isLoadingTaskDefinitions}
+              disabled={isLoadingTaskDefinitions || !!preselectedTaskDefinition}
             />
 
             {selectedTaskDefinitionName && availableVersions.length > 0 && (
@@ -239,6 +307,7 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
                   onChange={(e) =>
                     setSelectedTaskDefinitionId(e.target.value as number)
                   }
+                  disabled={!!preselectedTaskDefinition}
                 >
                   {availableVersions.map((taskDef) => (
                     <MenuItem key={taskDef.id} value={taskDef.id}>
@@ -307,6 +376,78 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
               required
               placeholder="작업에 대한 고유한 이름을 입력하세요"
             />
+
+            {/* 로그 만료일 설정 */}
+            <Box sx={{ mt: 2 }}>
+              <FormLabel component="legend">로그 만료일</FormLabel>
+              <RadioGroup
+                row
+                value={logExpirationMode}
+                onChange={(e) =>
+                  setLogExpirationMode(
+                    e.target.value as "none" | "days" | "date",
+                  )
+                }
+              >
+                <FormControlLabel
+                  value="none"
+                  control={<Radio />}
+                  label="만료 없음"
+                />
+                <FormControlLabel
+                  value="days"
+                  control={<Radio />}
+                  label="일수 지정"
+                />
+                <FormControlLabel
+                  value="date"
+                  control={<Radio />}
+                  label="날짜 지정"
+                />
+              </RadioGroup>
+
+              {logExpirationMode === "days" && (
+                <Box sx={{ mt: 1 }}>
+                  <TextField
+                    type="number"
+                    label="만료 일수"
+                    value={logExpirationDays}
+                    onChange={(e) =>
+                      setLogExpirationDays(Number(e.target.value))
+                    }
+                    inputProps={{ min: 1, max: 365 }}
+                    sx={{ width: "200px" }}
+                    helperText="1일 ~ 365일"
+                  />
+                </Box>
+              )}
+
+              {logExpirationMode === "date" && (
+                <Box sx={{ mt: 1, display: "flex", gap: 2 }}>
+                  <TextField
+                    type="date"
+                    label="만료 날짜"
+                    value={logExpirationDate}
+                    onChange={(e) => setLogExpirationDate(e.target.value)}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    inputProps={{
+                      min: new Date().toISOString().split("T")[0],
+                    }}
+                  />
+                  <TextField
+                    type="time"
+                    label="만료 시간"
+                    value={logExpirationTime}
+                    onChange={(e) => setLogExpirationTime(e.target.value)}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions>
