@@ -95,6 +95,8 @@ export interface Job {
   container_id: string | null;
   exit_code: number | null;
   error_message: string | null;
+  log_expire_after: string | null;
+  log_expired: boolean;
 }
 
 export interface SubmitJobRequest {

@@ -40,6 +40,8 @@ pub struct JobDto {
     pub exit_code: Option<i32>,
     pub error_message: Option<String>,
     pub created_at: chrono::DateTime<Utc>,
+    pub log_expire_after: Option<chrono::DateTime<Utc>>,
+    pub log_expired: bool,
 }
 
 impl From<super::entities::job::Model> for JobDto {
@@ -57,6 +59,8 @@ impl From<super::entities::job::Model> for JobDto {
             error_message: model.error_message,
             created_at: model.created_at,
             container_type: model.container_type,
+            log_expire_after: model.log_expire_after,
+            log_expired: model.log_expired,
             ..Default::default()
         }
     }
