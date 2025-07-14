@@ -87,6 +87,12 @@ pub async fn list_job_logs(
 
     match result {
         Ok(response) => Json(response).into_response(),
+        Err(crate::errors::Error::JobLogExpired) => Response::builder()
+            .status(410) // Gone
+            .body(Body::new(
+                crate::errors::Error::JobLogExpired.into_json_response(),
+            ))
+            .unwrap(),
         Err(error) => Response::builder()
             .status(500)
             .body(Body::new(error.into_json_response()))
@@ -105,6 +111,12 @@ pub async fn count_job_logs(
 
     match result {
         Ok(response) => Json(response).into_response(),
+        Err(crate::errors::Error::JobLogExpired) => Response::builder()
+            .status(410) // Gone
+            .body(Body::new(
+                crate::errors::Error::JobLogExpired.into_json_response(),
+            ))
+            .unwrap(),
         Err(error) => Response::builder()
             .status(500)
             .body(Body::new(error.into_json_response()))

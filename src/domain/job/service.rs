@@ -310,6 +310,18 @@ impl JobService for JobServiceImpl {
             return Err(errors::Error::JobNotFound);
         };
 
+        // 로그 만료 확인
+        if job.log_expired {
+            return Err(errors::Error::JobLogExpired);
+        }
+
+        // 로그 만료일 확인
+        if let Some(expire_after) = job.log_expire_after {
+            if chrono::Utc::now() > expire_after {
+                return Err(errors::Error::JobLogExpired);
+            }
+        }
+
         // 컨테이너 ID가 없으면 에러
         let Some(container_id) = &job.container_id else {
             return Err(errors::Error::ContainerIDNotFound);
@@ -365,6 +377,18 @@ impl JobService for JobServiceImpl {
         let Some(job) = jobs.pop() else {
             return Err(errors::Error::JobNotFound);
         };
+
+        // 로그 만료 확인
+        if job.log_expired {
+            return Err(errors::Error::JobLogExpired);
+        }
+
+        // 로그 만료일 확인
+        if let Some(expire_after) = job.log_expire_after {
+            if chrono::Utc::now() > expire_after {
+                return Err(errors::Error::JobLogExpired);
+            }
+        }
 
         let Some(container_id) = &job.container_id else {
             return Err(errors::Error::ContainerIDNotFound);
