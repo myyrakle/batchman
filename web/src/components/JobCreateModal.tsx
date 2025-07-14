@@ -103,7 +103,10 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
       setAvailableVersions(versions);
 
       // preselectedTaskDefinition이 있으면 해당 버전을 선택, 없으면 최신 버전 선택
-      if (preselectedTaskDefinition && versions.find(v => v.id === preselectedTaskDefinition.id)) {
+      if (
+        preselectedTaskDefinition &&
+        versions.find((v) => v.id === preselectedTaskDefinition.id)
+      ) {
         setSelectedTaskDefinitionId(preselectedTaskDefinition.id);
       } else {
         const latestVersion = versions.find((v) => v.is_latest);
@@ -153,14 +156,14 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
 
   const handleClose = () => {
     setJobName("");
-    
+
     // preselectedTaskDefinition이 없을 때만 작업 정의 선택 상태 초기화
     if (!preselectedTaskDefinition) {
       setSelectedTaskDefinitionName("");
       setSelectedTaskDefinitionId("");
       setAvailableVersions([]);
     }
-    
+
     setErrorMessage(null);
 
     // 로그 만료일 상태 초기화

@@ -14,6 +14,7 @@ pub enum Error {
     ContainerFailedToKill(String),
     ContainerFailedToStart(String),
     ContainerFailedToInspect(String),
+    JobLogExpired,
     IO(std::io::Error),
     Seaorm(sea_orm::DbErr),
     SerdeJson(serde_json::Error),
@@ -34,6 +35,7 @@ impl Error {
             Error::ContainerFailedToKill(_) => "FAILED_TO_KILL_CONTAINER".to_string(),
             Error::ContainerFailedToStart(_) => "FAILED_TO_START_CONTAINER".to_string(),
             Error::ContainerFailedToInspect(_) => "FAILED_TO_INSPECT_CONTAINER".to_string(),
+            Error::JobLogExpired => "JOB_LOG_EXPIRED".to_string(),
             Error::IO(_) => "IO_ERROR".to_string(),
             Error::Seaorm(_) => "DATABASE_ERROR".to_string(),
             Error::SerdeJson(_) => "JSON_SERIALIZATION_ERROR".to_string(),
@@ -67,6 +69,7 @@ impl From<&Error> for String {
             Error::ContainerFailedToKill(err) => format!("Failed to kill container: {}", err),
             Error::ContainerFailedToStart(err) => format!("Failed to start container: {}", err),
             Error::ContainerFailedToInspect(err) => format!("Failed to inspect container: {}", err),
+            Error::JobLogExpired => "Job log has expired and is no longer available".to_string(),
             Error::IO(err) => format!("I/O error: {}", err),
             Error::Seaorm(err) => format!("Database error: {}", err),
             Error::SerdeJson(err) => {

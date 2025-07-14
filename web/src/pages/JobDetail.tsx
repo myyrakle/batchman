@@ -184,7 +184,12 @@ const JobDetail: React.FC = () => {
       });
 
       if (logsResult.response instanceof ErrorResponse) {
-        console.error("Failed to fetch job logs:", logsResult.response);
+        if (logsResult.status_code === 410) {
+          // 로그 만료됨 - 빈 배열로 처리
+          setLogs([]);
+        } else {
+          console.error("Failed to fetch job logs:", logsResult.response);
+        }
       } else {
         setLogs(logsResult.response.logs);
       }
@@ -549,7 +554,17 @@ const JobDetail: React.FC = () => {
                   borderRadius: 1,
                 }}
               >
-                {logs.length === 0 ? (
+                {error && error.includes("로그가 만료되어") ? (
+                  <Box
+                    sx={{
+                      textAlign: "center",
+                      py: 4,
+                      color: "#f85149",
+                    }}
+                  >
+                    작업 로그가 만료되어 더 이상 조회할 수 없습니다.
+                  </Box>
+                ) : logs.length === 0 ? (
                   <Box
                     sx={{
                       textAlign: "center",
