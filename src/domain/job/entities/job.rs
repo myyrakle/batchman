@@ -39,6 +39,9 @@ pub struct Model {
     pub exit_code: Option<i32>,       // batch exit code
     pub error_message: Option<String>, // batch error message
 
+    pub log_expire_after: Option<chrono::DateTime<Utc>>, // log expire time
+    pub log_expired: bool,                               // log expired
+
     pub created_at: chrono::DateTime<Utc>,
 }
 
