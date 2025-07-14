@@ -4,15 +4,16 @@ use super::entities::job::JobStatus;
 
 #[derive(Debug, Default)]
 pub struct CreateJobParams {
-    pub name: String,                               // job name
-    pub task_definition_id: i64,                    // task definition id
-    pub status: JobStatus,                          // job status
-    pub submited_at: Option<chrono::DateTime<Utc>>, // job submited time
-    pub started_at: Option<chrono::DateTime<Utc>>,  // job started time
-    pub finished_at: Option<chrono::DateTime<Utc>>, // job finished time
-    pub container_id: Option<String>,               // batch container id (docker container id)
-    pub exit_code: Option<i32>,                     // batch exit code
-    pub error_message: Option<String>,              // batch error message
+    pub name: String,                                    // job name
+    pub task_definition_id: i64,                         // task definition id
+    pub status: JobStatus,                               // job status
+    pub submited_at: Option<chrono::DateTime<Utc>>,      // job submited time
+    pub started_at: Option<chrono::DateTime<Utc>>,       // job started time
+    pub finished_at: Option<chrono::DateTime<Utc>>,      // job finished time
+    pub container_id: Option<String>,                    // batch container id (docker container id)
+    pub exit_code: Option<i32>,                          // batch exit code
+    pub error_message: Option<String>,                   // batch error message
+    pub log_expire_after: Option<chrono::DateTime<Utc>>, // log expire time
 }
 
 #[derive(Debug, Default)]

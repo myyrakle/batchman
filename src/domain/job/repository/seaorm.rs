@@ -67,6 +67,8 @@ impl JobRepository for JobSeaOrmRepository {
             container_id: Set(params.container_id),
             exit_code: Set(params.exit_code),
             error_message: Set(params.error_message),
+            log_expire_after: Set(params.log_expire_after),
+            log_expired: Set(false),
             created_at: Set(chrono::Utc::now()),
             ..Default::default()
         };

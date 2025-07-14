@@ -83,6 +83,7 @@ pub async fn start_scheduler_loop(
                             request_body: SubmitJobBody {
                                 task_definition_id: schedule.model.task_definition_id,
                                 job_name: schedule.model.job_name.clone(),
+                                ..Default::default()
                             },
                         })
                         .await

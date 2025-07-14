@@ -64,6 +64,7 @@ impl JobService for JobServiceImpl {
                 task_definition_id: params.request_body.task_definition_id,
                 status: entities::job::JobStatus::Pending,
                 submited_at: Some(chrono::Utc::now()),
+                log_expire_after: params.request_body.log_expire_after,
                 ..Default::default()
             })
             .await?;
