@@ -62,10 +62,11 @@ impl From<super::entities::job::Model> for JobDto {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Default)]
 pub struct SubmitJobBody {
     pub task_definition_id: i64,
     pub job_name: String,
+    pub log_expire_after: Option<chrono::DateTime<Utc>>,
 }
 
 #[derive(Debug, Clone)]
