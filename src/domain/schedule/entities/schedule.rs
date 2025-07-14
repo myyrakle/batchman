@@ -21,6 +21,7 @@ pub struct Model {
     pub enabled: bool,                // schedule enabled status
     pub created_at: chrono::DateTime<Utc>, // job submited time
     pub last_triggered_at: Option<chrono::DateTime<Utc>>, // last triggered time
+    pub log_retain_days: Option<i32>, // log retain days
 }
 
 impl TryFrom<Model> for ScheduleWithStates {
