@@ -18,6 +18,10 @@ import {
   Autocomplete,
   Chip,
   Paper,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormLabel,
 } from "@mui/material";
 import { PlayArrow as PlayArrowIcon } from "@mui/icons-material";
 import {
@@ -56,6 +60,12 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
     useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // 로그 만료일 관련 상태
+  const [logExpirationMode, setLogExpirationMode] = useState<'none' | 'days' | 'date'>('none');
+  const [logExpirationDays, setLogExpirationDays] = useState<number>(30);
+  const [logExpirationDate, setLogExpirationDate] = useState<string>('');
+  const [logExpirationTime, setLogExpirationTime] = useState<string>('23:59');
 
   const selectedTaskDefinition = taskDefinitions.find(
     (td) => td.id === selectedTaskDefinitionId,
@@ -131,6 +141,13 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
     setSelectedTaskDefinitionId("");
     setAvailableVersions([]);
     setErrorMessage(null);
+    
+    // 로그 만료일 상태 초기화
+    setLogExpirationMode('none');
+    setLogExpirationDays(30);
+    setLogExpirationDate('');
+    setLogExpirationTime('23:59');
+    
     onClose();
   };
 
@@ -140,14 +157,43 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
       return;
     }
 
+    // 로그 만료일 계산
+    let logExpirationDaysValue: number | undefined;
+    
+    if (logExpirationMode === 'days') {
+      logExpirationDaysValue = logExpirationDays;
+    } else if (logExpirationMode === 'date') {
+      if (!logExpirationDate) {
+        setErrorMessage("로그 만료일을 선택해주세요.");
+        return;
+      }
+      const expirationDateTime = new Date(`${logExpirationDate}T${logExpirationTime}`);
+      const now = new Date();
+      const diffTime = expirationDateTime.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays <= 0) {
+        setErrorMessage("로그 만료일은 현재 시간 이후로 설정해주세요.");
+        return;
+      }
+      
+      logExpirationDaysValue = diffDays;
+    }
+
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
 
-      const result = await submitJob({
+      const submitData: any = {
         task_definition_id: selectedTaskDefinitionId as number,
         job_name: jobName.trim(),
-      });
+      };
+
+      if (logExpirationDaysValue !== undefined) {
+        submitData.log_expiration_days = logExpirationDaysValue;
+      }
+
+      const result = await submitJob(submitData);
 
       if (result.response instanceof ErrorResponse) {
         setErrorMessage(
@@ -307,6 +353,72 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
               required
               placeholder="작업에 대한 고유한 이름을 입력하세요"
             />
+
+            {/* 로그 만료일 설정 */}
+            <Box sx={{ mt: 2 }}>
+              <FormLabel component="legend">로그 만료일</FormLabel>
+              <RadioGroup
+                row
+                value={logExpirationMode}
+                onChange={(e) => setLogExpirationMode(e.target.value as 'none' | 'days' | 'date')}
+              >
+                <FormControlLabel
+                  value="none"
+                  control={<Radio />}
+                  label="만료 없음"
+                />
+                <FormControlLabel
+                  value="days"
+                  control={<Radio />}
+                  label="일수 지정"
+                />
+                <FormControlLabel
+                  value="date"
+                  control={<Radio />}
+                  label="날짜 지정"
+                />
+              </RadioGroup>
+
+              {logExpirationMode === 'days' && (
+                <Box sx={{ mt: 1 }}>
+                  <TextField
+                    type="number"
+                    label="만료 일수"
+                    value={logExpirationDays}
+                    onChange={(e) => setLogExpirationDays(Number(e.target.value))}
+                    inputProps={{ min: 1, max: 365 }}
+                    sx={{ width: '200px' }}
+                    helperText="1일 ~ 365일"
+                  />
+                </Box>
+              )}
+
+              {logExpirationMode === 'date' && (
+                <Box sx={{ mt: 1, display: 'flex', gap: 2 }}>
+                  <TextField
+                    type="date"
+                    label="만료 날짜"
+                    value={logExpirationDate}
+                    onChange={(e) => setLogExpirationDate(e.target.value)}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    inputProps={{
+                      min: new Date().toISOString().split('T')[0],
+                    }}
+                  />
+                  <TextField
+                    type="time"
+                    label="만료 시간"
+                    value={logExpirationTime}
+                    onChange={(e) => setLogExpirationTime(e.target.value)}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions>

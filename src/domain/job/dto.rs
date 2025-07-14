@@ -66,7 +66,7 @@ impl From<super::entities::job::Model> for JobDto {
 pub struct SubmitJobBody {
     pub task_definition_id: i64,
     pub job_name: String,
-    pub log_expire_after: Option<chrono::DateTime<Utc>>,
+    pub log_expiration_days: Option<i32>,
 }
 
 #[derive(Debug, Clone)]

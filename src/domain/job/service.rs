@@ -57,6 +57,13 @@ impl JobService for JobServiceImpl {
             return Err(errors::Error::TaskDefinitionNotFound);
         };
 
+        // log_expiration_days가 있으면 log_expire_after로 변환
+        let log_expire_after = if let Some(days) = params.request_body.log_expiration_days {
+            Some(chrono::Utc::now() + chrono::Duration::days(days as i64))
+        } else {
+            None
+        };
+
         let new_job_id = self
             .job_repository
             .create_job(CreateJobParams {
@@ -64,7 +71,7 @@ impl JobService for JobServiceImpl {
                 task_definition_id: params.request_body.task_definition_id,
                 status: entities::job::JobStatus::Pending,
                 submited_at: Some(chrono::Utc::now()),
-                log_expire_after: params.request_body.log_expire_after,
+                log_expire_after,
                 ..Default::default()
             })
             .await?;
