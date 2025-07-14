@@ -174,7 +174,13 @@ const JobDetail: React.FC = () => {
   };
 
   const fetchJobLogs = async () => {
-    if (!jobId) return;
+    if (!jobId || !job) return;
+
+    // 로그가 이미 만료된 경우 API 호출하지 않음
+    if (job.log_expired) {
+      setLogs([]);
+      return;
+    }
 
     try {
       const logsResult = await listJobLogs({
@@ -200,8 +206,13 @@ const JobDetail: React.FC = () => {
 
   useEffect(() => {
     fetchJobDetail();
-    fetchJobLogs();
   }, [jobId]);
+
+  useEffect(() => {
+    if (job) {
+      fetchJobLogs();
+    }
+  }, [job]);
 
   const getStatusColor = (status: JobStatus) => {
     switch (status) {
@@ -517,6 +528,32 @@ const JobDetail: React.FC = () => {
                     </TableCell>
                     <TableCell>{job.container_id || "-"}</TableCell>
                   </TableRow>
+                  <TableRow>
+                    <TableCell
+                      component="th"
+                      scope="row"
+                      sx={{ fontWeight: "bold" }}
+                    >
+                      로그 만료일
+                    </TableCell>
+                    <TableCell>{formatDate(job.log_expire_after)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell
+                      component="th"
+                      scope="row"
+                      sx={{ fontWeight: "bold" }}
+                    >
+                      로그 만료 여부
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={job.log_expired ? "만료됨" : "유효"}
+                        color={job.log_expired ? "error" : "success"}
+                        size="small"
+                      />
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </CardContent>
@@ -536,6 +573,7 @@ const JobDetail: React.FC = () => {
                   size="small"
                   onClick={() => navigate(`/jobs/${job.id}/logs`)}
                   sx={{ minWidth: "auto" }}
+                  disabled={job.log_expired}
                 >
                   전체 보기
                 </Button>
@@ -554,7 +592,7 @@ const JobDetail: React.FC = () => {
                   borderRadius: 1,
                 }}
               >
-                {error && error.includes("로그가 만료되어") ? (
+                {job.log_expired ? (
                   <Box
                     sx={{
                       textAlign: "center",
