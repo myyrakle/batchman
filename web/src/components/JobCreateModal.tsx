@@ -62,10 +62,12 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // 로그 만료일 관련 상태
-  const [logExpirationMode, setLogExpirationMode] = useState<'none' | 'days' | 'date'>('none');
+  const [logExpirationMode, setLogExpirationMode] = useState<
+    "none" | "days" | "date"
+  >("none");
   const [logExpirationDays, setLogExpirationDays] = useState<number>(30);
-  const [logExpirationDate, setLogExpirationDate] = useState<string>('');
-  const [logExpirationTime, setLogExpirationTime] = useState<string>('23:59');
+  const [logExpirationDate, setLogExpirationDate] = useState<string>("");
+  const [logExpirationTime, setLogExpirationTime] = useState<string>("23:59");
 
   const selectedTaskDefinition = taskDefinitions.find(
     (td) => td.id === selectedTaskDefinitionId,
@@ -141,13 +143,13 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
     setSelectedTaskDefinitionId("");
     setAvailableVersions([]);
     setErrorMessage(null);
-    
+
     // 로그 만료일 상태 초기화
-    setLogExpirationMode('none');
+    setLogExpirationMode("none");
     setLogExpirationDays(30);
-    setLogExpirationDate('');
-    setLogExpirationTime('23:59');
-    
+    setLogExpirationDate("");
+    setLogExpirationTime("23:59");
+
     onClose();
   };
 
@@ -158,26 +160,27 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
     }
 
     // 로그 만료일 계산
-    let logExpirationDaysValue: number | undefined;
-    
-    if (logExpirationMode === 'days') {
-      logExpirationDaysValue = logExpirationDays;
-    } else if (logExpirationMode === 'date') {
+    let logExpireAfter: string | undefined;
+
+    if (logExpirationMode === "days") {
+      const expireDate = new Date();
+      expireDate.setDate(expireDate.getDate() + logExpirationDays);
+      logExpireAfter = expireDate.toISOString();
+    } else if (logExpirationMode === "date") {
       if (!logExpirationDate) {
         setErrorMessage("로그 만료일을 선택해주세요.");
         return;
       }
-      const expirationDateTime = new Date(`${logExpirationDate}T${logExpirationTime}`);
-      const now = new Date();
-      const diffTime = expirationDateTime.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays <= 0) {
+      const expirationDateTime = new Date(
+        `${logExpirationDate}T${logExpirationTime}`,
+      );
+
+      if (expirationDateTime.getTime() <= Date.now()) {
         setErrorMessage("로그 만료일은 현재 시간 이후로 설정해주세요.");
         return;
       }
-      
-      logExpirationDaysValue = diffDays;
+
+      logExpireAfter = expirationDateTime.toISOString();
     }
 
     try {
@@ -189,8 +192,8 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
         job_name: jobName.trim(),
       };
 
-      if (logExpirationDaysValue !== undefined) {
-        submitData.log_expiration_days = logExpirationDaysValue;
+      if (logExpireAfter) {
+        submitData.log_expire_after = logExpireAfter;
       }
 
       const result = await submitJob(submitData);
@@ -360,7 +363,11 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
               <RadioGroup
                 row
                 value={logExpirationMode}
-                onChange={(e) => setLogExpirationMode(e.target.value as 'none' | 'days' | 'date')}
+                onChange={(e) =>
+                  setLogExpirationMode(
+                    e.target.value as "none" | "days" | "date",
+                  )
+                }
               >
                 <FormControlLabel
                   value="none"
@@ -379,22 +386,24 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
                 />
               </RadioGroup>
 
-              {logExpirationMode === 'days' && (
+              {logExpirationMode === "days" && (
                 <Box sx={{ mt: 1 }}>
                   <TextField
                     type="number"
                     label="만료 일수"
                     value={logExpirationDays}
-                    onChange={(e) => setLogExpirationDays(Number(e.target.value))}
+                    onChange={(e) =>
+                      setLogExpirationDays(Number(e.target.value))
+                    }
                     inputProps={{ min: 1, max: 365 }}
-                    sx={{ width: '200px' }}
+                    sx={{ width: "200px" }}
                     helperText="1일 ~ 365일"
                   />
                 </Box>
               )}
 
-              {logExpirationMode === 'date' && (
-                <Box sx={{ mt: 1, display: 'flex', gap: 2 }}>
+              {logExpirationMode === "date" && (
+                <Box sx={{ mt: 1, display: "flex", gap: 2 }}>
                   <TextField
                     type="date"
                     label="만료 날짜"
@@ -404,7 +413,7 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
                       shrink: true,
                     }}
                     inputProps={{
-                      min: new Date().toISOString().split('T')[0],
+                      min: new Date().toISOString().split("T")[0],
                     }}
                   />
                   <TextField
