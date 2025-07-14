@@ -18,7 +18,7 @@ import {
     Add as AddIcon,
 } from '@mui/icons-material';
 import { TaskDefinition } from '../api';
-import JobSubmitModal from './JobSubmitModal';
+import JobCreateModal from './JobCreateModal';
 
 interface TaskDefinitionDetailModalProps {
     open: boolean;
@@ -206,10 +206,13 @@ const TaskDefinitionDetailModal: React.FC<TaskDefinitionDetailModalProps> = ({
             </Dialog>
 
             {/* 작업 제출 모달 */}
-            <JobSubmitModal
+            <JobCreateModal
                 open={isJobSubmitModalOpen}
                 onClose={handleJobSubmitModalClose}
-                taskDefinition={taskDefinition}
+                preselectedTaskDefinition={taskDefinition}
+                onJobCreated={() => {
+                    // 작업 생성 후 필요한 동작
+                }}
             />
         </>
     );

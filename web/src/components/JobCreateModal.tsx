@@ -37,12 +37,14 @@ interface JobCreateModalProps {
   open: boolean;
   onClose: () => void;
   onJobCreated?: () => void;
+  preselectedTaskDefinition?: TaskDefinition;
 }
 
 const JobCreateModal: React.FC<JobCreateModalProps> = ({
   open,
   onClose,
   onJobCreated,
+  preselectedTaskDefinition,
 }) => {
   const navigate = useNavigate();
   const [taskDefinitions, setTaskDefinitions] = useState<TaskDefinition[]>([]);
@@ -84,6 +86,14 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
     }
   }, [open]);
 
+  // preselectedTaskDefinition이 있을 때 초기화
+  useEffect(() => {
+    if (preselectedTaskDefinition && taskDefinitions.length > 0) {
+      setSelectedTaskDefinitionName(preselectedTaskDefinition.name);
+      setSelectedTaskDefinitionId(preselectedTaskDefinition.id);
+    }
+  }, [preselectedTaskDefinition, taskDefinitions]);
+
   // 선택된 작업정의 이름에 따라 버전 목록 업데이트
   useEffect(() => {
     if (selectedTaskDefinitionName) {
@@ -92,18 +102,22 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
         .sort((a, b) => b.version - a.version); // 버전 내림차순 정렬
       setAvailableVersions(versions);
 
-      // 최신 버전을 기본으로 선택
-      const latestVersion = versions.find((v) => v.is_latest);
-      if (latestVersion) {
-        setSelectedTaskDefinitionId(latestVersion.id);
-      } else if (versions.length > 0) {
-        setSelectedTaskDefinitionId(versions[0].id);
+      // preselectedTaskDefinition이 있으면 해당 버전을 선택, 없으면 최신 버전 선택
+      if (preselectedTaskDefinition && versions.find(v => v.id === preselectedTaskDefinition.id)) {
+        setSelectedTaskDefinitionId(preselectedTaskDefinition.id);
+      } else {
+        const latestVersion = versions.find((v) => v.is_latest);
+        if (latestVersion) {
+          setSelectedTaskDefinitionId(latestVersion.id);
+        } else if (versions.length > 0) {
+          setSelectedTaskDefinitionId(versions[0].id);
+        }
       }
     } else {
       setAvailableVersions([]);
       setSelectedTaskDefinitionId("");
     }
-  }, [selectedTaskDefinitionName, taskDefinitions]);
+  }, [selectedTaskDefinitionName, taskDefinitions, preselectedTaskDefinition]);
 
   const fetchTaskDefinitions = async () => {
     try {
@@ -139,9 +153,14 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
 
   const handleClose = () => {
     setJobName("");
-    setSelectedTaskDefinitionName("");
-    setSelectedTaskDefinitionId("");
-    setAvailableVersions([]);
+    
+    // preselectedTaskDefinition이 없을 때만 작업 정의 선택 상태 초기화
+    if (!preselectedTaskDefinition) {
+      setSelectedTaskDefinitionName("");
+      setSelectedTaskDefinitionId("");
+      setAvailableVersions([]);
+    }
+    
     setErrorMessage(null);
 
     // 로그 만료일 상태 초기화
@@ -276,7 +295,7 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
                   }}
                 />
               )}
-              disabled={isLoadingTaskDefinitions}
+              disabled={isLoadingTaskDefinitions || !!preselectedTaskDefinition}
             />
 
             {selectedTaskDefinitionName && availableVersions.length > 0 && (
@@ -288,6 +307,7 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
                   onChange={(e) =>
                     setSelectedTaskDefinitionId(e.target.value as number)
                   }
+                  disabled={!!preselectedTaskDefinition}
                 >
                   {availableVersions.map((taskDef) => (
                     <MenuItem key={taskDef.id} value={taskDef.id}>
