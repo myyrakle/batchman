@@ -5,7 +5,7 @@ use crate::{
         ContainerRepository,
         dao::{
             InspectContainerParams, InspectContainerResult, KillContainerParams,
-            RunContainerParams, RunContainerResult, StopContainerParams,
+            RemoveContainerParams, RunContainerParams, RunContainerResult, StopContainerParams,
         },
     },
     errors,
@@ -222,6 +222,40 @@ impl ContainerRepository for ContainerDockerRepository {
             container_id: params.container_id,
         })
         .await?;
+
+        Ok(())
+    }
+
+    async fn remove_container(&self, params: RemoveContainerParams) -> errors::Result<()> {
+        let mut command = Command::new(DOCKER_PATH);
+
+        command.arg("rm");
+
+        if params.force {
+            command.arg("--force");
+        }
+
+        if params.remove_volumes {
+            command.arg("--volumes");
+        }
+
+        if params.remove_links {
+            command.arg("--link");
+        }
+
+        command.arg(&params.container_id);
+
+        let output = command.output()?;
+
+        if !output.status.success() {
+            let error = String::from_utf8_lossy(&output.stderr);
+
+            if error.contains("No such container") {
+                return Err(errors::Error::ContainerNotFound);
+            }
+
+            return Err(errors::Error::ContainerFailedToRemove(error.to_string()));
+        }
 
         Ok(())
     }

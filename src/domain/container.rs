@@ -1,6 +1,6 @@
 use dao::{
-    InspectContainerParams, InspectContainerResult, KillContainerParams, RunContainerParams,
-    RunContainerResult, StopContainerParams,
+    InspectContainerParams, InspectContainerResult, KillContainerParams, RemoveContainerParams,
+    RunContainerParams, RunContainerResult, StopContainerParams,
 };
 use serde::Serialize;
 
@@ -33,4 +33,6 @@ pub trait ContainerRepository {
     async fn kill_container(&self, params: KillContainerParams) -> errors::Result<()>;
 
     async fn stop_container(&self, params: StopContainerParams) -> errors::Result<()>;
+
+    async fn remove_container(&self, params: RemoveContainerParams) -> errors::Result<()>;
 }
