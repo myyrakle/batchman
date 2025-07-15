@@ -288,3 +288,11 @@ pub struct StopContainerParams {
     pub container_id: String,
     pub timeout_seconds: u32,
 }
+
+#[derive(Debug, Clone)]
+pub struct RemoveContainerParams {
+    pub container_id: String,
+    pub force: bool,
+    pub remove_volumes: bool,
+    pub remove_links: bool,
+}
