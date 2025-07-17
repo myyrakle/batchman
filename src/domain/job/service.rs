@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     domain::{
         container::{
-            ContainerRepository,
+            ContainerRepository, ContainerType,
             dao::{InspectContainerParams, RunContainerParams, StopContainerParams},
         },
         job::dto::{
@@ -64,6 +64,7 @@ impl JobService for JobServiceImpl {
                 task_definition_id: params.request_body.task_definition_id,
                 status: entities::job::JobStatus::Pending,
                 submited_at: Some(chrono::Utc::now()),
+                container_type: ContainerType::Docker,
                 log_expire_after: params.request_body.log_expire_after,
                 ..Default::default()
             })
@@ -148,6 +149,7 @@ impl JobService for JobServiceImpl {
         self.job_repository
             .patch_job(PatchJobParams {
                 job_id: pending_job.id,
+                container_type: Some(ContainerType::Docker),
                 container_id: Some(container_id.clone()),
                 status: Some(JobStatus::Running),
                 ..Default::default()
