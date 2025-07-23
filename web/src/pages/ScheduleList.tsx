@@ -31,8 +31,11 @@ import {
   listSchedules,
   ListSchedulesResponse,
   Schedule,
+  createSchedule,
+  CreateScheduleRequest,
 } from "../api";
 import { useSearchParams } from "react-router-dom";
+import ScheduleCreateModal from "../components/ScheduleCreateModal";
 
 const ScheduleList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,6 +48,7 @@ const ScheduleList: React.FC = () => {
   const [enabledFilter, setEnabledFilter] = useState<string>(
     searchParams.get("enabled") || "all",
   );
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const fetchSchedules = async () => {
     try {
@@ -57,9 +61,12 @@ const ScheduleList: React.FC = () => {
 
         // 검색 필터 적용
         if (searchText) {
-          filteredSchedules = filteredSchedules.filter((schedule) =>
-            schedule.name.toLowerCase().includes(searchText.toLowerCase()) ||
-            schedule.job_name.toLowerCase().includes(searchText.toLowerCase())
+          filteredSchedules = filteredSchedules.filter(
+            (schedule) =>
+              schedule.name.toLowerCase().includes(searchText.toLowerCase()) ||
+              schedule.job_name
+                .toLowerCase()
+                .includes(searchText.toLowerCase()),
           );
         }
 
@@ -67,7 +74,7 @@ const ScheduleList: React.FC = () => {
         if (enabledFilter !== "all") {
           const isEnabled = enabledFilter === "enabled";
           filteredSchedules = filteredSchedules.filter(
-            (schedule) => schedule.enabled === isEnabled
+            (schedule) => schedule.enabled === isEnabled,
           );
         }
 
@@ -75,7 +82,9 @@ const ScheduleList: React.FC = () => {
         setError(null);
       } else {
         const errorResponse = result.response as ErrorResponse;
-        setError(errorResponse.message || "스케줄을 불러오는 중 오류가 발생했습니다.");
+        setError(
+          errorResponse.message || "스케줄을 불러오는 중 오류가 발생했습니다.",
+        );
       }
     } catch (err) {
       setError("스케줄을 불러오는 중 오류가 발생했습니다.");
@@ -117,6 +126,23 @@ const ScheduleList: React.FC = () => {
     return cron;
   };
 
+  const handleCreateSchedule = async (scheduleData: CreateScheduleRequest) => {
+    try {
+      const result = await createSchedule(scheduleData);
+      
+      if (result.status_code === 200) {
+        setIsCreateModalOpen(false);
+        fetchSchedules(); // 목록 새로고침
+        // 성공 메시지는 스낵바로 표시할 수 있지만, 여기서는 단순히 새로고침만 함
+      } else {
+        const errorResponse = result.response as ErrorResponse;
+        setError(errorResponse.message || "스케줄 생성 중 오류가 발생했습니다.");
+      }
+    } catch (err) {
+      setError("스케줄 생성 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Box
@@ -133,9 +159,7 @@ const ScheduleList: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => {
-            // TODO: 스케줄 생성 모달 열기
-          }}
+          onClick={() => setIsCreateModalOpen(true)}
         >
           스케줄 생성
         </Button>
@@ -143,7 +167,11 @@ const ScheduleList: React.FC = () => {
 
       {/* 검색 및 필터 */}
       <Box sx={{ mb: 3 }}>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center">
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          alignItems="center"
+        >
           <TextField
             label="스케줄명 또는 작업명 검색"
             value={searchText}
@@ -202,16 +230,24 @@ const ScheduleList: React.FC = () => {
           }}
         >
           {schedules.map((schedule) => (
-            <Card 
+            <Card
               key={schedule.id}
-              sx={{ 
-                display: "flex", 
+              sx={{
+                display: "flex",
                 flexDirection: "column",
-                border: schedule.enabled ? "1px solid #4caf50" : "1px solid #666"
+                border: schedule.enabled
+                  ? "1px solid #4caf50"
+                  : "1px solid #666",
               }}
             >
               <CardContent sx={{ flexGrow: 1 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 2,
+                  }}
+                >
                   <Typography variant="h6" component="h2" noWrap>
                     {schedule.name}
                   </Typography>
@@ -233,18 +269,30 @@ const ScheduleList: React.FC = () => {
                   </Typography>
                 </Box>
 
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
                   태스크 정의 ID: {schedule.task_definition_id}
                 </Typography>
 
                 {schedule.command && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
                     명령어: {schedule.command}
                   </Typography>
                 )}
 
                 {schedule.timezone && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
                     시간대: {schedule.timezone}
                   </Typography>
                 )}
@@ -254,7 +302,9 @@ const ScheduleList: React.FC = () => {
                 </Typography>
               </CardContent>
 
-              <CardActions sx={{ justifyContent: "space-between", px: 2, pb: 2 }}>
+              <CardActions
+                sx={{ justifyContent: "space-between", px: 2, pb: 2 }}
+              >
                 <Box>
                   <Tooltip title={schedule.enabled ? "일시정지" : "활성화"}>
                     <IconButton
@@ -306,6 +356,13 @@ const ScheduleList: React.FC = () => {
           {error}
         </Alert>
       </Snackbar>
+
+      {/* 스케줄 생성 모달 */}
+      <ScheduleCreateModal
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateSchedule}
+      />
     </Box>
   );
 };
