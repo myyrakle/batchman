@@ -159,9 +159,14 @@ export interface Schedule {
   cron_expression: string;
   task_definition_id: number;
   command: string | null;
-  timezone: string;
-  timezone_offset: number;
+  timezone: string | null;
+  timezone_offset: number | null;
   enabled: boolean;
+  created_at: string;
+}
+
+export interface ListSchedulesResponse {
+  schedules: Schedule[];
 }
 
 export interface CreateScheduleRequest {
@@ -365,7 +370,7 @@ export const countJobLogs = async (
 
 // Schedule API
 export const listSchedules = async (): Promise<
-  ApiResponse<Schedule[] | ErrorResponse>
+  ApiResponse<ListSchedulesResponse | ErrorResponse>
 > => {
   try {
     const response = await api.get("/schedules");
