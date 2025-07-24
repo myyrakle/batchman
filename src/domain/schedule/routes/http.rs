@@ -9,8 +9,8 @@ use axum::{
 use crate::{
     context::SharedContext,
     domain::schedule::dto::{
-        CreateSchduleRequest, CreateScheduleBody, ListSchedulesItem, ListSchedulesQuery,
-        ListSchedulesRequest, ListSchedulesResponse, PatchScheduleBody, PatchScheduleRequest,
+        CreateSchduleRequest, CreateScheduleBody, ListSchedulesQuery, ListSchedulesRequest,
+        PatchScheduleBody, PatchScheduleRequest,
     },
     errors,
 };
@@ -101,18 +101,13 @@ pub async fn list_schedules(
     Query(query): Query<ListSchedulesQuery>,
     Extension(context): Extension<SharedContext>,
 ) -> impl IntoResponse {
-    let schedules = context
+    let result = context
         .schedule_service
         .list_schedules(ListSchedulesRequest { query })
         .await;
 
-    match schedules {
-        Ok(schedules) => {
-            let response = ListSchedulesResponse {
-                schedules: schedules.into_iter().map(ListSchedulesItem::from).collect(),
-            };
-            Json(response).into_response()
-        }
+    match result {
+        Ok(response) => Json(response).into_response(),
         Err(error) => Response::builder()
             .status(500)
             .body(Body::new(error.into_json_response()))

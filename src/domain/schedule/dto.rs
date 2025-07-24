@@ -44,6 +44,8 @@ pub struct ListSchedulesQuery {
     pub contains_name: Option<String>, // name contains text
     pub name: Option<String>,          // exact name
     pub enabled: Option<bool>,         // enabled status
+    pub page_number: Option<i64>,      // page number (1-based)
+    pub page_size: Option<i64>,        // page size
 }
 
 #[derive(Debug, Clone)]
@@ -85,4 +87,5 @@ impl From<entities::schedule::Model> for ListSchedulesItem {
 #[derive(Serialize)]
 pub struct ListSchedulesResponse {
     pub schedules: Vec<ListSchedulesItem>,
+    pub total_count: i64,
 }

@@ -64,7 +64,6 @@ impl JobRepository for JobSeaOrmRepository {
             submited_at: Set(params.submited_at),
             started_at: Set(params.started_at),
             finished_at: Set(params.finished_at),
-            container_type: Set(params.container_type),
             container_id: Set(params.container_id),
             exit_code: Set(params.exit_code),
             error_message: Set(params.error_message),
@@ -109,10 +108,6 @@ impl JobRepository for JobSeaOrmRepository {
 
         if let Some(finished_at) = params.finished_at {
             model.finished_at = Set(Some(finished_at));
-        }
-
-        if let Some(container_type) = params.container_type {
-            model.container_type = Set(container_type);
         }
 
         if let Some(container_id) = params.container_id {

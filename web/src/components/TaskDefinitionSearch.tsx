@@ -1,10 +1,10 @@
 import React from 'react';
 import { Box, TextField, Button } from '@mui/material';
-import { ListTaskDefinitionsParams } from '../api';
+import { ListTaskDefinitionsRequest } from '../api';
 
 interface TaskDefinitionSearchProps {
-    searchParams: ListTaskDefinitionsParams;
-    onSearchParamsChange: (params: ListTaskDefinitionsParams) => void;
+    searchParams: ListTaskDefinitionsRequest;
+    onSearchParamsChange: (params: ListTaskDefinitionsRequest) => void;
     onSearch: () => void;
 }
 

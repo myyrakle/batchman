@@ -1,7 +1,6 @@
 use chrono::Utc;
 
 use super::entities::job::JobStatus;
-use crate::domain::container::ContainerType;
 
 #[derive(Debug, Default)]
 pub struct CreateJobParams {
@@ -11,7 +10,6 @@ pub struct CreateJobParams {
     pub submited_at: Option<chrono::DateTime<Utc>>,      // job submited time
     pub started_at: Option<chrono::DateTime<Utc>>,       // job started time
     pub finished_at: Option<chrono::DateTime<Utc>>,      // job finished time
-    pub container_type: ContainerType,                   // container type
     pub container_id: Option<String>,                    // batch container id (docker container id)
     pub exit_code: Option<i32>,                          // batch exit code
     pub error_message: Option<String>,                   // batch error message
@@ -27,7 +25,6 @@ pub struct PatchJobParams {
     pub submited_at: Option<chrono::DateTime<Utc>>, // job submited time
     pub started_at: Option<chrono::DateTime<Utc>>,  // job started time
     pub finished_at: Option<chrono::DateTime<Utc>>, // job finished time
-    pub container_type: Option<ContainerType>,      // container type
     pub container_id: Option<String>,               // batch container id (docker container id)
     pub exit_code: Option<i32>,                     // batch exit code
     pub error_message: Option<String>,              // batch error message

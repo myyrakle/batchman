@@ -1,6 +1,6 @@
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter,
-    QuerySelect, Set,
+    ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait, PaginatorTrait,
+    QueryFilter, QuerySelect, Set,
 };
 
 use crate::{
@@ -53,6 +53,30 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
         Ok(schedules)
     }
 
+    async fn count_schedules(&self, params: ListSchedulesParams) -> errors::Result<i64> {
+        let mut query = entities::schedule::Entity::find();
+
+        if !params.schedule_ids.is_empty() {
+            query = query.filter(entities::schedule::Column::Id.is_in(params.schedule_ids));
+        }
+
+        if let Some(enabled) = params.enabled {
+            query = query.filter(entities::schedule::Column::Enabled.eq(enabled));
+        }
+
+        if let Some(name) = params.name {
+            query = query.filter(entities::schedule::Column::Name.eq(name));
+        }
+
+        if let Some(contains_name) = params.contains_name {
+            query = query.filter(entities::schedule::Column::Name.contains(contains_name));
+        }
+
+        let count = query.count(&self.connection).await?;
+
+        Ok(count as i64)
+    }
+
     async fn create_schedule(&self, params: CreateScheduleParams) -> errors::Result<i64> {
         let schedule = entities::schedule::ActiveModel {
             name: sea_orm::Set(params.name),
@@ -63,6 +87,7 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
             timezone: sea_orm::Set(params.timezone),
             timezone_offset: sea_orm::Set(params.timezone_offset),
             created_at: sea_orm::Set(chrono::Utc::now()),
+            enabled: sea_orm::Set(params.enabled),
             ..Default::default()
         };
 
