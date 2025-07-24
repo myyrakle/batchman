@@ -11,7 +11,6 @@ import {
   Select,
   MenuItem,
   Pagination,
-  Stack,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SearchIcon from "@mui/icons-material/Search";
@@ -155,51 +154,16 @@ const ScheduleList: React.FC = () => {
           mb: 3,
         }}
       >
-        <Typography variant="h4" component="h1">
-          스케줄 관리
+        <Typography variant="h5" component="h1">
+          스케줄러
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          스케줄 생성
-        </Button>
-      </Box>
-
-      {/* 검색 및 필터 */}
-      <Box sx={{ mb: 3 }}>
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          alignItems="center"
-        >
-          <FormControl sx={{ minWidth: 150 }}>
-            <InputLabel>활성화 상태</InputLabel>
-            <Select
-              value={enabledFilter}
-              label="활성화 상태"
-              onChange={(e) => setEnabledFilter(e.target.value)}
-            >
-              <MenuItem value="all">전체</MenuItem>
-              <MenuItem value="enabled">활성화</MenuItem>
-              <MenuItem value="disabled">비활성화</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label="스케줄명 또는 작업명 검색"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-            sx={{ minWidth: 200 }}
-          />
-
+        <Box sx={{ display: "flex", gap: 1 }}>
           <Button
-            variant="outlined"
-            startIcon={<SearchIcon />}
-            onClick={handleSearch}
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setIsCreateModalOpen(true)}
           >
-            검색
+            스케줄 생성
           </Button>
           <Button
             variant="outlined"
@@ -209,7 +173,37 @@ const ScheduleList: React.FC = () => {
           >
             새로고침
           </Button>
-        </Stack>
+        </Box>
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 2, mb: 3, alignItems: "center" }}>
+        <TextField
+          label="스케줄명 또는 작업명 검색"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+          sx={{ width: "300px" }}
+        />
+        <FormControl sx={{ minWidth: 150 }}>
+          <InputLabel>활성화 상태</InputLabel>
+          <Select
+            value={enabledFilter}
+            label="활성화 상태"
+            onChange={(e) => setEnabledFilter(e.target.value)}
+          >
+            <MenuItem value="all">전체</MenuItem>
+            <MenuItem value="enabled">활성화</MenuItem>
+            <MenuItem value="disabled">비활성화</MenuItem>
+          </Select>
+        </FormControl>
+        <Button
+          variant="contained"
+          startIcon={<SearchIcon />}
+          onClick={handleSearch}
+          disabled={isLoading}
+        >
+          검색
+        </Button>
       </Box>
 
       {/* 스케줄 테이블 */}
