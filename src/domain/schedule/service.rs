@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use crate::{
-    domain::task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
+    domain::{
+        schedule::dto::{ListSchedulesItem, ListSchedulesResponse},
+        task_definition::{TaskDefinitionRepository, dao::ListTaskDefinitionsParams},
+    },
     errors,
     types::cron::CronExpression,
 };
@@ -10,7 +13,6 @@ use super::{
     ScheduleRepository, ScheduleService,
     dao::{CreateScheduleParams, ListSchedulesParams, PatchScheduleParams},
     dto::{CreateSchduleRequest, ListSchedulesRequest, PatchScheduleRequest},
-    entities,
 };
 
 pub struct ScheduleServiceImpl {
@@ -117,21 +119,51 @@ impl ScheduleService for ScheduleServiceImpl {
     async fn list_schedules(
         &self,
         request: ListSchedulesRequest,
-    ) -> errors::Result<Vec<entities::schedule::Model>> {
-        let result = self
+    ) -> errors::Result<ListSchedulesResponse> {
+        let page_number = request.query.page_number.unwrap_or(1);
+        let page_size = request.query.page_size.unwrap_or(10);
+        let offset = ((page_number - 1) * page_size) as u64;
+        let limit = page_size as u64;
+
+        let params = ListSchedulesParams {
+            enabled: request.query.enabled,
+            name: request.query.name.clone(),
+            contains_name: request.query.contains_name.clone(),
+            schedule_ids: match request.query.schedule_id {
+                Some(schedule_id) => vec![schedule_id],
+                _ => vec![],
+            },
+            limit: Some(limit),
+            offset: Some(offset),
+            ..Default::default()
+        };
+
+        let schedules = self
             .schedule_repository
-            .list_schedules(ListSchedulesParams {
-                enabled: request.query.enabled,
-                name: request.query.name.clone(),
-                contains_name: request.query.contains_name.clone(),
-                schedule_ids: match request.query.schedule_id {
-                    Some(schedule_id) => vec![schedule_id],
-                    None => vec![],
-                },
-                ..Default::default()
-            })
+            .list_schedules(params.clone())
             .await?;
 
-        Ok(result)
+        let count_params = ListSchedulesParams {
+            enabled: request.query.enabled,
+            name: request.query.name.clone(),
+            contains_name: request.query.contains_name.clone(),
+            schedule_ids: match request.query.schedule_id {
+                Some(schedule_id) => vec![schedule_id],
+                _ => vec![],
+            },
+            ..Default::default()
+        };
+
+        let total_count = self
+            .schedule_repository
+            .count_schedules(count_params)
+            .await?;
+
+        let response = ListSchedulesResponse {
+            schedules: schedules.into_iter().map(ListSchedulesItem::from).collect(),
+            total_count,
+        };
+
+        Ok(response)
     }
 }

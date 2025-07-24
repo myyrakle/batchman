@@ -1,4 +1,4 @@
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct ListSchedulesParams {
     pub schedule_ids: Vec<i64>,
     pub enabled: Option<bool>,
