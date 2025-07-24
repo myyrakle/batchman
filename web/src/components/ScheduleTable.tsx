@@ -41,11 +41,11 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
 
   const formatCronExpression = (cron: string) => {
     // 간단한 cron 표현식 설명
-    if (cron === "0 * * * *") return "매시 정각";
-    if (cron === "0 0 * * *") return "매일 자정";
-    if (cron === "0 0 * * 0") return "매주 일요일 자정";
-    if (cron === "0 0 1 * *") return "매월 1일 자정";
-    return cron;
+    if (cron === "0 * * * *") return "(매시 정각)";
+    if (cron === "0 0 * * *") return "(매일 자정)";
+    if (cron === "0 0 * * 0") return "(매주 일요일 자정)";
+    if (cron === "0 0 1 * *") return "(매월 1일 자정)";
+    return "";
   };
 
   if (isLoading) {
@@ -54,10 +54,10 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>ID</TableCell>
               <TableCell>스케줄명</TableCell>
-              <TableCell>작업명</TableCell>
               <TableCell>Cron 표현식</TableCell>
-              <TableCell>태스크 정의 ID</TableCell>
+              <TableCell>작업 정의</TableCell>
               <TableCell>상태</TableCell>
               <TableCell>생성일</TableCell>
               <TableCell align="center">작업</TableCell>
@@ -100,10 +100,10 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell>ID</TableCell>
             <TableCell>스케줄명</TableCell>
-            <TableCell>작업명</TableCell>
             <TableCell>Cron 표현식</TableCell>
-            <TableCell>태스크 정의 ID</TableCell>
+            <TableCell>작업 정의</TableCell>
             <TableCell>상태</TableCell>
             <TableCell>생성일</TableCell>
             <TableCell align="center">작업</TableCell>
@@ -112,7 +112,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
         <TableBody>
           {schedules.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+              <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                 스케줄이 없습니다.
               </TableCell>
             </TableRow>
@@ -127,21 +127,21 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
                     : "4px solid #666",
                 }}
               >
+                <TableCell>{schedule.id}</TableCell>
                 <TableCell>
                   <Box sx={{ fontWeight: "medium" }}>{schedule.name}</Box>
                 </TableCell>
-                <TableCell>{schedule.job_name}</TableCell>
                 <TableCell>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <AccessTimeIcon sx={{ mr: 1, fontSize: 16 }} />
                     <Box>
-                      <div>
-                        {formatCronExpression(schedule.cron_expression)}
-                      </div>
                       <div
                         style={{ fontSize: "0.75rem", color: "text.secondary" }}
                       >
                         {schedule.cron_expression}
+                      </div>
+                      <div>
+                        {formatCronExpression(schedule.cron_expression)}
                       </div>
                     </Box>
                   </Box>

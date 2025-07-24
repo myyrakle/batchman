@@ -49,14 +49,16 @@ const ScheduleList: React.FC = () => {
   const fetchSchedules = async () => {
     try {
       setIsLoading(true);
-      
+
       const request: ListSchedulesRequest = {
         page_number: currentPage,
         page_size: currentPageSize,
         contains_name: searchParams.get("contains_name") || undefined,
-        enabled: searchParams.get("enabled") ? searchParams.get("enabled") === "enabled" : undefined,
+        enabled: searchParams.get("enabled")
+          ? searchParams.get("enabled") === "enabled"
+          : undefined,
       };
-      
+
       const result = await listSchedules(request);
 
       if (result.status_code === 200) {
@@ -66,7 +68,9 @@ const ScheduleList: React.FC = () => {
         setError(null);
       } else {
         const errorResponse = result.response as ErrorResponse;
-        setError(errorResponse.message || "스케줄을 불러오는 중 오류가 발생했습니다.");
+        setError(
+          errorResponse.message || "스케줄을 불러오는 중 오류가 발생했습니다.",
+        );
       }
     } catch (err) {
       setError("스케줄을 불러오는 중 오류가 발생했습니다.");
@@ -111,13 +115,15 @@ const ScheduleList: React.FC = () => {
   const handleCreateSchedule = async (scheduleData: CreateScheduleRequest) => {
     try {
       const result = await createSchedule(scheduleData);
-      
+
       if (result.status_code === 200) {
         setIsCreateModalOpen(false);
         fetchSchedules(); // 목록 새로고침
       } else {
         const errorResponse = result.response as ErrorResponse;
-        setError(errorResponse.message || "스케줄 생성 중 오류가 발생했습니다.");
+        setError(
+          errorResponse.message || "스케줄 생성 중 오류가 발생했습니다.",
+        );
       }
     } catch (err) {
       setError("스케줄 생성 중 오류가 발생했습니다.");
@@ -168,13 +174,6 @@ const ScheduleList: React.FC = () => {
           spacing={2}
           alignItems="center"
         >
-          <TextField
-            label="스케줄명 또는 작업명 검색"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-            sx={{ minWidth: 200 }}
-          />
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>활성화 상태</InputLabel>
             <Select
@@ -187,6 +186,14 @@ const ScheduleList: React.FC = () => {
               <MenuItem value="disabled">비활성화</MenuItem>
             </Select>
           </FormControl>
+          <TextField
+            label="스케줄명 또는 작업명 검색"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+            sx={{ minWidth: 200 }}
+          />
+
           <Button
             variant="outlined"
             startIcon={<SearchIcon />}
