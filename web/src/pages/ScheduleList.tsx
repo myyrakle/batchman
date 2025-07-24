@@ -178,7 +178,7 @@ const ScheduleList: React.FC = () => {
 
       <Box sx={{ display: "flex", gap: 2, mb: 3, alignItems: "center" }}>
         <TextField
-          label="스케줄명 또는 작업명 검색"
+          label="스케줄러 검색"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           onKeyPress={(e) => e.key === "Enter" && handleSearch()}
