@@ -34,7 +34,7 @@ export interface TaskDefinition {
   is_latest: boolean;
 }
 
-export interface ListTaskDefinitionsParams {
+export interface ListTaskDefinitionsRequest {
   page_number: number;
   page_size: number;
   name?: string;
@@ -167,6 +167,16 @@ export interface Schedule {
 
 export interface ListSchedulesResponse {
   schedules: Schedule[];
+  total_count: number;
+}
+
+export interface ListSchedulesRequest {
+  page_number?: number;
+  page_size?: number;
+  schedule_id?: number;
+  contains_name?: string;
+  name?: string;
+  enabled?: boolean;
 }
 
 export interface CreateScheduleRequest {
@@ -218,11 +228,11 @@ const handleApiError = (error: AxiosError): ApiResponse<ErrorResponse> => {
 
 // Task Definition API
 export const listTaskDefinitions = async (
-  params: ListTaskDefinitionsParams,
+  request: ListTaskDefinitionsRequest,
 ): Promise<ApiResponse<ListTaskDefinitionsResponse | ErrorResponse>> => {
   try {
-    const response = await api.get("/task-definitions", { params });
-    console.log("API request params:", params); // 디버깅용
+    const response = await api.get("/task-definitions", { params: request });
+    console.log("API request params:", request); // 디버깅용
     return {
       response: response.data,
       status_code: response.status,
@@ -369,11 +379,11 @@ export const countJobLogs = async (
 };
 
 // Schedule API
-export const listSchedules = async (): Promise<
-  ApiResponse<ListSchedulesResponse | ErrorResponse>
-> => {
+export const listSchedules = async (
+  request?: ListSchedulesRequest,
+): Promise<ApiResponse<ListSchedulesResponse | ErrorResponse>> => {
   try {
-    const response = await api.get("/schedules");
+    const response = await api.get("/schedules", { params: request });
     return {
       response: response.data,
       status_code: response.status,

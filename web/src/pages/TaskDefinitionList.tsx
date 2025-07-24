@@ -22,7 +22,7 @@ import {
     createTaskDefinition,
     ErrorResponse,
     listTaskDefinitions,
-    ListTaskDefinitionsParams,
+    ListTaskDefinitionsRequest,
     TaskDefinition,
     deleteTaskDefinition,
 } from '../api';
@@ -55,7 +55,7 @@ const TaskDefinitionList: React.FC = () => {
     const fetchTaskDefinitions = async () => {
         try {
             setIsLoading(true);
-            const params: ListTaskDefinitionsParams = {
+            const request: ListTaskDefinitionsRequest = {
                 page_number: currentPage,
                 page_size: currentPageSize,
                 name: searchParams.get('name') || undefined,
@@ -65,8 +65,8 @@ const TaskDefinitionList: React.FC = () => {
                 contains_name: searchParams.get('contains_name') || undefined,
                 is_latest_only: searchParams.get('is_latest_only') === 'true',
             };
-            console.log('API params:', params); // 디버깅용
-            const result = await listTaskDefinitions(params);
+            console.log('API params:', request); // 디버깅용
+            const result = await listTaskDefinitions(request);
 
             if (result.response instanceof ErrorResponse) {
                 setError('작업정의 목록을 불러오는데 실패했습니다.');
@@ -93,15 +93,15 @@ const TaskDefinitionList: React.FC = () => {
         fetchTaskDefinitions();
     }, [currentPage, currentPageSize, searchParams]);
 
-    const handleSearch = (params: ListTaskDefinitionsParams) => {
+    const handleSearch = (request: ListTaskDefinitionsRequest) => {
         const newParams = new URLSearchParams(searchParams);
         newParams.set('page_number', '1');
-        if (params.contains_name) {
-            newParams.set('contains_name', params.contains_name);
+        if (request.contains_name) {
+            newParams.set('contains_name', request.contains_name);
         } else {
             newParams.delete('contains_name');
         }
-        if (params.is_latest_only) {
+        if (request.is_latest_only) {
             newParams.set('is_latest_only', 'true');
         } else {
             newParams.delete('is_latest_only');

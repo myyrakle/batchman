@@ -29,7 +29,7 @@ import {
   ErrorResponse,
   submitJob,
   listTaskDefinitions,
-  ListTaskDefinitionsParams,
+  ListTaskDefinitionsRequest,
 } from "../api";
 import { useNavigate } from "react-router-dom";
 
@@ -125,13 +125,13 @@ const JobCreateModal: React.FC<JobCreateModalProps> = ({
   const fetchTaskDefinitions = async () => {
     try {
       setIsLoadingTaskDefinitions(true);
-      const params: ListTaskDefinitionsParams = {
+      const request: ListTaskDefinitionsRequest = {
         page_number: 1,
         page_size: 1000, // 모든 버전을 가져오도록 크게 설정
         is_latest_only: false, // 모든 버전을 가져오도록 설정
       };
 
-      const result = await listTaskDefinitions(params);
+      const result = await listTaskDefinitions(request);
 
       if (result.response instanceof ErrorResponse) {
         setErrorMessage(
