@@ -29,6 +29,8 @@ import {
   createSchedule,
   CreateScheduleRequest,
   deleteSchedule,
+  patchSchedule,
+  PatchScheduleRequest,
 } from "../api";
 import { useSearchParams } from "react-router-dom";
 import ScheduleCreateModal from "../components/ScheduleCreateModal";
@@ -178,9 +180,29 @@ const ScheduleList: React.FC = () => {
     setSelectedSchedule(null);
   };
 
-  const handleToggleEnabled = (schedule: Schedule) => {
-    // TODO: 스케줄 활성화/비활성화 토글
-    console.log("Toggle enabled:", schedule);
+  const handleToggleEnabled = async (schedule: Schedule) => {
+    try {
+      setIsLoading(true);
+      
+      const patchRequest: PatchScheduleRequest = {
+        enabled: !schedule.enabled,
+      };
+
+      const result = await patchSchedule(schedule.id, patchRequest);
+
+      if (result.status_code === 200) {
+        fetchSchedules(); // 목록 새로고침
+      } else {
+        const errorResponse = result.response as ErrorResponse;
+        setError(
+          errorResponse.message || "스케줄 상태 변경 중 오류가 발생했습니다.",
+        );
+      }
+    } catch (err) {
+      setError("스케줄 상태 변경 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
