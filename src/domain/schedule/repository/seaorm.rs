@@ -132,6 +132,10 @@ impl ScheduleRepository for ScheduleSeaOrmRepository {
             schedule_active_model.timezone_offset = Set(Some(timezone_offset));
         }
 
+        if let Some(enabled) = params.enabled {
+            schedule_active_model.enabled = Set(enabled);
+        }
+
         if let Some(last_triggered_at) = params.last_triggered_at {
             schedule_active_model.last_triggered_at = Set(Some(last_triggered_at));
         }
