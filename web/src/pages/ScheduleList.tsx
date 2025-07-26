@@ -11,6 +11,11 @@ import {
   Select,
   MenuItem,
   Pagination,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SearchIcon from "@mui/icons-material/Search";
@@ -23,6 +28,7 @@ import {
   Schedule,
   createSchedule,
   CreateScheduleRequest,
+  deleteSchedule,
 } from "../api";
 import { useSearchParams } from "react-router-dom";
 import ScheduleCreateModal from "../components/ScheduleCreateModal";
@@ -41,6 +47,10 @@ const ScheduleList: React.FC = () => {
     searchParams.get("enabled") || "all",
   );
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
+    null,
+  );
 
   const currentPage = Number(searchParams.get("page_number")) || 1;
   const currentPageSize = Number(searchParams.get("page_size")) || 10;
@@ -135,8 +145,37 @@ const ScheduleList: React.FC = () => {
   };
 
   const handleDelete = (schedule: Schedule) => {
-    // TODO: 스케줄 삭제 확인 대화상자
-    console.log("Delete schedule:", schedule);
+    setSelectedSchedule(schedule);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedSchedule) return;
+
+    try {
+      setIsLoading(true);
+      const result = await deleteSchedule(selectedSchedule.id);
+
+      if (result.status_code === 200) {
+        setIsDeleteModalOpen(false);
+        setSelectedSchedule(null);
+        fetchSchedules(); // 목록 새로고침
+      } else {
+        const errorResponse = result.response as ErrorResponse;
+        setError(
+          errorResponse.message || "스케줄 삭제 중 오류가 발생했습니다.",
+        );
+      }
+    } catch (err) {
+      setError("스케줄 삭제 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedSchedule(null);
   };
 
   const handleToggleEnabled = (schedule: Schedule) => {
@@ -242,6 +281,31 @@ const ScheduleList: React.FC = () => {
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateSchedule}
       />
+
+      {/* 스케줄 삭제 확인 모달 */}
+      <Dialog open={isDeleteModalOpen} onClose={handleDeleteCancel}>
+        <DialogTitle>스케줄 삭제 확인</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            "{selectedSchedule?.name}" 스케줄을 정말 삭제하시겠습니까?
+            <br />
+            삭제된 스케줄은 복구할 수 없습니다.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} color="inherit">
+            취소
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={isLoading}
+          >
+            삭제
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
