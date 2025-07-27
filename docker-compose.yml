@@ -7,3 +7,7 @@ services:
     build:
       dockerfile: ./dockerfiles/Dockerfile.fail
     container_name: fail
+  success:
+    build:
+      dockerfile: ./dockerfiles/Dockerfile.success
+    container_name: success
