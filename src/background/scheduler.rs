@@ -81,7 +81,7 @@ pub async fn start_scheduler_loop(
                 continue;
             }
 
-            for schedule in schedules.iter() {
+            for schedule in schedules.iter_mut() {
                 if schedule.is_time_to_trigger(&now) {
                     if let Err(error) = context
                         .job_service
@@ -101,6 +101,7 @@ pub async fn start_scheduler_loop(
                         );
                     }
 
+                    schedule.model.last_triggered_at = Some(now);
                     if let Err(error) = context
                         .schedule_repository
                         .patch_schedule(PatchScheduleParams {

@@ -183,7 +183,7 @@ const ScheduleList: React.FC = () => {
   const handleToggleEnabled = async (schedule: Schedule) => {
     try {
       setIsLoading(true);
-      
+
       const patchRequest: PatchScheduleRequest = {
         enabled: !schedule.enabled,
       };

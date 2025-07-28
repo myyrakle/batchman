@@ -51,8 +51,6 @@ impl ScheduleWithStates {
             return false;
         }
 
-        println!("cron: {:?}", self.cron_expression);
-
         // 2. Year Check
         match &self.cron_expression.year {
             Some(CronExpressionField::All) => {
@@ -207,7 +205,7 @@ impl ScheduleWithStates {
             }
         }
 
-        false
+        true // All checks passed, it's time to trigger
     }
 }
 
