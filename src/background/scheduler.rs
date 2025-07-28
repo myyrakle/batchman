@@ -5,7 +5,7 @@ use crate::{
     domain::{
         job::dto::{SubmitJobBody, SubmitJobRequest},
         schedule::{
-            dao::PatchScheduleParams,
+            dao::{ListSchedulesParams, PatchScheduleParams},
             entities::{self, schedule::ScheduleWithStates},
         },
     },
@@ -45,7 +45,10 @@ pub async fn start_scheduler_loop(
     let _ = tokio::spawn(async move {
         let mut schedules = context
             .schedule_repository
-            .list_schedules(Default::default())
+            .list_schedules(ListSchedulesParams {
+                enabled: Some(true),
+                ..Default::default()
+            })
             .await
             .expect("Failed to load schedules")
             .into_iter()
@@ -61,7 +64,10 @@ pub async fn start_scheduler_loop(
             if receiver.try_recv().is_ok() {
                 schedules = context
                     .schedule_repository
-                    .list_schedules(Default::default())
+                    .list_schedules(ListSchedulesParams {
+                        enabled: Some(true),
+                        ..Default::default()
+                    })
                     .await
                     .expect("Failed to load schedules")
                     .into_iter()

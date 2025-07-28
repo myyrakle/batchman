@@ -47,8 +47,11 @@ impl ScheduleWithStates {
     pub fn is_time_to_trigger(&self, now: &chrono::DateTime<Utc>) -> bool {
         // 1. Check if the schedule is enabled
         if !self.model.enabled {
+            println!("Schedule is not enabled");
             return false;
         }
+
+        println!("cron: {:?}", self.cron_expression);
 
         // 2. Year Check
         match &self.cron_expression.year {
