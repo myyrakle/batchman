@@ -47,6 +47,7 @@ impl ScheduleWithStates {
     pub fn is_time_to_trigger(&self, now: &chrono::DateTime<Utc>) -> bool {
         // 1. Check if the schedule is enabled
         if !self.model.enabled {
+            println!("Schedule is not enabled");
             return false;
         }
 
@@ -204,7 +205,7 @@ impl ScheduleWithStates {
             }
         }
 
-        false
+        true // All checks passed, it's time to trigger
     }
 }
 
