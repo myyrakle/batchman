@@ -22,6 +22,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import VerticalAlignBottomIcon from "@mui/icons-material/VerticalAlignBottom";
 import PauseIcon from "@mui/icons-material/Pause";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { PageContainer } from "../components/common";
 import {
   Job,
   JobLog,
@@ -308,7 +309,7 @@ const JobLogs: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <PageContainer>
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <IconButton onClick={() => navigate(`/jobs/${jobId}`)} sx={{ mr: 1 }}>
           <ArrowBackIcon />
@@ -449,7 +450,7 @@ const JobLogs: React.FC = () => {
           </Paper>
         </CardContent>
       </Card>
-    </Box>
+    </PageContainer>
   );
 };
 

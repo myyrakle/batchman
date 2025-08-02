@@ -22,6 +22,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
+import { PageContainer } from "../components/common";
 import {
   Job,
   JobStatus,
@@ -274,7 +275,7 @@ const TaskDefinitionDetail: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <PageContainer>
       {/* 헤더 */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <IconButton
@@ -607,7 +608,7 @@ const TaskDefinitionDetail: React.FC = () => {
           // 작업 생성 후 페이지 새로고침이나 다른 동작이 필요하다면 여기에 추가
         }}
       />
-    </Box>
+    </PageContainer>
   );
 };
 

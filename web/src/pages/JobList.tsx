@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
-  Typography,
   Alert,
   Snackbar,
-  Pagination,
   TextField,
   FormControl,
   InputLabel,
@@ -17,6 +15,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import JobTable from "../components/JobTable";
 import JobCreateModal from "../components/JobCreateModal";
+import { PageContainer, PageHeader, SearchBar, ErrorSnackbar, PagePagination } from "../components/common";
 import {
   ErrorResponse,
   listJobs,
@@ -132,28 +131,21 @@ const JobList: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Typography variant="h5" component="h1">
-          작업 목록
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1 }}>
+    <PageContainer>
+      <PageHeader
+        title="작업 목록"
+        actions={[
           <Button
+            key="create"
             variant="contained"
             startIcon={<AddIcon />}
             onClick={handleOpenJobCreateModal}
             color="primary"
           >
             새 작업 생성
-          </Button>
+          </Button>,
           <Button
+            key="refresh"
             variant="outlined"
             startIcon={<RefreshIcon />}
             onClick={fetchJobs}
@@ -161,40 +153,42 @@ const JobList: React.FC = () => {
           >
             새로고침
           </Button>
-        </Box>
-      </Box>
+        ]}
+      />
 
-      <Box sx={{ display: "flex", gap: 2, mb: 3, alignItems: "center" }}>
-        <TextField
-          label="검색"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          sx={{ width: "300px" }}
-        />
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>상태</InputLabel>
-          <Select
-            value={statusFilter}
-            label="상태"
-            onChange={(e) => setStatusFilter(e.target.value as JobStatus | "")}
-          >
-            <MenuItem value="">전체</MenuItem>
-            <MenuItem value="Pending">대기중</MenuItem>
-            <MenuItem value="Starting">시작중</MenuItem>
-            <MenuItem value="Running">실행중</MenuItem>
-            <MenuItem value="Finished">완료</MenuItem>
-            <MenuItem value="Failed">실패</MenuItem>
-          </Select>
-        </FormControl>
-        <Button
-          variant="contained"
-          startIcon={<SearchIcon />}
-          onClick={handleSearch}
-          disabled={isLoading}
-        >
-          검색
-        </Button>
-      </Box>
+      <SearchBar
+        fields={[
+          {
+            label: "검색",
+            value: searchText,
+            onChange: setSearchText,
+            width: "300px"
+          }
+        ]}
+        filters={[
+          {
+            component: (
+              <FormControl sx={{ minWidth: 120 }}>
+                <InputLabel>상태</InputLabel>
+                <Select
+                  value={statusFilter}
+                  label="상태"
+                  onChange={(e) => setStatusFilter(e.target.value as JobStatus | "")}
+                >
+                  <MenuItem value="">전체</MenuItem>
+                  <MenuItem value="Pending">대기중</MenuItem>
+                  <MenuItem value="Starting">시작중</MenuItem>
+                  <MenuItem value="Running">실행중</MenuItem>
+                  <MenuItem value="Finished">완료</MenuItem>
+                  <MenuItem value="Failed">실패</MenuItem>
+                </Select>
+              </FormControl>
+            )
+          }
+        ]}
+        onSearch={handleSearch}
+        isLoading={isLoading}
+      />
 
       <Box sx={{ position: "relative", minHeight: "400px" }}>
         <JobTable
@@ -204,36 +198,24 @@ const JobList: React.FC = () => {
         />
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-        <Pagination
-          count={Math.ceil(total / currentPageSize)}
-          page={currentPage}
-          onChange={handlePageChange}
-          color="primary"
-        />
-      </Box>
+      <PagePagination
+        total={total}
+        pageSize={currentPageSize}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+      />
 
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
+      <ErrorSnackbar
+        error={error}
         onClose={handleCloseError}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleCloseError}
-          severity="error"
-          sx={{ width: "100%" }}
-        >
-          {error}
-        </Alert>
-      </Snackbar>
+      />
 
       <JobCreateModal
         open={isJobCreateModalOpen}
         onClose={handleCloseJobCreateModal}
         onJobCreated={handleJobCreated}
       />
-    </Box>
+    </PageContainer>
   );
 };
 

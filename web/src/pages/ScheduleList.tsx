@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
-  Typography,
   Alert,
   Snackbar,
   TextField,
@@ -10,7 +9,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Pagination,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -20,6 +18,7 @@ import {
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
+import { PageContainer, PageHeader, SearchBar, ErrorSnackbar, PagePagination } from "../components/common";
 import {
   ErrorResponse,
   listSchedules,
@@ -206,27 +205,20 @@ const ScheduleList: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Typography variant="h5" component="h1">
-          스케줄러
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1 }}>
+    <PageContainer>
+      <PageHeader
+        title="스케줄러"
+        actions={[
           <Button
+            key="create"
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setIsCreateModalOpen(true)}
           >
             스케줄 생성
-          </Button>
+          </Button>,
           <Button
+            key="refresh"
             variant="outlined"
             startIcon={<RefreshIcon />}
             onClick={handleRefresh}
@@ -234,38 +226,40 @@ const ScheduleList: React.FC = () => {
           >
             새로고침
           </Button>
-        </Box>
-      </Box>
+        ]}
+      />
 
-      <Box sx={{ display: "flex", gap: 2, mb: 3, alignItems: "center" }}>
-        <TextField
-          label="스케줄러 검색"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-          sx={{ width: "300px" }}
-        />
-        <FormControl sx={{ minWidth: 150 }}>
-          <InputLabel>활성화 상태</InputLabel>
-          <Select
-            value={enabledFilter}
-            label="활성화 상태"
-            onChange={(e) => setEnabledFilter(e.target.value)}
-          >
-            <MenuItem value="all">전체</MenuItem>
-            <MenuItem value="enabled">활성화</MenuItem>
-            <MenuItem value="disabled">비활성화</MenuItem>
-          </Select>
-        </FormControl>
-        <Button
-          variant="contained"
-          startIcon={<SearchIcon />}
-          onClick={handleSearch}
-          disabled={isLoading}
-        >
-          검색
-        </Button>
-      </Box>
+      <SearchBar
+        fields={[
+          {
+            label: "스케줄러 검색",
+            value: searchText,
+            onChange: setSearchText,
+            onKeyPress: (e) => e.key === "Enter" && handleSearch(),
+            width: "300px"
+          }
+        ]}
+        filters={[
+          {
+            component: (
+              <FormControl sx={{ minWidth: 150 }}>
+                <InputLabel>활성화 상태</InputLabel>
+                <Select
+                  value={enabledFilter}
+                  label="활성화 상태"
+                  onChange={(e) => setEnabledFilter(e.target.value)}
+                >
+                  <MenuItem value="all">전체</MenuItem>
+                  <MenuItem value="enabled">활성화</MenuItem>
+                  <MenuItem value="disabled">비활성화</MenuItem>
+                </Select>
+              </FormControl>
+            )
+          }
+        ]}
+        onSearch={handleSearch}
+        isLoading={isLoading}
+      />
 
       {/* 스케줄 테이블 */}
       <ScheduleTable
@@ -277,25 +271,18 @@ const ScheduleList: React.FC = () => {
       />
 
       {/* 페이지네이션 */}
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-        <Pagination
-          count={Math.ceil(total / currentPageSize)}
-          page={currentPage}
-          onChange={handlePageChange}
-          color="primary"
-        />
-      </Box>
+      <PagePagination
+        total={total}
+        pageSize={currentPageSize}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+      />
 
       {/* 에러 스낵바 */}
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
+      <ErrorSnackbar
+        error={error}
         onClose={() => setError(null)}
-      >
-        <Alert onClose={() => setError(null)} severity="error">
-          {error}
-        </Alert>
-      </Snackbar>
+      />
 
       {/* 스케줄 생성 모달 */}
       <ScheduleCreateModal
@@ -328,7 +315,7 @@ const ScheduleList: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageContainer>
   );
 };
 
