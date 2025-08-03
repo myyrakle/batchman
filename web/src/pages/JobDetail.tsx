@@ -26,6 +26,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import StopIcon from "@mui/icons-material/Stop";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import { PageContainer } from "../components/common";
 import {
   Job,
   JobStatus,
@@ -309,7 +310,7 @@ const JobDetail: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <PageContainer>
       {/* 헤더 */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <IconButton onClick={() => navigate("/jobs")} sx={{ mr: 1 }}>
@@ -681,7 +682,7 @@ const JobDetail: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageContainer>
   );
 };
 

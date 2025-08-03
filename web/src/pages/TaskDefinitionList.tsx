@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
-  Typography,
   Alert,
   Snackbar,
-  Pagination,
   CircularProgress,
   TextField,
   FormControlLabel,
@@ -18,6 +16,7 @@ import CreateTaskDefinitionModal from "../components/CreateTaskDefinitionModal";
 import CreateVersionModal from "../components/CreateVersionModal";
 import TaskDefinitionDetailModal from "../components/TaskDefinitionDetailModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
+import { PageContainer, PageHeader, SearchBar, ErrorSnackbar, PagePagination } from "../components/common";
 import {
   createTaskDefinition,
   ErrorResponse,
@@ -223,68 +222,65 @@ const TaskDefinitionList: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Typography variant="h5" component="h1">
-          작업정의 목록
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleCreateTask}
-          disabled={isLoading}
-        >
-          새 작업정의 생성
-        </Button>
-      </Box>
+    <PageContainer>
+      <PageHeader 
+        title="작업정의 목록"
+        actions={[
+          <Button
+            key="create"
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleCreateTask}
+            disabled={isLoading}
+          >
+            새 작업정의 생성
+          </Button>
+        ]}
+      />
 
-      <Box sx={{ display: "flex", gap: 2, mb: 3, alignItems: "center" }}>
-        <TextField
-          label="검색"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          sx={{ width: "300px" }}
-        />
-        <Button
-          variant="contained"
-          startIcon={<SearchIcon />}
-          onClick={() =>
-            handleSearch({
-              page_number: 1,
-              page_size: currentPageSize,
-              contains_name: searchText,
-              is_latest_only: showLatestOnly,
-            })
+      <SearchBar
+        fields={[
+          {
+            label: "검색",
+            value: searchText,
+            onChange: setSearchText,
+            width: "300px"
           }
-        >
-          검색
-        </Button>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showLatestOnly}
-              onChange={(e) => {
-                const newValue = e.target.checked;
-                setShowLatestOnly(newValue);
-                handleSearch({
-                  page_number: 1,
-                  page_size: currentPageSize,
-                  contains_name: searchText,
-                  is_latest_only: newValue,
-                });
-              }}
-            />
+        ]}
+        filters={[
+          {
+            component: (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={showLatestOnly}
+                    onChange={(e) => {
+                      const newValue = e.target.checked;
+                      setShowLatestOnly(newValue);
+                      handleSearch({
+                        page_number: 1,
+                        page_size: currentPageSize,
+                        contains_name: searchText,
+                        is_latest_only: newValue,
+                      });
+                    }}
+                  />
+                }
+                label="최신 버전만 보기"
+              />
+            )
           }
-          label="최신 버전만 보기"
-        />
-      </Box>
+        ]}
+        onSearch={() =>
+          handleSearch({
+            page_number: 1,
+            page_size: currentPageSize,
+            contains_name: searchText,
+            is_latest_only: showLatestOnly,
+          })
+        }
+        isLoading={isLoading}
+      />
 
       <Box sx={{ position: "relative", minHeight: "400px" }}>
         <TaskDefinitionTable
@@ -296,14 +292,12 @@ const TaskDefinitionList: React.FC = () => {
         />
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-        <Pagination
-          count={Math.ceil(total / currentPageSize)}
-          page={currentPage}
-          onChange={handlePageChange}
-          color="primary"
-        />
-      </Box>
+      <PagePagination
+        total={total}
+        pageSize={currentPageSize}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+      />
 
       <CreateTaskDefinitionModal
         open={isCreateModalOpen}
@@ -338,21 +332,11 @@ const TaskDefinitionList: React.FC = () => {
         message={`정말로 "${selectedTask?.name}" 작업정의를 삭제하시겠습니까?`}
       />
 
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
+      <ErrorSnackbar 
+        error={error}
         onClose={handleCloseError}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleCloseError}
-          severity="error"
-          sx={{ width: "100%" }}
-        >
-          {error}
-        </Alert>
-      </Snackbar>
-    </Box>
+      />
+    </PageContainer>
   );
 };
 
